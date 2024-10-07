@@ -7,8 +7,14 @@ import (
 )
 
 type Config struct {
-	DBUrl string `env:"DB_URL"`
-	Port  int    `env:"PORT" envDefault:"8080"`
+	DBUrl string    `env:"DB_URL"`
+	Port  int       `env:"PORT" envDefault:"8080"`
+	JWT   JWTConfig `envPrefix:"JWT_"`
+}
+
+type JWTConfig struct {
+	Secret           string `env:"JWT_SECRET"`
+	AccessExpiration string `env:"JWT_ACCESS_EXPIRATION"`
 }
 
 func NewConfig() (*Config, error) {

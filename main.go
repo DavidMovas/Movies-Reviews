@@ -12,6 +12,8 @@ import (
 	"time"
 
 	"github.com/DavidMovas/Movies-Reviews/internal/config"
+	"github.com/DavidMovas/Movies-Reviews/internal/jwt"
+	"github.com/DavidMovas/Movies-Reviews/internal/modules/auth"
 	"github.com/DavidMovas/Movies-Reviews/internal/modules/users"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo"
@@ -33,7 +35,20 @@ func main() {
 
 	usersModule := users.NewModule(db)
 
-	e.GET("/users", usersModule.Handler.GetUsers)
+	authModule := auth.NewModule(usersModule.Service)
+
+	//TODO: --->
+	accessTime, err := time.ParseDuration(cfg.JWT.AccessExpiration)
+	if err != nil {
+		accessTime = time.Duration(5) * time.Minute
+	}
+	jwtService := jwt.NewService(cfg.JWT.Secret, accessTime)
+
+	_ = jwtService
+
+	e.POST("/api/auth/register", authModule.Handler.Register)
+	e.POST("/api/auth/login", authModule.Handler.Login)
+	e.GET("/api/users", usersModule.Handler.GetUsers)
 
 	go func() {
 		signalCh := make(chan os.Signal, 1)
