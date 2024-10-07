@@ -2,19 +2,24 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/DavidMovas/Movies-Reviews/internal/config"
+	"github.com/DavidMovas/Movies-Reviews/internal/modules/users"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo"
 )
 
 var (
 	dbConnectionTime = time.Second * 10
+	dbGracefulTime   = time.Second * 10
 )
 
 func main() {
@@ -26,30 +31,29 @@ func main() {
 	db, err := getDB(context.Background(), cfg.DBUrl)
 	failOnError(err, "failed to connect to db")
 
-	if err := db.Ping(context.Background()); err != nil {
-		failOnError(err, "failed to ping db")
-	}
+	usersModule := users.NewModule(db)
 
-	//TODO: Add signal's listener in goroutine to shutdown gracefully
+	e.GET("/users", usersModule.Handler.GetUsers)
+
 	go func() {
-		signalCh := make(chan os.Signal)
-		signal.Notify(signalCh, os.Interrupt, os.Kill)
+		signalCh := make(chan os.Signal, 1)
+		signal.Notify(signalCh, os.Interrupt, os.Kill, syscall.SIGTERM)
 
-		ctx, cancel := context.WithTimeout(context.Background(), 10)
+		<-signalCh
+
+		e.Logger.Info("Shutting down server...")
+
+		ctx, cancel := context.WithTimeout(context.Background(), dbGracefulTime)
 		defer cancel()
 
-		for {
-			select {
-			case <-signalCh:
-				e.Logger.Info("Shutting down server...")
-				if err := e.Shutdown(ctx); err != nil {
-					e.Logger.Error(err)
-				}
-			}
+		if err := e.Shutdown(ctx); err != nil {
+			e.Logger.Errorf("Server forced to shutdown: %v", err)
+		} else {
+			e.Logger.Info("Server gracefully stopped")
 		}
 	}()
 
-	if err := e.Start(fmt.Sprintf(":%d", cfg.Port)); err != nil {
+	if err := e.Start(fmt.Sprintf(":%d", cfg.Port)); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		e.Logger.Fatal(err)
 	}
 

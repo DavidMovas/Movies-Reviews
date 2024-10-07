@@ -5,7 +5,7 @@
 *.so
 *.dylib
 *.idea
-Makefile
+APP.md
 
 # Test binary, built with `go test -c`
 *.test
