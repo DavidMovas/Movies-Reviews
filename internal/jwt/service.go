@@ -15,8 +15,7 @@ func NewService(secret string, accessExpiration time.Duration) *Service {
 }
 
 func (s *Service) GenerateToken(id int, role string) (token string, err error) {
-
-	//TODO:
+	// TODO:
 	// 1. Create token from claims using secret
 	// 2. Return token
 

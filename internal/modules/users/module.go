@@ -14,7 +14,6 @@ type Module struct {
 }
 
 func NewModule(db *pgxpool.Pool) *Module {
-
 	repo := NewRepository(db)
 	service := NewService(repo)
 	handler := NewHandler(service)

@@ -9,7 +9,6 @@ type Module struct {
 }
 
 func NewModule(userService *users.Service) *Module {
-
 	repo := NewRepository()
 	service := NewService(userService)
 	handler := NewHandler(service)

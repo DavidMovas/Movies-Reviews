@@ -37,7 +37,7 @@ func main() {
 
 	authModule := auth.NewModule(usersModule.Service)
 
-	//TODO: --->
+	// TODO: --->
 	accessTime, err := time.ParseDuration(cfg.JWT.AccessExpiration)
 	if err != nil {
 		accessTime = time.Duration(5) * time.Minute

@@ -27,8 +27,7 @@ func (s *Service) Register(ctx context.Context, user *users.User, password strin
 }
 
 func (s *Service) Login(ctx context.Context, email, password string) (token string, err error) {
-
-	//TODO:
+	// TODO:
 	// 1. Get user by email from DB. Using userService
 	// 2. bcrypt.CompareHashAndPassword() need to compare hash and password
 	// 3. Create Claims from user data
