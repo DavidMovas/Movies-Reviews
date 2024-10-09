@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/DavidMovas/Movies-Reviews/internal/jwt"
 	"github.com/DavidMovas/Movies-Reviews/internal/modules/users"
@@ -28,19 +29,13 @@ func (s *Service) Register(ctx context.Context, user *users.User, password strin
 }
 
 func (s *Service) Login(ctx context.Context, email, password string) (token string, err error) {
-	// TODO:
-	// 1. Get user by email from DB. Using userService
-	// 2. bcrypt.CompareHashAndPassword() need to compare hash and password
-	// 3. Create Claims from user data
-	// 4. Create JWT token
-
 	userPass, err := s.usersService.GetUserByEmail(ctx, email)
 	if err != nil {
 		return "", err
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(userPass.PasswordHash), []byte(password)); err != nil {
-		return "", err
+		return "", fmt.Errorf("invalid password: %w", err)
 	}
 
 	user := users.User{
@@ -63,5 +58,6 @@ func (s *Service) Login(ctx context.Context, email, password string) (token stri
 func NewService(service *users.Service, jwtService *jwt.Service) *Service {
 	return &Service{
 		usersService: service,
+		jwtService:   jwtService,
 	}
 }

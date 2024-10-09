@@ -18,7 +18,7 @@ func NewAccessClaimsFromUser(user *users.User, exp time.Duration) *AccessClaims 
 		UserID: user.ID,
 		Role:   user.Role,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: int64(exp.Minutes()),
+			ExpiresAt: int64(exp.Seconds()) + time.Now().Unix(),
 			IssuedAt:  time.Now().Unix(),
 			Subject:   user.Email,
 		},
