@@ -30,7 +30,17 @@ func (h *Handler) Register(c echo.Context) error {
 }
 
 func (h *Handler) Login(c echo.Context) error {
-	return c.String(http.StatusOK, "[LOGIN] not implemented")
+	var lq LoginRequest
+	if err := c.Bind(&lq); err != nil {
+		return err
+	}
+
+	token, err := h.authService.Login(c.Request().Context(), lq.Email, lq.Password)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, LoginResponse{AccessToken: token})
 }
 
 func NewHandler(authService *Service) *Handler {

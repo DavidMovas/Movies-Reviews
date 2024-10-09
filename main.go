@@ -35,8 +35,6 @@ func main() {
 
 	usersModule := users.NewModule(db)
 
-	authModule := auth.NewModule(usersModule.Service)
-
 	// TODO: --->
 	accessTime, err := time.ParseDuration(cfg.JWT.AccessExpiration)
 	if err != nil {
@@ -44,7 +42,7 @@ func main() {
 	}
 	jwtService := jwt.NewService(cfg.JWT.Secret, accessTime)
 
-	_ = jwtService
+	authModule := auth.NewModule(usersModule.Service, jwtService)
 
 	e.POST("/api/auth/register", authModule.Handler.Register)
 	e.POST("/api/auth/login", authModule.Handler.Login)

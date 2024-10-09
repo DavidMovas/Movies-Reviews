@@ -18,6 +18,17 @@ func (r Repository) Create(ctx context.Context, user *UserWithPassword) (err err
 	return err
 }
 
+func (r Repository) GetUserByEmail(ctx context.Context, email string) (*UserWithPassword, error) {
+	user := UserWithPassword{}
+	err := r.db.QueryRow(ctx, `SELECT id, username, email, pass_hash FROM users WHERE email = $1`, email).
+		Scan(&user.ID, &user.Username, &user.Email, &user.PasswordHash)
+
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
 func NewRepository(db *pgxpool.Pool) *Repository {
 	return &Repository{
 		db: db,

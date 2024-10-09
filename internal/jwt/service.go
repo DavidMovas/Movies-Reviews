@@ -1,6 +1,10 @@
 package jwt
 
-import "time"
+import (
+	"time"
+
+	"github.com/golang-jwt/jwt/v4"
+)
 
 type Service struct {
 	secret           string
@@ -14,10 +18,16 @@ func NewService(secret string, accessExpiration time.Duration) *Service {
 	}
 }
 
-func (s *Service) GenerateToken(id int, role string) (token string, err error) {
-	// TODO:
-	// 1. Create token from claims using secret
-	// 2. Return token
+func (s *Service) GenerateToken(claims *AccessClaims) (token string, err error) {
+	token, err = jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(s.secret))
 
-	return "", nil
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
+}
+
+func (s *Service) GetAccessExpiration() time.Duration {
+	return s.accessExpiration
 }

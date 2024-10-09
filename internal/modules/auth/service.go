@@ -2,14 +2,15 @@ package auth
 
 import (
 	"context"
-	"errors"
 
+	"github.com/DavidMovas/Movies-Reviews/internal/jwt"
 	"github.com/DavidMovas/Movies-Reviews/internal/modules/users"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type Service struct {
 	usersService *users.Service
+	jwtService   *jwt.Service
 }
 
 func (s *Service) Register(ctx context.Context, user *users.User, password string) error {
@@ -33,10 +34,33 @@ func (s *Service) Login(ctx context.Context, email, password string) (token stri
 	// 3. Create Claims from user data
 	// 4. Create JWT token
 
-	return "", errors.New("not implemented")
+	userPass, err := s.usersService.GetUserByEmail(ctx, email)
+	if err != nil {
+		return "", err
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(userPass.PasswordHash), []byte(password)); err != nil {
+		return "", err
+	}
+
+	user := users.User{
+		ID:       userPass.ID,
+		Role:     userPass.Role,
+		Username: userPass.Username,
+		Email:    userPass.Email,
+	}
+
+	userClaims := jwt.NewAccessClaimsFromUser(&user, s.jwtService.GetAccessExpiration())
+	token, err = s.jwtService.GenerateToken(userClaims)
+
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
 }
 
-func NewService(service *users.Service) *Service {
+func NewService(service *users.Service, jwtService *jwt.Service) *Service {
 	return &Service{
 		usersService: service,
 	}
