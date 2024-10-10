@@ -17,7 +17,7 @@ import (
 	"github.com/DavidMovas/Movies-Reviews/internal/modules/users"
 	"github.com/DavidMovas/Movies-Reviews/internal/validation"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 var (
@@ -38,7 +38,6 @@ func main() {
 
 	usersModule := users.NewModule(db)
 
-	// TODO: --->
 	accessTime, err := time.ParseDuration(cfg.JWT.AccessExpiration)
 	if err != nil {
 		accessTime = time.Duration(5) * time.Minute
@@ -46,10 +45,15 @@ func main() {
 	jwtService := jwt.NewService(cfg.JWT.Secret, accessTime)
 
 	authModule := auth.NewModule(usersModule.Service, jwtService)
+	authMiddleware := jwt.NewAuthMiddleware(cfg.JWT.Secret)
 
-	e.POST("/api/auth/register", authModule.Handler.Register)
-	e.POST("/api/auth/login", authModule.Handler.Login)
-	e.GET("/api/users", usersModule.Handler.GetUsers)
+	apiGroup := e.Group("/api")
+
+	apiGroup.POST("auth/register", authModule.Handler.Register)
+	apiGroup.POST("auth/login", authModule.Handler.Login)
+	apiGroup.GET("/users", usersModule.Handler.GetUsers)
+	apiGroup.GET("/users/:id", usersModule.Handler.GetUserById)
+	apiGroup.DELETE("/users/:id", usersModule.Handler.DeleteUserById, authMiddleware)
 
 	go func() {
 		signalCh := make(chan os.Signal, 1)

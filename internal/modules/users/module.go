@@ -1,10 +1,7 @@
 package users
 
 import (
-	"net/http"
-
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/labstack/echo"
 )
 
 type Module struct {
@@ -23,8 +20,4 @@ func NewModule(db *pgxpool.Pool) *Module {
 		Service:    service,
 		Repository: repo,
 	}
-}
-
-func (h *Handler) GetUsers(c echo.Context) error {
-	return c.String(http.StatusOK, "not implemented")
 }
