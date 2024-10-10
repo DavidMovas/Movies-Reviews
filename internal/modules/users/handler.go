@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo"
+	"gopkg.in/validator.v2"
 )
 
 var (
@@ -53,6 +54,31 @@ func (h *Handler) GetExistingUserByUsername(c echo.Context) error {
 	return c.JSON(http.StatusOK, user)
 }
 
+func (h *Handler) UpdateExistingUserById(c echo.Context) error {
+	userId, err := readUserId(c)
+	if err != nil {
+		return ErrInvalidUserId
+	}
+
+	isUserExists, err := h.service.CheckUserExistsById(c.Request().Context(), userId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	} else if !isUserExists {
+		return echo.NewHTTPError(http.StatusNotFound, "user not found")
+	}
+
+	var ud NewUserData
+	if err := c.Bind(&ud); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	if err := validator.Validate(&ud); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	return h.service.UpdateExistingUserById(c.Request().Context(), userId, &ud)
+}
+
 func (h *Handler) UpdateUserRoleById(c echo.Context) error {
 	userId, err := readUserId(c)
 	if err != nil {
@@ -89,4 +115,9 @@ func readUserId(c echo.Context) (int, error) {
 	}
 
 	return id, nil
+}
+
+type NewUserData struct {
+	Username string `json:"username" validate:"min=3,max=24"`
+	Password string `json:"password" validate:"password"`
 }

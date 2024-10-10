@@ -57,7 +57,7 @@ func main() {
 	apiGroup.GET("/users", usersModule.Handler.GetExistingUsers)
 	apiGroup.GET("/users/:userId", usersModule.Handler.GetExistingUserById)
 	apiGroup.GET("/users/username/:username", usersModule.Handler.GetExistingUserByUsername)
-	//apiGroup.PUT("/users/:userId", usersModule.Handler.UpdateExistingUserById, authMiddleware, auth.Self)
+	apiGroup.PUT("/users/:userId", usersModule.Handler.UpdateExistingUserById, authMiddleware, auth.Self)
 	apiGroup.PUT("/users/:userId/role/:role", usersModule.Handler.UpdateUserRoleById, authMiddleware, auth.Admin)
 	apiGroup.DELETE("/users/:userId", usersModule.Handler.DeleteExistingUserById, authMiddleware, auth.Self)
 

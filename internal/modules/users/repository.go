@@ -61,6 +61,12 @@ func (r Repository) GetExistingUserByUsername(ctx context.Context, username stri
 	return user, nil
 }
 
+func (r Repository) UpdateExistingUserById(ctx context.Context, id int, newUsername string, newPassword string) error {
+	_, err := r.db.Exec(ctx, `UPDATE users SET username = $1, pass_hash = $2 WHERE id = $3`, newUsername, newPassword, id)
+
+	return err
+}
+
 func (r Repository) UpdateUserRoleById(ctx context.Context, id int, newRole string) error {
 	_, err := r.db.Exec(ctx, `UPDATE users SET role = $1 WHERE id = $2`, newRole, id)
 
@@ -74,8 +80,20 @@ func (r Repository) DeleteExistingUserById(ctx context.Context, id int) error {
 	}
 
 	if n.RowsAffected() == 0 {
-		return fmt.Errorf(" user not found")
+		return fmt.Errorf("user not found")
 	}
 
 	return nil
+}
+
+func (r Repository) CheckIsUserExistsById(ctx context.Context, id int) (bool, error) {
+	var count int
+	err := r.db.QueryRow(ctx, `SELECT count(*) FROM users WHERE id = $1 AND deleted_at IS NULL`, id).
+		Scan(&count)
+
+	if err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
 }

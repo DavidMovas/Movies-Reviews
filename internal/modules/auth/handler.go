@@ -12,6 +12,12 @@ type Handler struct {
 	authService *Service
 }
 
+func NewHandler(authService *Service) *Handler {
+	return &Handler{
+		authService: authService,
+	}
+}
+
 func (h *Handler) Register(c echo.Context) error {
 	var raq RegisterRequest
 	if err := c.Bind(&raq); err != nil {
@@ -50,12 +56,6 @@ func (h *Handler) Login(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, LoginResponse{AccessToken: token})
-}
-
-func NewHandler(authService *Service) *Handler {
-	return &Handler{
-		authService: authService,
-	}
 }
 
 type RegisterRequest struct {
