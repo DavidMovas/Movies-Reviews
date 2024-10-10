@@ -5,6 +5,7 @@ import (
 
 	"github.com/DavidMovas/Movies-Reviews/internal/modules/users"
 	"github.com/labstack/echo"
+	"gopkg.in/validator.v2"
 )
 
 type Handler struct {
@@ -14,6 +15,10 @@ type Handler struct {
 func (h *Handler) Register(c echo.Context) error {
 	var raq RegisterRequest
 	if err := c.Bind(&raq); err != nil {
+		return err
+	}
+
+	if err := validator.Validate(&raq); err != nil {
 		return err
 	}
 
@@ -35,6 +40,10 @@ func (h *Handler) Login(c echo.Context) error {
 		return err
 	}
 
+	if err := validator.Validate(&lq); err != nil {
+		return err
+	}
+
 	token, err := h.authService.Login(c.Request().Context(), lq.Email, lq.Password)
 	if err != nil {
 		return c.JSON(http.StatusUnauthorized, err)
@@ -50,14 +59,14 @@ func NewHandler(authService *Service) *Handler {
 }
 
 type RegisterRequest struct {
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Username string `json:"username" validate:"min=3,max=24"`
+	Email    string `json:"email" validate:"email"`
+	Password string `json:"password" validate:"password"`
 }
 
 type LoginRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string `json:"email" validate:"email"`
+	Password string `json:"password" validate:"password"`
 }
 
 type LoginResponse struct {

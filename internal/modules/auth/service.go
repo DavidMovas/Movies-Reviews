@@ -21,7 +21,7 @@ func (s *Service) Register(ctx context.Context, user *users.User, password strin
 	}
 
 	userWithPassword := &users.UserWithPassword{
-		User:         *user,
+		User:         user,
 		PasswordHash: string(passHash),
 	}
 
@@ -29,30 +29,16 @@ func (s *Service) Register(ctx context.Context, user *users.User, password strin
 }
 
 func (s *Service) Login(ctx context.Context, email, password string) (token string, err error) {
-	userPass, err := s.usersService.GetUserByEmail(ctx, email)
+	user, err := s.usersService.GetUserByEmail(ctx, email)
 	if err != nil {
 		return "", err
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(userPass.PasswordHash), []byte(password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err != nil {
 		return "", fmt.Errorf("invalid password: %w", err)
 	}
 
-	user := users.User{
-		ID:       userPass.ID,
-		Role:     userPass.Role,
-		Username: userPass.Username,
-		Email:    userPass.Email,
-	}
-
-	userClaims := jwt.NewAccessClaimsFromUser(&user, s.jwtService.GetAccessExpiration())
-	token, err = s.jwtService.GenerateToken(userClaims)
-
-	if err != nil {
-		return "", err
-	}
-
-	return token, nil
+	return s.jwtService.GenerateToken(user.ID, user.Role)
 }
 
 func NewService(service *users.Service, jwtService *jwt.Service) *Service {

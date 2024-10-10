@@ -15,6 +15,7 @@ import (
 	"github.com/DavidMovas/Movies-Reviews/internal/jwt"
 	"github.com/DavidMovas/Movies-Reviews/internal/modules/auth"
 	"github.com/DavidMovas/Movies-Reviews/internal/modules/users"
+	"github.com/DavidMovas/Movies-Reviews/internal/validation"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo"
 )
@@ -26,6 +27,8 @@ var (
 
 func main() {
 	e := echo.New()
+
+	validation.SetupValidators()
 
 	cfg, err := config.NewConfig()
 	failOnError(err, "failed to load config")

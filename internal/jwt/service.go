@@ -1,9 +1,11 @@
 package jwt
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/google/uuid"
 )
 
 type Service struct {
@@ -18,14 +20,21 @@ func NewService(secret string, accessExpiration time.Duration) *Service {
 	}
 }
 
-func (s *Service) GenerateToken(claims *AccessClaims) (token string, err error) {
-	token, err = jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(s.secret))
-
-	if err != nil {
-		return "", err
+func (s *Service) GenerateToken(userID int, role string) (string, error) {
+	now := time.Now()
+	claims := &AccessClaims{
+		StandardClaims: jwt.StandardClaims{
+			Id:        uuid.New().String(),
+			Subject:   strconv.Itoa(userID),
+			IssuedAt:  now.Unix(),
+			ExpiresAt: now.Add(s.accessExpiration).Unix(),
+		},
+		UserID: userID,
+		Role:   role,
 	}
 
-	return token, nil
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(s.secret))
 }
 
 func (s *Service) GetAccessExpiration() time.Duration {
