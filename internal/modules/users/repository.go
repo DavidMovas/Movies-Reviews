@@ -12,6 +12,12 @@ type Repository struct {
 	db *pgxpool.Pool
 }
 
+func NewRepository(db *pgxpool.Pool) *Repository {
+	return &Repository{
+		db: db,
+	}
+}
+
 func (r Repository) Create(ctx context.Context, user *UserWithPassword) (err error) {
 	err = r.db.QueryRow(ctx,
 		`INSERT INTO users (username, email, pass_hash) 
@@ -23,8 +29,8 @@ func (r Repository) Create(ctx context.Context, user *UserWithPassword) (err err
 
 func (r Repository) GetExistingUserByEmail(ctx context.Context, email string) (*UserWithPassword, error) {
 	user := newUserWithPassword()
-	err := r.db.QueryRow(ctx, `SELECT id, username, email, pass_hash, role FROM users WHERE email = $1 AND deleted_at IS NULL`, email).
-		Scan(&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.Role)
+	err := r.db.QueryRow(ctx, `SELECT id, username, email, pass_hash, role, created_at FROM users WHERE email = $1 AND deleted_at IS NULL`, email).
+		Scan(&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.Role, &user.CreatedAt)
 
 	if err != nil {
 		return nil, err
@@ -34,12 +40,24 @@ func (r Repository) GetExistingUserByEmail(ctx context.Context, email string) (*
 
 func (r Repository) GetExistingUserById(ctx context.Context, id int) (*UserWithPassword, error) {
 	user := newUserWithPassword()
-	err := r.db.QueryRow(ctx, `SELECT id, username, email, pass_hash, role FROM users WHERE id = $1 AND deleted_at IS NULL`, id).
-		Scan(&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.Role)
+	err := r.db.QueryRow(ctx, `SELECT id, username, email, pass_hash, role, created_at FROM users WHERE id = $1 AND deleted_at IS NULL`, id).
+		Scan(&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.Role, &user.CreatedAt)
 
 	if err != nil {
 		return nil, errors.New("user not found")
 	}
+	return user, nil
+}
+
+func (r Repository) GetExistingUserByUsername(ctx context.Context, username string) (*UserWithPassword, error) {
+	user := newUserWithPassword()
+	err := r.db.QueryRow(ctx, `SELECT id, username, email, pass_hash, role, created_at FROM users WHERE username = $1 AND deleted_at IS NULL`, username).
+		Scan(&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.Role, &user.CreatedAt)
+
+	if err != nil {
+		return nil, errors.New("user not found")
+	}
+
 	return user, nil
 }
 
@@ -54,10 +72,4 @@ func (r Repository) DeleteExistingUserById(ctx context.Context, id int) error {
 	}
 
 	return nil
-}
-
-func NewRepository(db *pgxpool.Pool) *Repository {
-	return &Repository{
-		db: db,
-	}
 }

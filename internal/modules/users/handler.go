@@ -36,6 +36,18 @@ func (h *Handler) GetExistingUserById(c echo.Context) error {
 	return c.JSON(http.StatusOK, user)
 }
 
+func (h *Handler) GetExistingUserByUsername(c echo.Context) error {
+	username := c.Param("username")
+
+	user, err := h.service.GetExistingUserByUsername(c.Request().Context(), username)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, err)
+	}
+
+	return c.JSON(http.StatusOK, user)
+}
+
 func (h *Handler) DeleteExistingUserById(c echo.Context) error {
 	userId, err := readUserId(c)
 	if err != nil {

@@ -24,6 +24,10 @@ func (s *Service) DeleteExistingUserById(ctx context.Context, userId int) error 
 	return s.repo.DeleteExistingUserById(ctx, userId)
 }
 
+func (s *Service) GetExistingUserByUsername(ctx context.Context, username string) (*UserWithPassword, error) {
+	return s.repo.GetExistingUserByUsername(ctx, username)
+}
+
 func NewService(repo *Repository) *Service {
 	return &Service{
 		repo: repo,

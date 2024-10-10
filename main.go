@@ -49,10 +49,14 @@ func main() {
 
 	apiGroup := e.Group("/api")
 
+	//ENDPOINTS: auth
 	apiGroup.POST("/auth/register", authModule.Handler.Register)
 	apiGroup.POST("/auth/login", authModule.Handler.Login)
+
+	//ENDPOINTS: users
 	apiGroup.GET("/users", usersModule.Handler.GetExistingUsers)
 	apiGroup.GET("/users/:userId", usersModule.Handler.GetExistingUserById)
+	apiGroup.GET("/users/username/:username", usersModule.Handler.GetExistingUserByUsername)
 	apiGroup.DELETE("/users/:userId", usersModule.Handler.DeleteExistingUserById, authMiddleware, auth.Self)
 
 	go func() {
