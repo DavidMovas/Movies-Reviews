@@ -23,7 +23,7 @@ func (r Repository) Create(ctx context.Context, user *UserWithPassword) (err err
 
 func (r Repository) GetExistingUserByEmail(ctx context.Context, email string) (*UserWithPassword, error) {
 	user := newUserWithPassword()
-	err := r.db.QueryRow(ctx, `SELECT id, username, email, pass_hash, role FROM users WHERE email = $1`, email).
+	err := r.db.QueryRow(ctx, `SELECT id, username, email, pass_hash, role FROM users WHERE email = $1 AND deleted_at IS NULL`, email).
 		Scan(&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.Role)
 
 	if err != nil {
