@@ -1,9 +1,10 @@
 package jwt
 
 import (
-	"github.com/golang-jwt/jwt/v4"
-	echojwt "github.com/labstack/echo-jwt/v4"
-	"github.com/labstack/echo/v4"
+	"net/http"
+
+	"github.com/golang-jwt/jwt"
+	"github.com/labstack/echo"
 )
 
 const (
@@ -11,11 +12,38 @@ const (
 )
 
 func NewAuthMiddleware(secret string) echo.MiddlewareFunc {
-	return echojwt.WithConfig(echojwt.Config{
-		ContextKey: tokenContextKey,
-		SigningKey: secret,
-		NewClaimsFunc: func(c echo.Context) jwt.Claims {
-			return &AccessClaims{}
-		},
-	})
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			tokenStr := c.Request().Header.Get("Authorization")
+			token, err := jwt.ParseWithClaims(tokenStr, &AccessClaims{}, func(token *jwt.Token) (interface{}, error) {
+				return []byte(secret), nil
+			})
+
+			if err != nil || !token.Valid {
+				return c.JSON(http.StatusUnauthorized, "Invalid token")
+			}
+
+			c.Set(tokenContextKey, token)
+
+			return next(c)
+		}
+	}
+}
+
+func GetClaims(c echo.Context) *AccessClaims {
+	token := c.Get(tokenContextKey)
+	if token == nil {
+		panic("token not found in context")
+	}
+
+	t, ok := token.(*jwt.Token)
+	if !ok {
+		panic("invalid token type")
+	}
+
+	claims, ok := t.Claims.(*AccessClaims)
+	if !ok {
+		panic("invalid claims type")
+	}
+	return claims
 }

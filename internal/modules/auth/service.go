@@ -29,7 +29,7 @@ func (s *Service) Register(ctx context.Context, user *users.User, password strin
 }
 
 func (s *Service) Login(ctx context.Context, email, password string) (token string, err error) {
-	user, err := s.usersService.GetUserByEmail(ctx, email)
+	user, err := s.usersService.GetExistingUserByEmail(ctx, email)
 	if err != nil {
 		return "", err
 	}

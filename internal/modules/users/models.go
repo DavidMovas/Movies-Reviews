@@ -21,3 +21,9 @@ type UserWithPassword struct {
 	*User
 	PasswordHash string
 }
+
+func newUserWithPassword() *UserWithPassword {
+	return &UserWithPassword{
+		User: &User{},
+	}
+}

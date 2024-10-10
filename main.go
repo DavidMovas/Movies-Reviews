@@ -17,7 +17,7 @@ import (
 	"github.com/DavidMovas/Movies-Reviews/internal/modules/users"
 	"github.com/DavidMovas/Movies-Reviews/internal/validation"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo"
 )
 
 var (
@@ -49,11 +49,11 @@ func main() {
 
 	apiGroup := e.Group("/api")
 
-	apiGroup.POST("auth/register", authModule.Handler.Register)
-	apiGroup.POST("auth/login", authModule.Handler.Login)
-	apiGroup.GET("/users", usersModule.Handler.GetUsers)
-	apiGroup.GET("/users/:id", usersModule.Handler.GetUserById)
-	apiGroup.DELETE("/users/:id", usersModule.Handler.DeleteUserById, authMiddleware)
+	apiGroup.POST("/auth/register", authModule.Handler.Register)
+	apiGroup.POST("/auth/login", authModule.Handler.Login)
+	apiGroup.GET("/users", usersModule.Handler.GetExistingUsers)
+	apiGroup.GET("/users/:userId", usersModule.Handler.GetExistingUserById)
+	apiGroup.DELETE("/users/:userId", usersModule.Handler.DeleteExistingUserById, authMiddleware, auth.Self)
 
 	go func() {
 		signalCh := make(chan os.Signal, 1)

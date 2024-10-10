@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/DavidMovas/Movies-Reviews/internal/modules/users"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo"
 	"gopkg.in/validator.v2"
 )
 
