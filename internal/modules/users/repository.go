@@ -61,6 +61,12 @@ func (r Repository) GetExistingUserByUsername(ctx context.Context, username stri
 	return user, nil
 }
 
+func (r Repository) UpdateUserRoleById(ctx context.Context, id int, newRole string) error {
+	_, err := r.db.Exec(ctx, `UPDATE users SET role = $1 WHERE id = $2`, newRole, id)
+
+	return err
+}
+
 func (r Repository) DeleteExistingUserById(ctx context.Context, id int) error {
 	n, err := r.db.Exec(ctx, `UPDATE users SET deleted_at = NOW() WHERE id = $1 AND deleted_at IS NULL`, id)
 	if err != nil {

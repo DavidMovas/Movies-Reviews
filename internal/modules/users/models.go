@@ -2,12 +2,6 @@ package users
 
 import "time"
 
-const (
-	AdminRole  = "admin"
-	EditorRole = "editor"
-	UserRole   = "user"
-)
-
 type User struct {
 	ID        int        `json:"id"`
 	Username  string     `json:"username"`

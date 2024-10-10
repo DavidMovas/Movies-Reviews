@@ -7,6 +7,11 @@ import (
 	"github.com/labstack/echo"
 )
 
+var (
+	ErrInvalidUserId = echo.NewHTTPError(http.StatusBadRequest, "invalid user id")
+	ErrInvalidRole   = echo.NewHTTPError(http.StatusBadRequest, "invalid role")
+)
+
 type Handler struct {
 	service *Service
 }
@@ -24,7 +29,7 @@ func (h *Handler) GetExistingUsers(c echo.Context) error {
 func (h *Handler) GetExistingUserById(c echo.Context) error {
 	userId, err := readUserId(c)
 	if err != nil {
-		return err
+		return ErrInvalidUserId
 	}
 
 	user, err := h.service.GetExistingUserById(c.Request().Context(), userId)
@@ -46,6 +51,21 @@ func (h *Handler) GetExistingUserByUsername(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, user)
+}
+
+func (h *Handler) UpdateUserRoleById(c echo.Context) error {
+	userId, err := readUserId(c)
+	if err != nil {
+		return ErrInvalidUserId
+	}
+
+	newRole := c.Param("role")
+
+	if !ValidateRole(newRole) {
+		return ErrInvalidRole
+	}
+
+	return h.service.UpdateUserRoleById(c.Request().Context(), userId, newRole)
 }
 
 func (h *Handler) DeleteExistingUserById(c echo.Context) error {
