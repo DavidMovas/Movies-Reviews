@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/DavidMovas/Movies-Reviews/internal/dbx"
+	apperrors "github.com/DavidMovas/Movies-Reviews/internal/error"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -21,10 +23,19 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 func (r Repository) Create(ctx context.Context, user *UserWithPassword) (err error) {
 	err = r.db.QueryRow(ctx,
 		`INSERT INTO users (username, email, pass_hash) 
-    		VALUES ($1, $2, $3) RETURNING id`, user.Username, user.Email, user.PasswordHash).
-		Scan(&user.ID)
+    		VALUES ($1, $2, $3) RETURNING id, created_at`, user.Username, user.Email, user.PasswordHash).
+		Scan(&user.ID, &user.CreatedAt)
 
-	return err
+	switch {
+	case dbx.IsUniqueViolation(err, "email"):
+		return apperrors.AlreadyExists("user", "email", user.Email)
+	case dbx.IsUniqueViolation(err, "username"):
+		return apperrors.AlreadyExists("user", "username", user.Username)
+	case err != nil:
+		return apperrors.Internal(err)
+	}
+
+	return nil
 }
 
 func (r Repository) GetExistingUserByEmail(ctx context.Context, email string) (*UserWithPassword, error) {
