@@ -2,8 +2,6 @@ package users
 
 import (
 	"context"
-	"errors"
-	"fmt"
 
 	"github.com/DavidMovas/Movies-Reviews/internal/dbx"
 	apperrors "github.com/DavidMovas/Movies-Reviews/internal/error"
@@ -43,8 +41,11 @@ func (r Repository) GetExistingUserByEmail(ctx context.Context, email string) (*
 	err := r.db.QueryRow(ctx, `SELECT id, username, email, pass_hash, role, created_at FROM users WHERE email = $1 AND deleted_at IS NULL`, email).
 		Scan(&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.Role, &user.CreatedAt)
 
-	if err != nil {
-		return nil, err
+	switch {
+	case dbx.IsNoRows(err):
+		return nil, apperrors.NotFound("user", "email", email)
+	case err != nil:
+		return nil, apperrors.Internal(err)
 	}
 	return user, nil
 }
@@ -54,9 +55,13 @@ func (r Repository) GetExistingUserById(ctx context.Context, id int) (*UserWithP
 	err := r.db.QueryRow(ctx, `SELECT id, username, email, pass_hash, role, created_at FROM users WHERE id = $1 AND deleted_at IS NULL`, id).
 		Scan(&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.Role, &user.CreatedAt)
 
-	if err != nil {
-		return nil, errors.New("user not found")
+	switch {
+	case dbx.IsNoRows(err):
+		return nil, apperrors.NotFound("user", "id", id)
+	case err != nil:
+		return nil, apperrors.Internal(err)
 	}
+
 	return user, nil
 }
 
@@ -65,33 +70,52 @@ func (r Repository) GetExistingUserByUsername(ctx context.Context, username stri
 	err := r.db.QueryRow(ctx, `SELECT id, username, email, pass_hash, role, created_at FROM users WHERE username = $1 AND deleted_at IS NULL`, username).
 		Scan(&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.Role, &user.CreatedAt)
 
-	if err != nil {
-		return nil, errors.New("user not found")
+	switch {
+	case dbx.IsNoRows(err):
+		return nil, apperrors.NotFound("user", "username", username)
+	case err != nil:
+		return nil, apperrors.Internal(err)
 	}
 
 	return user, nil
 }
 
 func (r Repository) UpdateExistingUserById(ctx context.Context, id int, newUsername string, newPassword string) error {
-	_, err := r.db.Exec(ctx, `UPDATE users SET username = $1, pass_hash = $2 WHERE id = $3`, newUsername, newPassword, id)
+	n, err := r.db.Exec(ctx, `UPDATE users SET username = $1, pass_hash = $2 WHERE id = $3`, newUsername, newPassword, id)
 
-	return err
+	if err != nil {
+		return apperrors.Internal(err)
+	}
+
+	if n.RowsAffected() == 0 {
+		return apperrors.NotFound("user", "id", id)
+	}
+
+	return nil
 }
 
 func (r Repository) UpdateUserRoleById(ctx context.Context, id int, newRole string) error {
-	_, err := r.db.Exec(ctx, `UPDATE users SET role = $1 WHERE id = $2`, newRole, id)
+	n, err := r.db.Exec(ctx, `UPDATE users SET role = $1 WHERE id = $2`, newRole, id)
 
-	return err
+	if err != nil {
+		return apperrors.Internal(err)
+	}
+
+	if n.RowsAffected() == 0 {
+		return apperrors.NotFound("user", "id", id)
+	}
+
+	return nil
 }
 
 func (r Repository) DeleteExistingUserById(ctx context.Context, id int) error {
 	n, err := r.db.Exec(ctx, `UPDATE users SET deleted_at = NOW() WHERE id = $1 AND deleted_at IS NULL`, id)
 	if err != nil {
-		return err
+		return apperrors.Internal(err)
 	}
 
 	if n.RowsAffected() == 0 {
-		return fmt.Errorf("user not found")
+		return apperrors.NotFound("user", "id", id)
 	}
 
 	return nil
@@ -103,7 +127,11 @@ func (r Repository) CheckIsUserExistsById(ctx context.Context, id int) (bool, er
 		Scan(&count)
 
 	if err != nil {
-		return false, err
+		return false, apperrors.Internal(err)
+	}
+
+	if count == 0 {
+		return false, apperrors.NotFound("user", "id", id)
 	}
 
 	return count > 0, nil
