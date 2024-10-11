@@ -3,6 +3,7 @@ package auth
 import (
 	"net/http"
 
+	"github.com/DavidMovas/Movies-Reviews/internal/echox"
 	apperrors "github.com/DavidMovas/Movies-Reviews/internal/error"
 	"github.com/DavidMovas/Movies-Reviews/internal/modules/users"
 	"github.com/labstack/echo"
@@ -20,21 +21,20 @@ func NewHandler(authService *Service) *Handler {
 }
 
 func (h *Handler) Register(c echo.Context) error {
-	var raq RegisterRequest
-	if err := c.Bind(&raq); err != nil {
+	req, err := echox.BindAndValidate[RegisterRequest](c)
+	if err != nil {
 		return err
 	}
-
-	if err := validator.Validate(&raq); err != nil {
+	if err := validator.Validate(&req); err != nil {
 		return apperrors.BadRequestHidden(err, "invalid email or password")
 	}
 
 	user := &users.User{
-		Username: raq.Username,
-		Email:    raq.Email,
+		Username: req.Username,
+		Email:    req.Email,
 	}
 
-	if err := h.authService.Register(c.Request().Context(), user, raq.Password); err != nil {
+	if err := h.authService.Register(c.Request().Context(), user, req.Password); err != nil {
 		return err
 	}
 
@@ -42,16 +42,16 @@ func (h *Handler) Register(c echo.Context) error {
 }
 
 func (h *Handler) Login(c echo.Context) error {
-	var lq LoginRequest
-	if err := c.Bind(&lq); err != nil {
+	req, err := echox.BindAndValidate[LoginRequest](c)
+	if err != nil {
 		return err
 	}
 
-	if err := validator.Validate(&lq); err != nil {
+	if err := validator.Validate(&req); err != nil {
 		return apperrors.BadRequestHidden(err, "invalid email or password")
 	}
 
-	token, err := h.authService.Login(c.Request().Context(), lq.Email, lq.Password)
+	token, err := h.authService.Login(c.Request().Context(), req.Email, req.Password)
 	if err != nil {
 		return c.JSON(http.StatusUnauthorized, err)
 	}

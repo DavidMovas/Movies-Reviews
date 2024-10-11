@@ -1,12 +1,13 @@
 package users
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
+	"github.com/DavidMovas/Movies-Reviews/internal/echox"
 	apperrors "github.com/DavidMovas/Movies-Reviews/internal/error"
 	"github.com/labstack/echo"
-	"gopkg.in/validator.v2"
 )
 
 type Handler struct {
@@ -20,7 +21,7 @@ func NewHandler(service *Service) *Handler {
 }
 
 func (h *Handler) GetExistingUsers(c echo.Context) error {
-	return c.String(http.StatusOK, "not implemented")
+	return apperrors.BadRequest(errors.New("not implemented"))
 }
 
 func (h *Handler) GetExistingUserById(c echo.Context) error {
@@ -56,16 +57,12 @@ func (h *Handler) UpdateExistingUserById(c echo.Context) error {
 		return apperrors.BadRequest(err)
 	}
 
-	var ud NewUserData
-	if err := c.Bind(&ud); err != nil {
-		return apperrors.BadRequest(err)
+	raq, err := echox.BindAndValidate[NewUserData](c)
+	if err != nil {
+		return err
 	}
 
-	if err := validator.Validate(&ud); err != nil {
-		return apperrors.BadRequest(err)
-	}
-
-	if err := h.service.UpdateExistingUserById(c.Request().Context(), userId, &ud); err != nil {
+	if err := h.service.UpdateExistingUserById(c.Request().Context(), userId, raq); err != nil {
 		return err
 	}
 

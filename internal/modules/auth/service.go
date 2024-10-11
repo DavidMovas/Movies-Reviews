@@ -15,6 +15,13 @@ type Service struct {
 	jwtService   *jwt.Service
 }
 
+func NewService(service *users.Service, jwtService *jwt.Service) *Service {
+	return &Service{
+		usersService: service,
+		jwtService:   jwtService,
+	}
+}
+
 func (s *Service) Register(ctx context.Context, user *users.User, password string) error {
 	passHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
@@ -43,11 +50,4 @@ func (s *Service) Login(ctx context.Context, email, password string) (token stri
 	}
 
 	return s.jwtService.GenerateToken(user.ID, user.Role)
-}
-
-func NewService(service *users.Service, jwtService *jwt.Service) *Service {
-	return &Service{
-		usersService: service,
-		jwtService:   jwtService,
-	}
 }
