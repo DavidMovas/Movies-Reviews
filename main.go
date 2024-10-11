@@ -46,13 +46,12 @@ func main() {
 	}
 	jwtService := jwt.NewService(cfg.JWT.Secret, accessTime)
 
+	//TODO: Create admin user from config for server starting
+
 	authModule := auth.NewModule(usersModule.Service, jwtService)
 	apiGroup := e.Group("/api")
 
 	apiGroup.Use(jwt.NewAuthMiddleware(cfg.JWT.Secret))
-
-	//TODO: Add different logic for (GET) "api/users/:id/role/:role" and "api/users/:id"
-	// For admin and for others
 
 	//ENDPOINTS: auth
 	apiGroup.POST("/auth/register", authModule.Handler.Register)
