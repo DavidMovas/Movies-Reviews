@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/DavidMovas/Movies-Reviews/contracts"
 	"github.com/DavidMovas/Movies-Reviews/internal/echox"
 	apperrors "github.com/DavidMovas/Movies-Reviews/internal/error"
 	"github.com/labstack/echo"
@@ -57,7 +58,7 @@ func (h *Handler) UpdateExistingUserById(c echo.Context) error {
 		return apperrors.BadRequest(err)
 	}
 
-	raq, err := echox.BindAndValidate[NewUserData](c)
+	raq, err := echox.BindAndValidate[contracts.NewUserData](c)
 	if err != nil {
 		return err
 	}
@@ -77,7 +78,7 @@ func (h *Handler) UpdateUserRoleById(c echo.Context) error {
 
 	newRole := c.Param("role")
 
-	if !ValidateRole(newRole) {
+	if !contracts.ValidateRole(newRole) {
 		return apperrors.BadRequestHidden(errors.New("invalid role"), "role unknown")
 	}
 
@@ -109,9 +110,4 @@ func readUserId(c echo.Context) (int, error) {
 	}
 
 	return id, nil
-}
-
-type NewUserData struct {
-	Username string `json:"username" validate:"min=3,max=24"`
-	Password string `json:"password" validate:"password"`
 }

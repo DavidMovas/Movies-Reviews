@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/DavidMovas/Movies-Reviews/internal/contracts"
+	"github.com/DavidMovas/Movies-Reviews/contracts"
 	"github.com/go-resty/resty/v2"
 )
 

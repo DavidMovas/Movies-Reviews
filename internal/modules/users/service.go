@@ -3,6 +3,7 @@ package users
 import (
 	"context"
 
+	"github.com/DavidMovas/Movies-Reviews/contracts"
 	"github.com/DavidMovas/Movies-Reviews/internal/log"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -17,7 +18,7 @@ func NewService(repo *Repository) *Service {
 	}
 }
 
-func (s *Service) Create(ctx context.Context, user *UserWithPassword) error {
+func (s *Service) Create(ctx context.Context, user *contracts.UserWithPassword) error {
 	if err := s.repo.Create(ctx, user); err != nil {
 		return err
 	}
@@ -26,19 +27,19 @@ func (s *Service) Create(ctx context.Context, user *UserWithPassword) error {
 	return nil
 }
 
-func (s *Service) GetExistingUserByEmail(ctx context.Context, email string) (*UserWithPassword, error) {
+func (s *Service) GetExistingUserByEmail(ctx context.Context, email string) (*contracts.UserWithPassword, error) {
 	return s.repo.GetExistingUserByEmail(ctx, email)
 }
 
-func (s *Service) GetExistingUserById(ctx context.Context, userId int) (*UserWithPassword, error) {
+func (s *Service) GetExistingUserById(ctx context.Context, userId int) (*contracts.UserWithPassword, error) {
 	return s.repo.GetExistingUserById(ctx, userId)
 }
 
-func (s *Service) GetExistingUserByUsername(ctx context.Context, username string) (*UserWithPassword, error) {
+func (s *Service) GetExistingUserByUsername(ctx context.Context, username string) (*contracts.UserWithPassword, error) {
 	return s.repo.GetExistingUserByUsername(ctx, username)
 }
 
-func (s *Service) UpdateExistingUserById(ctx context.Context, id int, user *NewUserData) error {
+func (s *Service) UpdateExistingUserById(ctx context.Context, id int, user *contracts.NewUserData) error {
 	//TODO: Split this method on two: one for updating username and one for updating password
 
 	passHash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)

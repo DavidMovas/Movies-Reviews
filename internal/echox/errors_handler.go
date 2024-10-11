@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/DavidMovas/Movies-Reviews/internal/contracts"
+	"github.com/DavidMovas/Movies-Reviews/contracts"
 	apperrors "github.com/DavidMovas/Movies-Reviews/internal/error"
 	"github.com/DavidMovas/Movies-Reviews/internal/log"
 	"github.com/labstack/echo"

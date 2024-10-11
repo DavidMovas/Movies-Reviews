@@ -1,9 +1,9 @@
 package auth
 
 import (
+	"github.com/DavidMovas/Movies-Reviews/contracts"
 	apperrors "github.com/DavidMovas/Movies-Reviews/internal/error"
 	"github.com/DavidMovas/Movies-Reviews/internal/jwt"
-	"github.com/DavidMovas/Movies-Reviews/internal/modules/users"
 	"github.com/labstack/echo"
 )
 
@@ -18,7 +18,7 @@ func Self(next echo.HandlerFunc) echo.HandlerFunc {
 			return errForbidden
 		}
 
-		if claims.Role == users.AdminRole || claims.Subject == userId {
+		if claims.Role == contracts.AdminRole || claims.Subject == userId {
 			return next(c)
 		}
 
@@ -35,7 +35,7 @@ func Editor(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		switch claims.Role {
-		case users.AdminRole, users.EditorRole:
+		case contracts.AdminRole, contracts.EditorRole:
 			return next(c)
 		default:
 			return errForbidden
@@ -51,7 +51,7 @@ func Admin(next echo.HandlerFunc) echo.HandlerFunc {
 			return errForbidden
 		}
 
-		if claims.Role == users.AdminRole {
+		if claims.Role == contracts.AdminRole {
 			return next(c)
 		}
 

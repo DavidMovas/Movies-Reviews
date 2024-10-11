@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/DavidMovas/Movies-Reviews/contracts"
 	apperrors "github.com/DavidMovas/Movies-Reviews/internal/error"
 	"github.com/DavidMovas/Movies-Reviews/internal/jwt"
 	"github.com/DavidMovas/Movies-Reviews/internal/modules/users"
@@ -22,13 +23,13 @@ func NewService(service *users.Service, jwtService *jwt.Service) *Service {
 	}
 }
 
-func (s *Service) Register(ctx context.Context, user *users.User, password string) error {
+func (s *Service) Register(ctx context.Context, user *contracts.User, password string) error {
 	passHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return apperrors.Internal(err)
 	}
 
-	userWithPassword := &users.UserWithPassword{
+	userWithPassword := &contracts.UserWithPassword{
 		User:         user,
 		PasswordHash: string(passHash),
 	}

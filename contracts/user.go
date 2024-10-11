@@ -1,6 +1,12 @@
-package users
+package contracts
 
 import "time"
+
+const (
+	AdminRole  = "admin"
+	EditorRole = "editor"
+	UserRole   = "user"
+)
 
 type User struct {
 	ID        int        `json:"id"`
@@ -16,11 +22,20 @@ type UserWithPassword struct {
 	PasswordHash string
 }
 
+type NewUserData struct {
+	Username string `json:"username" validate:"min=3,max=24"`
+	Password string `json:"password" validate:"password"`
+}
+
+func ValidateRole(role string) bool {
+	return role == AdminRole || role == EditorRole || role == UserRole
+}
+
 func (u *User) IsDeleted() bool {
 	return u.DeletedAt == nil
 }
 
-func newUserWithPassword() *UserWithPassword {
+func NewUserWithPassword() *UserWithPassword {
 	return &UserWithPassword{
 		User: &User{},
 	}

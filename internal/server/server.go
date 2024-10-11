@@ -5,8 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"net"
 	"time"
 
+	"github.com/DavidMovas/Movies-Reviews/contracts"
 	"github.com/DavidMovas/Movies-Reviews/internal/config"
 	"github.com/DavidMovas/Movies-Reviews/internal/echox"
 	apperrors "github.com/DavidMovas/Movies-Reviews/internal/error"
@@ -102,6 +104,19 @@ func (s *Server) Close() error {
 	return withClosers(s.closers, nil)
 }
 
+func (s *Server) Port() (int, error) {
+	listener := s.e.Listener
+	if listener == nil {
+		return 0, errors.New("server is not started")
+	}
+
+	addr := listener.Addr()
+	if addr == nil {
+		return 0, errors.New("server is not started")
+	}
+	return addr.(*net.TCPAddr).Port, nil
+}
+
 func getDB(ctx context.Context, connString string) (*pgxpool.Pool, error) {
 	ctx, cancel := context.WithTimeout(ctx, dbConnectionTime)
 	defer cancel()
@@ -117,10 +132,10 @@ func createInitialAdminUser(cfg config.AdminConfig, service *auth.Service) error
 	ctx, cancel := context.WithTimeout(context.Background(), adminCreationTime)
 	defer cancel()
 
-	err := service.Register(ctx, &users.User{
+	err := service.Register(ctx, &contracts.User{
 		Username: cfg.Username,
 		Email:    cfg.Email,
-		Role:     users.AdminRole,
+		Role:     contracts.AdminRole,
 	}, cfg.Password)
 
 	switch {

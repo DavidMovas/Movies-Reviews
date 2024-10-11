@@ -3,7 +3,7 @@ package auth
 import (
 	"net/http"
 
-	. "github.com/DavidMovas/Movies-Reviews/internal/contracts"
+	"github.com/DavidMovas/Movies-Reviews/contracts"
 	"github.com/DavidMovas/Movies-Reviews/internal/echox"
 	apperrors "github.com/DavidMovas/Movies-Reviews/internal/error"
 	"github.com/DavidMovas/Movies-Reviews/internal/modules/users"
@@ -22,7 +22,7 @@ func NewHandler(authService *Service) *Handler {
 }
 
 func (h *Handler) Register(c echo.Context) error {
-	req, err := echox.BindAndValidate[RegisterUserRequest](c)
+	req, err := echox.BindAndValidate[contracts.RegisterUserRequest](c)
 	if err != nil {
 		return err
 	}
@@ -30,7 +30,7 @@ func (h *Handler) Register(c echo.Context) error {
 		return apperrors.BadRequestHidden(err, "invalid email or password")
 	}
 
-	user := &users.User{
+	user := &contracts.User{
 		Username: req.Username,
 		Email:    req.Email,
 		Role:     users.UserRole,
@@ -44,7 +44,7 @@ func (h *Handler) Register(c echo.Context) error {
 }
 
 func (h *Handler) Login(c echo.Context) error {
-	req, err := echox.BindAndValidate[LoginUserRequest](c)
+	req, err := echox.BindAndValidate[contracts.LoginUserRequest](c)
 	if err != nil {
 		return err
 	}
@@ -58,5 +58,5 @@ func (h *Handler) Login(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, err)
 	}
 
-	return c.JSON(http.StatusOK, LoginUserResponse{AccessToken: token})
+	return c.JSON(http.StatusOK, contracts.LoginUserResponse{AccessToken: token})
 }
