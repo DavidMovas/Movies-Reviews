@@ -46,6 +46,8 @@ func main() {
 	}
 	jwtService := jwt.NewService(cfg.JWT.Secret, accessTime)
 
+	//TODO: Create admin user from config for server starting
+
 	authModule := auth.NewModule(usersModule.Service, jwtService)
 	apiGroup := e.Group("/api")
 
