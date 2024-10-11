@@ -78,7 +78,7 @@ func (h *Handler) UpdateUserRoleById(c echo.Context) error {
 	newRole := c.Param("role")
 
 	if !ValidateRole(newRole) {
-		return apperrors.BadRequest(err)
+		return apperrors.BadRequestHidden(errors.New("invalid role"), "role unknown")
 	}
 
 	if err := h.service.UpdateUserRoleById(c.Request().Context(), userId, newRole); err != nil {

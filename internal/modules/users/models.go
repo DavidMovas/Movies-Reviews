@@ -16,6 +16,10 @@ type UserWithPassword struct {
 	PasswordHash string
 }
 
+func (u *User) IsDeleted() bool {
+	return u.DeletedAt == nil
+}
+
 func newUserWithPassword() *UserWithPassword {
 	return &UserWithPassword{
 		User: &User{},
