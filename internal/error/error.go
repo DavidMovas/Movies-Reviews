@@ -1,6 +1,7 @@
 package apperrors
 
 import (
+	"errors"
 	"fmt"
 	"runtime/debug"
 
@@ -124,4 +125,10 @@ func newHiddenError(err error, code Code, message string) *Error {
 		innerError: err,
 		hiderError: true,
 	}
+}
+
+func Is(err error, code Code) bool {
+	var appErr *Error
+	ok := errors.As(err, &appErr)
+	return ok && appErr.Code == code
 }

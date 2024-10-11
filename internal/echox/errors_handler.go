@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/DavidMovas/Movies-Reviews/internal/contracts"
 	apperrors "github.com/DavidMovas/Movies-Reviews/internal/error"
 	"github.com/DavidMovas/Movies-Reviews/internal/log"
 	"github.com/labstack/echo"
@@ -25,7 +26,7 @@ func ErrorHandler(err error, c echo.Context) {
 		appError = apperrors.InternalWithoutStackTrace(err)
 	}
 
-	httpError := HttpError{
+	httpError := contracts.HttpError{
 		Message:    appError.SafeError(),
 		IncidentId: appError.IncidentId,
 	}

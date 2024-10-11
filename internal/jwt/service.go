@@ -13,10 +13,11 @@ type Service struct {
 	accessExpiration time.Duration
 }
 
-func NewService(secret string, accessExpiration time.Duration) *Service {
+func NewService(secret string, accessExpiration string) *Service {
+	accessExpirationDuration, _ := time.ParseDuration(accessExpiration)
 	return &Service{
 		secret:           secret,
-		accessExpiration: accessExpiration,
+		accessExpiration: accessExpirationDuration,
 	}
 }
 

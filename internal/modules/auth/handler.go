@@ -3,6 +3,7 @@ package auth
 import (
 	"net/http"
 
+	. "github.com/DavidMovas/Movies-Reviews/internal/contracts"
 	"github.com/DavidMovas/Movies-Reviews/internal/echox"
 	apperrors "github.com/DavidMovas/Movies-Reviews/internal/error"
 	"github.com/DavidMovas/Movies-Reviews/internal/modules/users"
@@ -21,7 +22,7 @@ func NewHandler(authService *Service) *Handler {
 }
 
 func (h *Handler) Register(c echo.Context) error {
-	req, err := echox.BindAndValidate[RegisterRequest](c)
+	req, err := echox.BindAndValidate[RegisterUserRequest](c)
 	if err != nil {
 		return err
 	}
@@ -43,7 +44,7 @@ func (h *Handler) Register(c echo.Context) error {
 }
 
 func (h *Handler) Login(c echo.Context) error {
-	req, err := echox.BindAndValidate[LoginRequest](c)
+	req, err := echox.BindAndValidate[LoginUserRequest](c)
 	if err != nil {
 		return err
 	}
@@ -57,20 +58,5 @@ func (h *Handler) Login(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, err)
 	}
 
-	return c.JSON(http.StatusOK, LoginResponse{AccessToken: token})
-}
-
-type RegisterRequest struct {
-	Username string `json:"username" validate:"min=3,max=24"`
-	Email    string `json:"email" validate:"email"`
-	Password string `json:"password" validate:"password"`
-}
-
-type LoginRequest struct {
-	Email    string `json:"email" validate:"email"`
-	Password string `json:"password" validate:"password"`
-}
-
-type LoginResponse struct {
-	AccessToken string `json:"access_token"`
+	return c.JSON(http.StatusOK, LoginUserResponse{AccessToken: token})
 }
