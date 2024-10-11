@@ -18,6 +18,10 @@ func NewAuthMiddleware(secret string) echo.MiddlewareFunc {
 				return []byte(secret), nil
 			})
 
+			if token == nil {
+				return next(c)
+			}
+
 			if err != nil || !token.Valid {
 				return apperrors.Forbidden("invalid token")
 			}
@@ -31,18 +35,5 @@ func NewAuthMiddleware(secret string) echo.MiddlewareFunc {
 
 func GetClaims(c echo.Context) *AccessClaims {
 	token := c.Get(tokenContextKey)
-	if token == nil {
-		panic("token not found in context")
-	}
-
-	t, ok := token.(*jwt.Token)
-	if !ok {
-		panic("invalid token type")
-	}
-
-	claims, ok := t.Claims.(*AccessClaims)
-	if !ok {
-		panic("invalid claims type")
-	}
-	return claims
+	return token.(*jwt.Token).Claims.(*AccessClaims)
 }

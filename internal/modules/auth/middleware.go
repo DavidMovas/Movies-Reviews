@@ -14,6 +14,10 @@ func Self(next echo.HandlerFunc) echo.HandlerFunc {
 		userId := c.Param("userId")
 		claims := jwt.GetClaims(c)
 
+		if claims == nil {
+			return errForbidden
+		}
+
 		if claims.Role == users.AdminRole || claims.Subject == userId {
 			return next(c)
 		}
@@ -24,7 +28,13 @@ func Self(next echo.HandlerFunc) echo.HandlerFunc {
 
 func Editor(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		switch jwt.GetClaims(c).Role {
+		claims := jwt.GetClaims(c)
+
+		if claims == nil {
+			return errForbidden
+		}
+
+		switch claims.Role {
 		case users.AdminRole, users.EditorRole:
 			return next(c)
 		default:
@@ -35,7 +45,13 @@ func Editor(next echo.HandlerFunc) echo.HandlerFunc {
 
 func Admin(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		if jwt.GetClaims(c).Role == users.AdminRole {
+		claims := jwt.GetClaims(c)
+
+		if claims == nil {
+			return errForbidden
+		}
+
+		if claims.Role == users.AdminRole {
 			return next(c)
 		}
 
