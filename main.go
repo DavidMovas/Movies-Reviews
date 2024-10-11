@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -14,6 +14,7 @@ import (
 	"github.com/DavidMovas/Movies-Reviews/internal/config"
 	"github.com/DavidMovas/Movies-Reviews/internal/echox"
 	"github.com/DavidMovas/Movies-Reviews/internal/jwt"
+	"github.com/DavidMovas/Movies-Reviews/internal/log"
 	"github.com/DavidMovas/Movies-Reviews/internal/modules/auth"
 	"github.com/DavidMovas/Movies-Reviews/internal/modules/users"
 	"github.com/DavidMovas/Movies-Reviews/internal/validation"
@@ -27,16 +28,22 @@ var (
 )
 
 func main() {
-	e := echo.New()
-	e.HTTPErrorHandler = echox.ErrorHandler
-
 	validation.SetupValidators()
 
 	cfg, err := config.NewConfig()
 	failOnError(err, "failed to load config")
 
+	logger, err := log.SetupLogger(cfg.Local, cfg.Logger.Level)
+	failOnError(err, "failed to setup logger")
+	slog.SetDefault(logger)
+
 	db, err := getDB(context.Background(), cfg.DBUrl)
 	failOnError(err, "failed to connect to db")
+
+	e := echo.New()
+	e.HTTPErrorHandler = echox.ErrorHandler
+	e.HideBanner = true
+	e.HidePort = true
 
 	usersModule := users.NewModule(db)
 
@@ -44,6 +51,7 @@ func main() {
 	if err != nil {
 		accessTime = time.Duration(5) * time.Minute
 	}
+
 	jwtService := jwt.NewService(cfg.JWT.Secret, accessTime)
 
 	//TODO: Create admin user from config for server starting
@@ -70,16 +78,15 @@ func main() {
 		signal.Notify(signalCh, os.Interrupt, os.Kill, syscall.SIGTERM)
 
 		<-signalCh
-
-		e.Logger.Info("Shutting down server...")
+		slog.Info("Shutting down server...")
 
 		ctx, cancel := context.WithTimeout(context.Background(), dbGracefulTime)
 		defer cancel()
 
 		if err := e.Shutdown(ctx); err != nil {
-			e.Logger.Errorf("Server forced to shutdown: %v", err)
+			slog.Warn("Server forced to shutdown", "error", err)
 		} else {
-			e.Logger.Info("Server gracefully stopped")
+			slog.Info("Server shutdown")
 		}
 	}()
 
@@ -87,7 +94,7 @@ func main() {
 		e.Logger.Fatal(err)
 	}
 
-	log.Printf("Server closed")
+	slog.Info("Server stopped")
 }
 
 func getDB(ctx context.Context, connString string) (*pgxpool.Pool, error) {
@@ -103,6 +110,7 @@ func getDB(ctx context.Context, connString string) (*pgxpool.Pool, error) {
 
 func failOnError(err error, msg string) {
 	if err != nil {
-		log.Fatalf("%s: %s", msg, err)
+		slog.Error("Error", err, msg)
+		os.Exit(1)
 	}
 }
