@@ -4,13 +4,9 @@ import (
 	"net/http"
 	"strconv"
 
+	apperrors "github.com/DavidMovas/Movies-Reviews/internal/error"
 	"github.com/labstack/echo"
 	"gopkg.in/validator.v2"
-)
-
-var (
-	ErrInvalidUserId = echo.NewHTTPError(http.StatusBadRequest, "invalid user id")
-	ErrInvalidRole   = echo.NewHTTPError(http.StatusBadRequest, "invalid role")
 )
 
 type Handler struct {
@@ -30,13 +26,13 @@ func (h *Handler) GetExistingUsers(c echo.Context) error {
 func (h *Handler) GetExistingUserById(c echo.Context) error {
 	userId, err := readUserId(c)
 	if err != nil {
-		return ErrInvalidUserId
+		return apperrors.BadRequest(err)
 	}
 
 	user, err := h.service.GetExistingUserById(c.Request().Context(), userId)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, err)
+		return err
 	}
 
 	return c.JSON(http.StatusOK, user)
@@ -48,7 +44,7 @@ func (h *Handler) GetExistingUserByUsername(c echo.Context) error {
 	user, err := h.service.GetExistingUserByUsername(c.Request().Context(), username)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, err)
+		return err
 	}
 
 	return c.JSON(http.StatusOK, user)
@@ -57,41 +53,42 @@ func (h *Handler) GetExistingUserByUsername(c echo.Context) error {
 func (h *Handler) UpdateExistingUserById(c echo.Context) error {
 	userId, err := readUserId(c)
 	if err != nil {
-		return ErrInvalidUserId
-	}
-
-	isUserExists, err := h.service.CheckUserExistsById(c.Request().Context(), userId)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	} else if !isUserExists {
-		return echo.NewHTTPError(http.StatusNotFound, "user not found")
+		return apperrors.BadRequest(err)
 	}
 
 	var ud NewUserData
 	if err := c.Bind(&ud); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return apperrors.BadRequest(err)
 	}
 
 	if err := validator.Validate(&ud); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return apperrors.BadRequest(err)
 	}
 
-	return h.service.UpdateExistingUserById(c.Request().Context(), userId, &ud)
+	if err := h.service.UpdateExistingUserById(c.Request().Context(), userId, &ud); err != nil {
+		return err
+	}
+
+	return c.NoContent(http.StatusOK)
 }
 
 func (h *Handler) UpdateUserRoleById(c echo.Context) error {
 	userId, err := readUserId(c)
 	if err != nil {
-		return ErrInvalidUserId
+		return apperrors.BadRequest(err)
 	}
 
 	newRole := c.Param("role")
 
 	if !ValidateRole(newRole) {
-		return ErrInvalidRole
+		return apperrors.BadRequest(err)
 	}
 
-	return h.service.UpdateUserRoleById(c.Request().Context(), userId, newRole)
+	if err := h.service.UpdateUserRoleById(c.Request().Context(), userId, newRole); err != nil {
+		return err
+	}
+
+	return c.NoContent(http.StatusOK)
 }
 
 func (h *Handler) DeleteExistingUserById(c echo.Context) error {

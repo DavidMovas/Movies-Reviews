@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/DavidMovas/Movies-Reviews/internal/config"
+	"github.com/DavidMovas/Movies-Reviews/internal/echox"
 	"github.com/DavidMovas/Movies-Reviews/internal/jwt"
 	"github.com/DavidMovas/Movies-Reviews/internal/modules/auth"
 	"github.com/DavidMovas/Movies-Reviews/internal/modules/users"
@@ -27,6 +28,7 @@ var (
 
 func main() {
 	e := echo.New()
+	e.HTTPErrorHandler = echox.ErrorHandler
 
 	validation.SetupValidators()
 
