@@ -99,12 +99,8 @@ func UnauthorizedHidden(err error, message string) *Error {
 	return newHiddenError(err, UnauthorizedCode, message)
 }
 
-func Forbidden(err error) *Error {
-	return newWrappedError(err, ForbiddenCode)
-}
-
-func ForbiddenHidden(err error, message string) *Error {
-	return newHiddenError(err, ForbiddenCode, message)
+func Forbidden(message string) *Error {
+	return newError(ForbiddenCode, message)
 }
 
 func newError(code Code, message string) *Error {

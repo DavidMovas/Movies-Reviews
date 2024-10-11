@@ -3,6 +3,7 @@ package auth
 import (
 	"net/http"
 
+	apperrors "github.com/DavidMovas/Movies-Reviews/internal/error"
 	"github.com/DavidMovas/Movies-Reviews/internal/modules/users"
 	"github.com/labstack/echo"
 	"gopkg.in/validator.v2"
@@ -25,7 +26,7 @@ func (h *Handler) Register(c echo.Context) error {
 	}
 
 	if err := validator.Validate(&raq); err != nil {
-		return err
+		return apperrors.BadRequestHidden(err, "invalid email or password")
 	}
 
 	user := &users.User{
@@ -47,7 +48,7 @@ func (h *Handler) Login(c echo.Context) error {
 	}
 
 	if err := validator.Validate(&lq); err != nil {
-		return err
+		return apperrors.BadRequestHidden(err, "invalid email or password")
 	}
 
 	token, err := h.authService.Login(c.Request().Context(), lq.Email, lq.Password)

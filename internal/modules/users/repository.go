@@ -45,7 +45,7 @@ func (r Repository) GetExistingUserByEmail(ctx context.Context, email string) (*
 	case dbx.IsNoRows(err):
 		return nil, apperrors.NotFound("user", "email", email)
 	case err != nil:
-		return nil, apperrors.Internal(err)
+		return nil, apperrors.InternalWithoutStackTrace(err)
 	}
 	return user, nil
 }
@@ -59,7 +59,7 @@ func (r Repository) GetExistingUserById(ctx context.Context, id int) (*UserWithP
 	case dbx.IsNoRows(err):
 		return nil, apperrors.NotFound("user", "id", id)
 	case err != nil:
-		return nil, apperrors.Internal(err)
+		return nil, apperrors.InternalWithoutStackTrace(err)
 	}
 
 	return user, nil

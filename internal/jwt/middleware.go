@@ -1,8 +1,7 @@
 package jwt
 
 import (
-	"net/http"
-
+	apperrors "github.com/DavidMovas/Movies-Reviews/internal/error"
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo"
 )
@@ -20,7 +19,7 @@ func NewAuthMiddleware(secret string) echo.MiddlewareFunc {
 			})
 
 			if err != nil || !token.Valid {
-				return c.JSON(http.StatusUnauthorized, "Invalid token")
+				return apperrors.Forbidden("invalid token")
 			}
 
 			c.Set(tokenContextKey, token)
