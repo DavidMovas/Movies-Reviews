@@ -1,6 +1,8 @@
 package jwt
 
 import (
+	"strings"
+
 	apperrors "github.com/DavidMovas/Movies-Reviews/internal/error"
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo"
@@ -14,7 +16,7 @@ func NewAuthMiddleware(secret string) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			tokenStr := c.Request().Header.Get("Authorization")
-			token, err := jwt.ParseWithClaims(tokenStr, &AccessClaims{}, func(token *jwt.Token) (interface{}, error) {
+			token, err := jwt.ParseWithClaims(clearToken(tokenStr), &AccessClaims{}, func(token *jwt.Token) (interface{}, error) {
 				return []byte(secret), nil
 			})
 
@@ -41,4 +43,12 @@ func GetClaims(c echo.Context) *AccessClaims {
 	}
 
 	return token.(*jwt.Token).Claims.(*AccessClaims)
+}
+
+func clearToken(tokenStr string) string {
+	if strings.Contains(tokenStr, "Bearer") {
+		return strings.TrimPrefix(tokenStr, "Bearer ")
+	}
+
+	return tokenStr
 }

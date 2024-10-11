@@ -39,9 +39,7 @@ func (s *Service) GetExistingUserByUsername(ctx context.Context, username string
 	return s.repo.GetExistingUserByUsername(ctx, username)
 }
 
-func (s *Service) UpdateExistingUserById(ctx context.Context, id int, user *contracts.NewUserData) error {
-	//TODO: Split this method on two: one for updating username and one for updating password
-
+func (s *Service) UpdateExistingUserById(ctx context.Context, id int, user *contracts.UpdateUserRequest) error {
 	passHash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err

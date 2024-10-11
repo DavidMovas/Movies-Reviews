@@ -58,7 +58,7 @@ func (h *Handler) UpdateExistingUserById(c echo.Context) error {
 		return apperrors.BadRequest(err)
 	}
 
-	raq, err := echox.BindAndValidate[contracts.NewUserData](c)
+	raq, err := echox.BindAndValidate[contracts.UpdateUserRequest](c)
 	if err != nil {
 		return err
 	}
@@ -101,12 +101,12 @@ func (h *Handler) DeleteExistingUserById(c echo.Context) error {
 func readUserId(c echo.Context) (int, error) {
 	userId := c.Param("userId")
 	if userId == "" {
-		return 0, echo.NewHTTPError(http.StatusBadRequest, "invalid user id")
+		return 0, echo.NewHTTPError(http.StatusBadRequest, "invalid userid")
 	}
 
 	id, err := strconv.Atoi(userId)
 	if err != nil {
-		return 0, echo.NewHTTPError(http.StatusBadRequest, "invalid user id")
+		return 0, echo.NewHTTPError(http.StatusBadRequest, "invalid userid")
 	}
 
 	return id, nil

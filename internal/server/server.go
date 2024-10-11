@@ -79,9 +79,9 @@ func New(ctx context.Context, cfg *config.Config) (*Server, error) {
 	//Users API routes
 	api.GET("/users/:userId", usersModule.Handler.GetExistingUserById)
 	api.GET("/users/username/:username", usersModule.Handler.GetExistingUserByUsername)
-	api.PUT("/users/:userId", usersModule.Handler.UpdateExistingUserById)
-	api.PUT("/users/:userId/role/:role", usersModule.Handler.UpdateUserRoleById)
-	api.DELETE("/users/:userId", usersModule.Handler.DeleteExistingUserById)
+	api.PUT("/users/:userId", usersModule.Handler.UpdateExistingUserById, auth.Self)
+	api.PUT("/users/:userId/role/:role", usersModule.Handler.UpdateUserRoleById, auth.Admin)
+	api.DELETE("/users/:userId", usersModule.Handler.DeleteExistingUserById, auth.Admin)
 
 	return &Server{
 		e:       e,

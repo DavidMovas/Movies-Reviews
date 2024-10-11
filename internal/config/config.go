@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/caarlos0/env/v11"
 	"github.com/joho/godotenv"
@@ -27,8 +28,8 @@ type Config struct {
 }
 
 type JWTConfig struct {
-	Secret           string `env:"SECRET"`
-	AccessExpiration string `env:"ACCESS_EXPIRATION"`
+	Secret           string        `env:"SECRET"`
+	AccessExpiration time.Duration `env:"ACCESS_EXPIRATION"`
 }
 
 type LoggerConfig struct {

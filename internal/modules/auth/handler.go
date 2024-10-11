@@ -6,7 +6,6 @@ import (
 	"github.com/DavidMovas/Movies-Reviews/contracts"
 	"github.com/DavidMovas/Movies-Reviews/internal/echox"
 	apperrors "github.com/DavidMovas/Movies-Reviews/internal/error"
-	"github.com/DavidMovas/Movies-Reviews/internal/modules/users"
 	"github.com/labstack/echo"
 	"gopkg.in/validator.v2"
 )
@@ -33,7 +32,7 @@ func (h *Handler) Register(c echo.Context) error {
 	user := &contracts.User{
 		Username: req.Username,
 		Email:    req.Email,
-		Role:     users.UserRole,
+		Role:     contracts.UserRole,
 	}
 
 	if err := h.authService.Register(c.Request().Context(), user, req.Password); err != nil {

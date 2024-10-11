@@ -19,5 +19,8 @@ func IsUniqueViolation(err error, name string) bool {
 }
 
 func IsNoRows(err error) bool {
+	if err != nil && err.Error() == "no rows in result set" {
+		return true
+	}
 	return errors.Is(err, pgx.ErrNoRows)
 }
