@@ -21,8 +21,8 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 func (r Repository) Create(ctx context.Context, user *UserWithPassword) (err error) {
 	err = r.db.QueryRow(ctx,
 		`INSERT INTO users (username, email, pass_hash) 
-    		VALUES ($1, $2, $3) RETURNING id, created_at`, user.Username, user.Email, user.PasswordHash).
-		Scan(&user.ID, &user.CreatedAt)
+    		VALUES ($1, $2, $3) RETURNING id, role, created_at`, user.Username, user.Email, user.PasswordHash).
+		Scan(&user.ID, &user.Role, &user.CreatedAt)
 
 	switch {
 	case dbx.IsUniqueViolation(err, "email"):

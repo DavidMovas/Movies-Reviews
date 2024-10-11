@@ -32,6 +32,7 @@ func (h *Handler) Register(c echo.Context) error {
 	user := &users.User{
 		Username: req.Username,
 		Email:    req.Email,
+		Role:     users.UserRole,
 	}
 
 	if err := h.authService.Register(c.Request().Context(), user, req.Password); err != nil {

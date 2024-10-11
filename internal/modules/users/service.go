@@ -3,6 +3,7 @@ package users
 import (
 	"context"
 
+	"github.com/DavidMovas/Movies-Reviews/internal/log"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -17,7 +18,12 @@ func NewService(repo *Repository) *Service {
 }
 
 func (s *Service) Create(ctx context.Context, user *UserWithPassword) error {
-	return s.repo.Create(ctx, user)
+	if err := s.repo.Create(ctx, user); err != nil {
+		return err
+	}
+
+	log.FromContext(ctx).Info("user created", "user_id", user.ID)
+	return nil
 }
 
 func (s *Service) GetExistingUserByEmail(ctx context.Context, email string) (*UserWithPassword, error) {
@@ -33,20 +39,37 @@ func (s *Service) GetExistingUserByUsername(ctx context.Context, username string
 }
 
 func (s *Service) UpdateExistingUserById(ctx context.Context, id int, user *NewUserData) error {
+	//TODO: Split this method on two: one for updating username and one for updating password
+
 	passHash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
 
-	return s.repo.UpdateExistingUserById(ctx, id, user.Username, string(passHash))
+	if err := s.repo.UpdateExistingUserById(ctx, id, user.Username, string(passHash)); err != nil {
+		return err
+	}
+
+	log.FromContext(ctx).Info("user updated", "user_id", id)
+	return nil
 }
 
 func (s *Service) UpdateUserRoleById(ctx context.Context, id int, role string) error {
-	return s.repo.UpdateUserRoleById(ctx, id, role)
+	if err := s.repo.UpdateUserRoleById(ctx, id, role); err != nil {
+		return err
+	}
+
+	log.FromContext(ctx).Info("user role updated", "user_id", id, "role", role)
+	return nil
 }
 
 func (s *Service) DeleteExistingUserById(ctx context.Context, userId int) error {
-	return s.repo.DeleteExistingUserById(ctx, userId)
+	if err := s.repo.DeleteExistingUserById(ctx, userId); err != nil {
+		return err
+	}
+
+	log.FromContext(ctx).Info("user deleted", "user_id", userId)
+	return nil
 }
 
 func (s *Service) CheckUserExistsById(ctx context.Context, id int) (bool, error) {
