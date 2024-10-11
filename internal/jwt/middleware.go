@@ -18,7 +18,7 @@ func NewAuthMiddleware(secret string) echo.MiddlewareFunc {
 				return []byte(secret), nil
 			})
 
-			if token == nil {
+			if err != nil && tokenStr == "" {
 				return next(c)
 			}
 
@@ -35,5 +35,10 @@ func NewAuthMiddleware(secret string) echo.MiddlewareFunc {
 
 func GetClaims(c echo.Context) *AccessClaims {
 	token := c.Get(tokenContextKey)
+
+	if token == nil {
+		return nil
+	}
+
 	return token.(*jwt.Token).Claims.(*AccessClaims)
 }
