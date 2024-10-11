@@ -47,9 +47,9 @@ func main() {
 	jwtService := jwt.NewService(cfg.JWT.Secret, accessTime)
 
 	authModule := auth.NewModule(usersModule.Service, jwtService)
-	authMiddleware := jwt.NewAuthMiddleware(cfg.JWT.Secret)
-
 	apiGroup := e.Group("/api")
+
+	apiGroup.Use(jwt.NewAuthMiddleware(cfg.JWT.Secret))
 
 	//TODO: Add different logic for (GET) "api/users/:id/role/:role" and "api/users/:id"
 	// For admin and for others
@@ -62,9 +62,9 @@ func main() {
 	apiGroup.GET("/users", usersModule.Handler.GetExistingUsers)
 	apiGroup.GET("/users/:userId", usersModule.Handler.GetExistingUserById)
 	apiGroup.GET("/users/username/:username", usersModule.Handler.GetExistingUserByUsername)
-	apiGroup.PUT("/users/:userId", usersModule.Handler.UpdateExistingUserById, authMiddleware, auth.Self)
-	apiGroup.PUT("/users/:userId/role/:role", usersModule.Handler.UpdateUserRoleById, authMiddleware, auth.Admin)
-	apiGroup.DELETE("/users/:userId", usersModule.Handler.DeleteExistingUserById, authMiddleware, auth.Self)
+	apiGroup.PUT("/users/:userId", usersModule.Handler.UpdateExistingUserById, auth.Self)
+	apiGroup.PUT("/users/:userId/role/:role", usersModule.Handler.UpdateUserRoleById, auth.Admin)
+	apiGroup.DELETE("/users/:userId", usersModule.Handler.DeleteExistingUserById, auth.Self)
 
 	go func() {
 		signalCh := make(chan os.Signal, 1)
