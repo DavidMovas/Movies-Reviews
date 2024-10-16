@@ -5,3 +5,8 @@
 .dockerignore
 .gitignore
 .git
+.github
+Makefile
+tern
+client
+intergation_tests
