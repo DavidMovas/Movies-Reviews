@@ -33,7 +33,7 @@ type Server struct {
 	closers []func() error
 }
 
-//TODO:
+// TODO:
 // 1. Add model for each request and response
 // 2. Add validation for this models ("nonezero/noneempty/required")
 // 3. Write test for new data responses
@@ -78,11 +78,11 @@ func New(ctx context.Context, cfg *config.Config) (*Server, error) {
 	api.Use(jwt.NewAuthMiddleware(cfg.JWT.Secret))
 	api.Use(echox.Logger)
 
-	//Auth API routes
+	// Auth API routes
 	api.POST("/auth/register", authModule.Handler.Register)
 	api.POST("/auth/login", authModule.Handler.Login)
 
-	//Users API routes
+	// Users API routes
 	api.GET("/users/:userId", usersModule.Handler.GetExistingUserById)
 	api.GET("/users/username/:username", usersModule.Handler.GetExistingUserByUsername)
 	api.PUT("/users/:userId", usersModule.Handler.UpdateExistingUserById, auth.Self)
@@ -148,13 +148,12 @@ func createInitialAdminUser(cfg config.AdminConfig, service *auth.Service) error
 	case apperrors.Is(err, apperrors.InternalCode):
 		return fmt.Errorf("create initial admin user: %w", err)
 	case err != nil:
-		//Just ignore the error
+		// Just ignore the error
 		return nil
 	default:
 		slog.Info("created initial admin user", "username", cfg.Username, "email", cfg.Email)
 		return nil
 	}
-
 }
 
 func withClosers(closers []func() error, err error) error {

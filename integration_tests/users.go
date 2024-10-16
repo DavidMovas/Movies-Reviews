@@ -11,7 +11,6 @@ import (
 )
 
 func usersApiChecks(t *testing.T, c *client.Client, cfg *config.Config) {
-
 	t.Run("users.GetExistingUserByUsername: not found", func(t *testing.T) {
 		_, err := c.GetUserByUsername("someTestName")
 		requireNotFoundError(t, err, "user", "username", "someTestName")

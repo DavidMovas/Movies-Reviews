@@ -14,9 +14,7 @@ import (
 	"github.com/DavidMovas/Movies-Reviews/internal/server"
 )
 
-var (
-	dbGracefulTime = time.Second * 10
-)
+var dbGracefulTime = time.Second * 10
 
 func main() {
 	cfg, err := config.NewConfig()

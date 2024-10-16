@@ -32,7 +32,6 @@ func (h *Handler) GetExistingUserById(c echo.Context) error {
 	}
 
 	user, err := h.service.GetExistingUserById(c.Request().Context(), userId)
-
 	if err != nil {
 		return err
 	}
@@ -44,7 +43,6 @@ func (h *Handler) GetExistingUserByUsername(c echo.Context) error {
 	username := c.Param("username")
 
 	user, err := h.service.GetExistingUserByUsername(c.Request().Context(), username)
-
 	if err != nil {
 		return err
 	}

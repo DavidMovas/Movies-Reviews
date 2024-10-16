@@ -20,7 +20,6 @@ const (
 )
 
 func authApiChecks(t *testing.T, c *client.Client, cfg *config.Config) {
-
 	t.Run("auth.RegisterUser: success", func(t *testing.T) {
 		req := &contracts.RegisterUserRequest{
 			Username: "johnmoore",

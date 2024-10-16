@@ -21,7 +21,7 @@ const (
 )
 
 func prepareInfrastructure(t *testing.T, runFunc func(t *testing.T, connString string)) {
-	//Start Postgres container
+	// Start Postgres container
 	postgres, err := testcontainers.GenericContainer(context.Background(), testcontainers.GenericContainerRequest{
 		ContainerRequest: testcontainers.ContainerRequest{
 			Name:  postgresContainerName,
@@ -43,11 +43,11 @@ func prepareInfrastructure(t *testing.T, runFunc func(t *testing.T, connString s
 	require.NoError(t, err)
 	pgConnString := fmt.Sprintf("postgres://%s:%s@%s:%d/%s", postgresUser, postgresPassword, "localhost", postgresPort.Int(), postgresDb)
 
-	//Run migrations
+	// Run migrations
 	time.Sleep(time.Second * 2)
 	runMigrations(t, pgConnString)
 
-	//Run tests
+	// Run tests
 	runFunc(t, pgConnString)
 }
 

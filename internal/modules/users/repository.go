@@ -83,7 +83,6 @@ func (r Repository) GetExistingUserByUsername(ctx context.Context, username stri
 
 func (r Repository) UpdateExistingUserById(ctx context.Context, id int, newUsername string, newPassword string) error {
 	n, err := r.db.Exec(ctx, `UPDATE users SET username = $1, pass_hash = $2 WHERE id = $3`, newUsername, newPassword, id)
-
 	if err != nil {
 		return apperrors.Internal(err)
 	}
@@ -97,7 +96,6 @@ func (r Repository) UpdateExistingUserById(ctx context.Context, id int, newUsern
 
 func (r Repository) UpdateUserRoleById(ctx context.Context, id int, newRole string) error {
 	n, err := r.db.Exec(ctx, `UPDATE users SET role = $1 WHERE id = $2`, newRole, id)
-
 	if err != nil {
 		return apperrors.Internal(err)
 	}
@@ -126,7 +124,6 @@ func (r Repository) CheckIsUserExistsById(ctx context.Context, id int) (bool, er
 	var count int
 	err := r.db.QueryRow(ctx, `SELECT count(*) FROM users WHERE id = $1 AND deleted_at IS NULL`, id).
 		Scan(&count)
-
 	if err != nil {
 		return false, apperrors.Internal(err)
 	}
