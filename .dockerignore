@@ -2,3 +2,6 @@
 *.yml
 *.env
 *.md
+.dockerignore
+.gitignore
+.git

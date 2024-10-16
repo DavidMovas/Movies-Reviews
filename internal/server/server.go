@@ -33,6 +33,12 @@ type Server struct {
 	closers []func() error
 }
 
+//TODO:
+// 1. Add model for each request and response
+// 2. Add validation for this models ("nonezero/noneempty/required")
+// 3. Write test for new data responses
+// 4. Write API document
+
 func New(ctx context.Context, cfg *config.Config) (*Server, error) {
 	logger, err := log.SetupLogger(cfg.Local, cfg.Logger.Level)
 	if err != nil {
