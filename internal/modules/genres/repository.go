@@ -29,18 +29,18 @@ func (r *Repository) GetGenres(ctx context.Context) ([]*contracts.Genre, error) 
 	defer rows.Close()
 
 	for rows.Next() {
-		genre := contracts.Genre{}
-		err = rows.Scan(&genre.Name, &genre.Name)
+		genre := contracts.NewGenre()
+		err = rows.Scan(&genre.ID, &genre.Name)
 		if err != nil {
 			return nil, apperrors.InternalWithoutStackTrace(err)
 		}
-		genres = append(genres, &genre)
+		genres = append(genres, genre)
 	}
 	return genres, nil
 }
 
 func (r *Repository) GetGenreById(ctx context.Context, id int) (*contracts.Genre, error) {
-	var genre *contracts.Genre
+	genre := contracts.NewGenre()
 	err := r.db.QueryRow(ctx, `SELECT id, name FROM genres WHERE id = $1`, id).
 		Scan(&genre.ID, &genre.Name)
 
@@ -54,13 +54,13 @@ func (r *Repository) GetGenreById(ctx context.Context, id int) (*contracts.Genre
 }
 
 func (r *Repository) CreateGenre(ctx context.Context, raq *contracts.CreateGenreRequest) (*contracts.Genre, error) {
-	var genre *contracts.Genre
-	err := r.db.QueryRow(ctx, `INSERT INTO genres(name) VALUES($1) RETURNING id, name`, raq.Name).
+	genre := contracts.NewGenre()
+	err := r.db.QueryRow(ctx, `INSERT INTO genres(name) VALUES($1) ON CONFLICT (name) DO NOTHING  RETURNING id, name`, raq.Name).
 		Scan(&genre.ID, &genre.Name)
 
 	switch {
 	case dbx.IsNoRows(err):
-		return nil, apperrors.NotFound("genre", "name", raq.Name)
+		return nil, apperrors.AlreadyExists("genre", "name", raq.Name)
 	case err != nil:
 		return nil, apperrors.InternalWithoutStackTrace(err)
 	}
@@ -68,12 +68,24 @@ func (r *Repository) CreateGenre(ctx context.Context, raq *contracts.CreateGenre
 }
 
 func (r *Repository) UpdateGenreById(ctx context.Context, id int, raq *contracts.UpdateGenreRequest) error {
-	n, err := r.db.Exec(ctx, `UPDATE genres SET name = $1 WHERE id = $2`, raq.Name, id)
+	n, err := r.db.Exec(ctx, `UPDATE genres SET name = $1 WHERE id = $2 
+        AND NOT EXISTS (SELECT 1 FROM genres WHERE name = $1 AND id <> $2)`, raq.Name, id)
+
 	if err != nil {
 		return apperrors.Internal(err)
 	}
 
 	if n.RowsAffected() == 0 {
+		var exists bool
+		err = r.db.QueryRow(ctx, `SELECT EXISTS (SELECT 1 FROM genres WHERE name = $1)`, raq.Name).Scan(&exists)
+		if err != nil {
+			return apperrors.Internal(err)
+		}
+
+		if exists {
+			return apperrors.AlreadyExists("genre", "name", raq.Name)
+		}
+
 		return apperrors.NotFound("genre", "id", id)
 	}
 
