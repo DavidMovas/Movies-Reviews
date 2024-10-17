@@ -85,18 +85,18 @@ func New(ctx context.Context, cfg *config.Config) (*Server, error) {
 	api.POST("/auth/login", authModule.Handler.Login)
 
 	// Users API routes
-	api.GET("/users/:userId", usersModule.Handler.GetExistingUserById)
+	api.GET("/users/:userId", usersModule.Handler.GetExistingUserByID)
 	api.GET("/users/username/:username", usersModule.Handler.GetExistingUserByUsername)
-	api.PUT("/users/:userId", usersModule.Handler.UpdateExistingUserById, auth.Self)
-	api.PUT("/users/:userId/role/:role", usersModule.Handler.UpdateUserRoleById, auth.Admin)
-	api.DELETE("/users/:userId", usersModule.Handler.DeleteExistingUserById, auth.Admin)
+	api.PUT("/users/:userId", usersModule.Handler.UpdateExistingUserByID, auth.Self)
+	api.PUT("/users/:userId/role/:role", usersModule.Handler.UpdateUserRoleByID, auth.Admin)
+	api.DELETE("/users/:userId", usersModule.Handler.DeleteExistingUserByID, auth.Admin)
 
 	// Genres AOI routers
 	api.GET("/genres", genresModule.Handler.GetGenres)
-	api.GET("/genres/:genreId", genresModule.Handler.GetGenreById)
+	api.GET("/genres/:genreId", genresModule.Handler.GetGenreByID)
 	api.POST("/genres", genresModule.Handler.CreateGenre, auth.Editor)
-	api.PUT("/genres/:genreId", genresModule.Handler.UpdateGenreById, auth.Editor)
-	api.DELETE("/genres/:genreId", genresModule.Handler.DeleteGenreById, auth.Editor)
+	api.PUT("/genres/:genreId", genresModule.Handler.UpdateGenreByID, auth.Editor)
+	api.DELETE("/genres/:genreId", genresModule.Handler.DeleteGenreByID, auth.Editor)
 
 	return &Server{
 		e:       e,

@@ -31,42 +31,42 @@ func (s *Service) GetExistingUserByEmail(ctx context.Context, email string) (*co
 	return s.repo.GetExistingUserByEmail(ctx, email)
 }
 
-func (s *Service) GetExistingUserById(ctx context.Context, userId int) (*contracts.UserWithPassword, error) {
-	return s.repo.GetExistingUserById(ctx, userId)
+func (s *Service) GetExistingUserByID(ctx context.Context, userID int) (*contracts.UserWithPassword, error) {
+	return s.repo.GetExistingUserByID(ctx, userID)
 }
 
 func (s *Service) GetExistingUserByUsername(ctx context.Context, username string) (*contracts.UserWithPassword, error) {
 	return s.repo.GetExistingUserByUsername(ctx, username)
 }
 
-func (s *Service) UpdateExistingUserById(ctx context.Context, id int, user *contracts.UpdateUserRequest) error {
+func (s *Service) UpdateExistingUserByID(ctx context.Context, userID int, user *contracts.UpdateUserRequest) error {
 	passHash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
 
-	if err := s.repo.UpdateExistingUserById(ctx, id, user.Username, string(passHash)); err != nil {
+	if err := s.repo.UpdateExistingUserByID(ctx, userID, user.Username, string(passHash)); err != nil {
 		return err
 	}
 
-	log.FromContext(ctx).Info("user updated", "user_id", id)
+	log.FromContext(ctx).Info("user updated", "user_id", userID)
 	return nil
 }
 
-func (s *Service) UpdateUserRoleById(ctx context.Context, id int, role string) error {
-	if err := s.repo.UpdateUserRoleById(ctx, id, role); err != nil {
+func (s *Service) UpdateUserRoleByID(ctx context.Context, userID int, role string) error {
+	if err := s.repo.UpdateUserRoleByID(ctx, userID, role); err != nil {
 		return err
 	}
 
-	log.FromContext(ctx).Info("user role updated", "user_id", id, "role", role)
+	log.FromContext(ctx).Info("user role updated", "user_id", userID, "role", role)
 	return nil
 }
 
-func (s *Service) DeleteExistingUserById(ctx context.Context, userId int) error {
-	if err := s.repo.DeleteExistingUserById(ctx, userId); err != nil {
+func (s *Service) DeleteExistingUserByID(ctx context.Context, userID int) error {
+	if err := s.repo.DeleteExistingUserByID(ctx, userID); err != nil {
 		return err
 	}
 
-	log.FromContext(ctx).Info("user deleted", "user_id", userId)
+	log.FromContext(ctx).Info("user deleted", "user_id", userID)
 	return nil
 }

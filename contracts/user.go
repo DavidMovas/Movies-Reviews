@@ -23,7 +23,7 @@ type UserWithPassword struct {
 }
 
 type UpdateUserRequest struct {
-	UserId   int    `json:"userId"`
+	UserID   int    `json:"userId"`
 	Username string `json:"username" validate:"min=3,max=24"`
 	Password string `json:"password" validate:"password"`
 }

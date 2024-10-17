@@ -25,7 +25,7 @@ func main() {
 
 	go func() {
 		signalCh := make(chan os.Signal, 1)
-		signal.Notify(signalCh, os.Interrupt, os.Kill, syscall.SIGTERM)
+		signal.Notify(signalCh, os.Interrupt, syscall.SIGTERM)
 
 		<-signalCh
 		slog.Info("Shutting down server...")
@@ -33,7 +33,7 @@ func main() {
 		ctx, cancel := context.WithTimeout(context.Background(), dbGracefulTime)
 		defer cancel()
 
-		if err := srv.Shutdown(ctx); err != nil {
+		if err = srv.Shutdown(ctx); err != nil {
 			slog.Warn("Server forced to shutdown", "error", err)
 		} else {
 			slog.Info("Server shutdown")
@@ -50,7 +50,7 @@ func main() {
 
 func failOnError(err error, msg string) {
 	if err != nil {
-		slog.Error("Error", err, msg)
+		slog.Error("Error", err.Error(), msg)
 		os.Exit(1)
 	}
 }

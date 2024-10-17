@@ -6,17 +6,11 @@ import (
 	"os"
 )
 
+type contextKey string
+
 const (
-	contextLoggerKey = "logger"
+	contextLoggerKey contextKey = "logger"
 )
-
-type leveler struct {
-	level slog.Level
-}
-
-func (l leveler) Level() slog.Level {
-	return l.level
-}
 
 func WithLogger(ctx context.Context, logger *slog.Logger) context.Context {
 	return context.WithValue(ctx, contextLoggerKey, logger)
@@ -31,11 +25,7 @@ func FromContext(ctx context.Context) *slog.Logger {
 }
 
 func SetupLogger(isLocal bool, level string) (*slog.Logger, error) {
-	l, err := newLevelFromString(level)
-	if err != nil {
-		return nil, err
-	}
-
+	l := newLevelFromString(level)
 	opts := &slog.HandlerOptions{Level: l}
 
 	var handler slog.Handler
@@ -48,17 +38,17 @@ func SetupLogger(isLocal bool, level string) (*slog.Logger, error) {
 	return slog.New(handler), nil
 }
 
-func newLevelFromString(level string) (slog.Level, error) {
+func newLevelFromString(level string) slog.Level {
 	switch level {
 	case "debug":
-		return slog.LevelDebug, nil
+		return slog.LevelDebug
 	case "info":
-		return slog.LevelInfo, nil
+		return slog.LevelInfo
 	case "warn":
-		return slog.LevelWarn, nil
+		return slog.LevelWarn
 	case "error":
-		return slog.LevelError, nil
+		return slog.LevelError
 	default:
-		return slog.LevelInfo, nil
+		return slog.LevelInfo
 	}
 }

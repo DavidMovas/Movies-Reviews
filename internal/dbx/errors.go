@@ -10,9 +10,9 @@ import (
 )
 
 func IsUniqueViolation(err error, name string) bool {
-	var perr *pgconn.PgError
-	if errors.As(err, &perr) {
-		return perr.Code == pgerrcode.UniqueViolation && strings.Contains(perr.ConstraintName, name)
+	var pgError *pgconn.PgError
+	if errors.As(err, &pgError) {
+		return pgError.Code == pgerrcode.UniqueViolation && strings.Contains(pgError.ConstraintName, name)
 	}
 
 	return false

@@ -1,4 +1,4 @@
-package integration_tests
+package tests
 
 import (
 	"fmt"
@@ -23,7 +23,7 @@ const (
 	standardPassword = "sgwva3!ekfRRR"
 )
 
-func authApiChecks(t *testing.T, c *client.Client, _ *config.Config) {
+func authAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 	t.Run("auth.RegisterUser: wrong email", func(t *testing.T) {
 		req := &contracts.RegisterUserRequest{
 			Username: "johnmoore",

@@ -51,7 +51,7 @@ func (r Repository) GetExistingUserByEmail(ctx context.Context, email string) (*
 	return user, nil
 }
 
-func (r Repository) GetExistingUserById(ctx context.Context, id int) (*contracts.UserWithPassword, error) {
+func (r Repository) GetExistingUserByID(ctx context.Context, id int) (*contracts.UserWithPassword, error) {
 	user := contracts.NewUserWithPassword()
 	err := r.db.QueryRow(ctx, `SELECT id, username, email, pass_hash, role, created_at, deleted_at FROM users WHERE id = $1 AND deleted_at IS NULL`, id).
 		Scan(&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.Role, &user.CreatedAt, &user.DeletedAt)
@@ -81,7 +81,7 @@ func (r Repository) GetExistingUserByUsername(ctx context.Context, username stri
 	return user, nil
 }
 
-func (r Repository) UpdateExistingUserById(ctx context.Context, id int, newUsername string, newPassword string) error {
+func (r Repository) UpdateExistingUserByID(ctx context.Context, id int, newUsername string, newPassword string) error {
 	n, err := r.db.Exec(ctx, `UPDATE users SET username = $1, pass_hash = $2 WHERE id = $3`, newUsername, newPassword, id)
 	if err != nil {
 		return apperrors.Internal(err)
@@ -94,7 +94,7 @@ func (r Repository) UpdateExistingUserById(ctx context.Context, id int, newUsern
 	return nil
 }
 
-func (r Repository) UpdateUserRoleById(ctx context.Context, id int, newRole string) error {
+func (r Repository) UpdateUserRoleByID(ctx context.Context, id int, newRole string) error {
 	n, err := r.db.Exec(ctx, `UPDATE users SET role = $1 WHERE id = $2`, newRole, id)
 	if err != nil {
 		return apperrors.Internal(err)
@@ -107,7 +107,7 @@ func (r Repository) UpdateUserRoleById(ctx context.Context, id int, newRole stri
 	return nil
 }
 
-func (r Repository) DeleteExistingUserById(ctx context.Context, id int) error {
+func (r Repository) DeleteExistingUserByID(ctx context.Context, id int) error {
 	n, err := r.db.Exec(ctx, `UPDATE users SET deleted_at = NOW() WHERE id = $1 AND deleted_at IS NULL`, id)
 	if err != nil {
 		return apperrors.Internal(err)

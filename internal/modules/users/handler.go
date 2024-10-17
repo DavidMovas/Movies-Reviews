@@ -20,13 +20,13 @@ func NewHandler(service *Service) *Handler {
 	}
 }
 
-func (h *Handler) GetExistingUserById(c echo.Context) error {
-	userId, err := echox.ReadFromParam[int](c, "userId", "invalid userid")
+func (h *Handler) GetExistingUserByID(c echo.Context) error {
+	userID, err := echox.ReadFromParam[int](c, "userId", "invalid userid")
 	if err != nil {
 		return apperrors.BadRequest(err)
 	}
 
-	user, err := h.service.GetExistingUserById(c.Request().Context(), userId)
+	user, err := h.service.GetExistingUserByID(c.Request().Context(), userID)
 	if err != nil {
 		return err
 	}
@@ -48,8 +48,8 @@ func (h *Handler) GetExistingUserByUsername(c echo.Context) error {
 	return c.JSON(http.StatusOK, user)
 }
 
-func (h *Handler) UpdateExistingUserById(c echo.Context) error {
-	userId, err := echox.ReadFromParam[int](c, "userId", "invalid userid")
+func (h *Handler) UpdateExistingUserByID(c echo.Context) error {
+	userID, err := echox.ReadFromParam[int](c, "userId", "invalid userid")
 	if err != nil {
 		return apperrors.BadRequest(err)
 	}
@@ -59,15 +59,15 @@ func (h *Handler) UpdateExistingUserById(c echo.Context) error {
 		return err
 	}
 
-	if err := h.service.UpdateExistingUserById(c.Request().Context(), userId, raq); err != nil {
+	if err := h.service.UpdateExistingUserByID(c.Request().Context(), userID, raq); err != nil {
 		return err
 	}
 
 	return c.NoContent(http.StatusOK)
 }
 
-func (h *Handler) UpdateUserRoleById(c echo.Context) error {
-	userId, err := echox.ReadFromParam[int](c, "userId", "invalid userid")
+func (h *Handler) UpdateUserRoleByID(c echo.Context) error {
+	userID, err := echox.ReadFromParam[int](c, "userId", "invalid userid")
 	if err != nil {
 		return apperrors.BadRequest(err)
 	}
@@ -78,18 +78,18 @@ func (h *Handler) UpdateUserRoleById(c echo.Context) error {
 		return apperrors.BadRequestHidden(errors.New("invalid role"), "role unknown")
 	}
 
-	if err := h.service.UpdateUserRoleById(c.Request().Context(), userId, newRole); err != nil {
+	if err := h.service.UpdateUserRoleByID(c.Request().Context(), userID, newRole); err != nil {
 		return err
 	}
 
 	return c.NoContent(http.StatusOK)
 }
 
-func (h *Handler) DeleteExistingUserById(c echo.Context) error {
-	userId, err := echox.ReadFromParam[int](c, "userId", "invalid userid")
+func (h *Handler) DeleteExistingUserByID(c echo.Context) error {
+	userID, err := echox.ReadFromParam[int](c, "userId", "invalid userid")
 	if err != nil {
 		return err
 	}
 
-	return h.service.DeleteExistingUserById(c.Request().Context(), userId)
+	return h.service.DeleteExistingUserByID(c.Request().Context(), userID)
 }

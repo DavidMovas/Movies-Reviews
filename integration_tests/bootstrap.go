@@ -1,4 +1,4 @@
-package integration_tests
+package tests
 
 import (
 	"context"
@@ -47,7 +47,7 @@ func prepareInfrastructure(t *testing.T, runFunc func(t *testing.T, connString s
 	time.Sleep(time.Second * 2)
 	runMigrations(t, pgConnString)
 
-	// Run tests
+	// Run integration_tests
 	runFunc(t, pgConnString)
 }
 

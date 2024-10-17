@@ -1,4 +1,4 @@
-package integration_tests
+package tests
 
 import (
 	"fmt"
@@ -10,20 +10,20 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func usersApiChecks(t *testing.T, c *client.Client, cfg *config.Config) {
+func usersAPIChecks(t *testing.T, c *client.Client, cfg *config.Config) {
 	t.Run("users.GetExistingUserByUsername: not found", func(t *testing.T) {
 		_, err := c.GetUserByUsername("someTestName")
 		requireNotFoundError(t, err, "user", "username", "someTestName")
 	})
 
 	t.Run("users.GetExistingUserById: not found", func(t *testing.T) {
-		_, err := c.GetUserById(100)
+		_, err := c.GetUserByID(100)
 		requireNotFoundError(t, err, "user", "id", 100)
 	})
 
 	t.Run("users.UpdateExistingUserById: success", func(t *testing.T) {
 		req := &contracts.UpdateUserRequest{
-			UserId:   johnMoore.ID,
+			UserID:   johnMoore.ID,
 			Username: fmt.Sprintf("%sTEST", johnMoore.Username),
 			Password: fmt.Sprintf("%sTEST", johnMoorePass),
 		}
@@ -33,9 +33,9 @@ func usersApiChecks(t *testing.T, c *client.Client, cfg *config.Config) {
 
 	t.Run("users.UpdateExistingUserById: rollback success", func(t *testing.T) {
 		req := &contracts.UpdateUserRequest{
-			UserId:   johnMoore.ID,
-			Username: fmt.Sprintf("%s", johnMoore.Username),
-			Password: fmt.Sprintf("%s", johnMoorePass),
+			UserID:   johnMoore.ID,
+			Username: johnMoore.Username,
+			Password: johnMoorePass,
 		}
 		err := c.UpdateUserData(contracts.NewAuthenticated(req, johnMooreToken))
 		require.NoError(t, err)
@@ -43,7 +43,7 @@ func usersApiChecks(t *testing.T, c *client.Client, cfg *config.Config) {
 
 	t.Run("users.UpdateExistingUserById: another user", func(t *testing.T) {
 		req := &contracts.UpdateUserRequest{
-			UserId:   johnMoore.ID + 100,
+			UserID:   johnMoore.ID + 100,
 			Username: fmt.Sprintf("%sTEST", johnMoore.Username),
 			Password: fmt.Sprintf("%sTEST", johnMoorePass),
 		}
@@ -53,7 +53,7 @@ func usersApiChecks(t *testing.T, c *client.Client, cfg *config.Config) {
 
 	t.Run("users.UpdateExistingUserById: non-authenticated", func(t *testing.T) {
 		req := &contracts.UpdateUserRequest{
-			UserId:   johnMoore.ID + 1,
+			UserID:   johnMoore.ID + 1,
 			Username: fmt.Sprintf("%sTEST", johnMoore.Username),
 			Password: fmt.Sprintf("%sTEST", johnMoorePass),
 		}
@@ -76,9 +76,9 @@ func usersApiChecks(t *testing.T, c *client.Client, cfg *config.Config) {
 
 	t.Run("users.UpdateUserRoleById: success", func(t *testing.T) {
 		req := &contracts.UpdateUserRequest{
-			UserId:   johnMoore.ID,
-			Username: fmt.Sprintf("%s", johnMoore.Username),
-			Password: fmt.Sprintf("%s", johnMoorePass),
+			UserID:   johnMoore.ID,
+			Username: johnMoore.Username,
+			Password: johnMoorePass,
 		}
 		err := c.UpdateUserRole(contracts.NewAuthenticated(req, adminToken), contracts.EditorRole)
 		require.NoError(t, err)
@@ -88,9 +88,9 @@ func usersApiChecks(t *testing.T, c *client.Client, cfg *config.Config) {
 
 	t.Run("users.UpdateUserRoleById: invalid role", func(t *testing.T) {
 		req := &contracts.UpdateUserRequest{
-			UserId:   johnMoore.ID,
-			Username: fmt.Sprintf("%s", johnMoore.Username),
-			Password: fmt.Sprintf("%s", johnMoorePass),
+			UserID:   johnMoore.ID,
+			Username: johnMoore.Username,
+			Password: johnMoorePass,
 		}
 		err := c.UpdateUserRole(contracts.NewAuthenticated(req, adminToken), "invalid_role")
 		requireBadRequestError(t, err, "role unknown")
@@ -98,9 +98,9 @@ func usersApiChecks(t *testing.T, c *client.Client, cfg *config.Config) {
 
 	t.Run("users.UpdateUserRoleById: user not found", func(t *testing.T) {
 		req := &contracts.UpdateUserRequest{
-			UserId:   johnMoore.ID + 100,
-			Username: fmt.Sprintf("%s", johnMoore.Username),
-			Password: fmt.Sprintf("%s", johnMoorePass),
+			UserID:   johnMoore.ID + 100,
+			Username: johnMoore.Username,
+			Password: johnMoorePass,
 		}
 		err := c.UpdateUserRole(contracts.NewAuthenticated(req, adminToken), contracts.EditorRole)
 		requireNotFoundError(t, err, "user", "id", johnMoore.ID+100)
@@ -108,27 +108,27 @@ func usersApiChecks(t *testing.T, c *client.Client, cfg *config.Config) {
 
 	t.Run("users.UpdateUserRoleById: non-authenticated", func(t *testing.T) {
 		req := &contracts.UpdateUserRequest{
-			UserId:   johnMoore.ID,
-			Username: fmt.Sprintf("%s", johnMoore.Username),
-			Password: fmt.Sprintf("%s", johnMoorePass),
+			UserID:   johnMoore.ID,
+			Username: johnMoore.Username,
+			Password: johnMoorePass,
 		}
 		err := c.UpdateUserRole(contracts.NewAuthenticated(req, ""), contracts.EditorRole)
 		requireForbiddenError(t, err, "insufficient permissions")
 	})
 
 	t.Run("users.DeleteUserById: non-authenticated", func(t *testing.T) {
-		err := c.DeleteUserById("", johnMoore.ID)
+		err := c.DeleteUserByID("", johnMoore.ID)
 		requireForbiddenError(t, err, "insufficient permissions")
 	})
 
 	t.Run("users.DeleteUserById: user not found", func(t *testing.T) {
-		err := c.DeleteUserById(adminToken, johnMoore.ID+1000)
+		err := c.DeleteUserByID(adminToken, johnMoore.ID+1000)
 		requireNotFoundError(t, err, "user", "id", johnMoore.ID+1000)
 	})
 
 	t.Run("users.DeleteUserById: success", func(t *testing.T) {
 		user := register(t, c, "userForDelete", "2lG8G@example.com", standardPassword)
-		err := c.DeleteUserById(adminToken, user.ID)
+		err := c.DeleteUserByID(adminToken, user.ID)
 		require.NoError(t, err)
 	})
 }

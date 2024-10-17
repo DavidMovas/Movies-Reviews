@@ -1,4 +1,4 @@
-package integration_tests
+package tests
 
 import (
 	"context"
@@ -66,7 +66,7 @@ func tests(t *testing.T, port int, cfg *config.Config) {
 	addr := fmt.Sprintf("http://localhost:%d", port)
 	c := client.New(addr)
 
-	authApiChecks(t, c, cfg)
-	usersApiChecks(t, c, cfg)
-	genresApiChecks(t, c, cfg)
+	authAPIChecks(t, c, cfg)
+	usersAPIChecks(t, c, cfg)
+	genresAPIChecks(t, c, cfg)
 }

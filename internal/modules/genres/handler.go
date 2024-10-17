@@ -28,13 +28,13 @@ func (h *Handler) GetGenres(c echo.Context) error {
 	return c.JSON(http.StatusOK, genres)
 }
 
-func (h *Handler) GetGenreById(c echo.Context) error {
-	genreId, err := echox.ReadFromParam[int](c, "genreId", "invalid genreId")
+func (h *Handler) GetGenreByID(c echo.Context) error {
+	genreID, err := echox.ReadFromParam[int](c, "genreId", "invalid genreId")
 	if err != nil {
 		return apperrors.BadRequest(err)
 	}
 
-	genre, err := h.Service.GetGenreById(c.Request().Context(), genreId)
+	genre, err := h.Service.GetGenreByID(c.Request().Context(), genreID)
 	if err != nil {
 		return err
 	}
@@ -56,8 +56,8 @@ func (h *Handler) CreateGenre(c echo.Context) error {
 	return c.JSON(http.StatusCreated, genre)
 }
 
-func (h *Handler) UpdateGenreById(c echo.Context) error {
-	genreId, err := echox.ReadFromParam[int](c, "genreId", "invalid genreId")
+func (h *Handler) UpdateGenreByID(c echo.Context) error {
+	genreID, err := echox.ReadFromParam[int](c, "genreId", "invalid genreId")
 	if err != nil {
 		return apperrors.BadRequest(err)
 	}
@@ -67,18 +67,18 @@ func (h *Handler) UpdateGenreById(c echo.Context) error {
 		return err
 	}
 
-	if err := h.Service.UpdateGenreById(c.Request().Context(), genreId, raq); err != nil {
+	if err := h.Service.UpdateGenreByID(c.Request().Context(), genreID, raq); err != nil {
 		return err
 	}
 
 	return c.NoContent(http.StatusOK)
 }
 
-func (h *Handler) DeleteGenreById(c echo.Context) error {
-	genreId, err := echox.ReadFromParam[int](c, "genreId", "invalid genreId")
+func (h *Handler) DeleteGenreByID(c echo.Context) error {
+	genreID, err := echox.ReadFromParam[int](c, "genreID", "invalid genreID")
 	if err != nil {
 		return apperrors.BadRequest(err)
 	}
 
-	return h.Service.DeleteGenreById(c.Request().Context(), genreId)
+	return h.Service.DeleteGenreByID(c.Request().Context(), genreID)
 }

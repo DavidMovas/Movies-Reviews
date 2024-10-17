@@ -2,12 +2,12 @@ package client
 
 import "github.com/DavidMovas/Movies-Reviews/contracts"
 
-func (c *Client) GetUserById(userId int) (*contracts.UserWithPassword, error) {
+func (c *Client) GetUserByID(userID int) (*contracts.UserWithPassword, error) {
 	var user *contracts.UserWithPassword
 
 	_, err := c.client.R().
 		SetResult(&user).
-		Get(c.path("/api/users/%d", userId))
+		Get(c.path("/api/users/%d", userID))
 
 	return user, err
 }
@@ -27,7 +27,7 @@ func (c *Client) UpdateUserData(req *contracts.AuthenticatedRequest[*contracts.U
 		SetAuthToken(req.AccessToken).
 		SetBody(req.Request).
 		SetHeader("Content-Type", "application/json").
-		Put(c.path("/api/users/%d", req.Request.UserId))
+		Put(c.path("/api/users/%d", req.Request.UserID))
 
 	return err
 }
@@ -36,16 +36,16 @@ func (c *Client) UpdateUserRole(req *contracts.AuthenticatedRequest[*contracts.U
 	_, err := c.client.R().
 		SetAuthToken(req.AccessToken).
 		SetHeader("Content-Type", "application/json").
-		Put(c.path("/api/users/%d/role/%s", req.Request.UserId, role))
+		Put(c.path("/api/users/%d/role/%s", req.Request.UserID, role))
 
 	return err
 }
 
-func (c *Client) DeleteUserById(accessToken string, userId int) error {
+func (c *Client) DeleteUserByID(accessToken string, userID int) error {
 	_, err := c.client.R().
 		SetAuthToken(accessToken).
 		SetHeader("Content-Type", "application/json").
-		Delete(c.path("/api/users/%d", userId))
+		Delete(c.path("/api/users/%d", userID))
 
 	return err
 }

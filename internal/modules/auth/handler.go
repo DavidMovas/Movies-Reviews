@@ -48,7 +48,7 @@ func (h *Handler) Login(c echo.Context) error {
 		return err
 	}
 
-	if err := validator.Validate(&req); err != nil {
+	if err = validator.Validate(&req); err != nil {
 		return apperrors.BadRequestHidden(err, "invalid email or password")
 	}
 

@@ -39,7 +39,7 @@ func (r *Repository) GetGenres(ctx context.Context) ([]*contracts.Genre, error) 
 	return genres, nil
 }
 
-func (r *Repository) GetGenreById(ctx context.Context, id int) (*contracts.Genre, error) {
+func (r *Repository) GetGenreByID(ctx context.Context, id int) (*contracts.Genre, error) {
 	genre := contracts.NewGenre()
 	err := r.db.QueryRow(ctx, `SELECT id, name FROM genres WHERE id = $1`, id).
 		Scan(&genre.ID, &genre.Name)
@@ -67,7 +67,7 @@ func (r *Repository) CreateGenre(ctx context.Context, raq *contracts.CreateGenre
 	return genre, nil
 }
 
-func (r *Repository) UpdateGenreById(ctx context.Context, id int, raq *contracts.UpdateGenreRequest) error {
+func (r *Repository) UpdateGenreByID(ctx context.Context, id int, raq *contracts.UpdateGenreRequest) error {
 	n, err := r.db.Exec(ctx, `UPDATE genres SET name = $1 WHERE id = $2 
         AND NOT EXISTS (SELECT 1 FROM genres WHERE name = $1 AND id <> $2)`, raq.Name, id)
 	if err != nil {
@@ -91,7 +91,7 @@ func (r *Repository) UpdateGenreById(ctx context.Context, id int, raq *contracts
 	return nil
 }
 
-func (r *Repository) DeleteGenreById(ctx context.Context, id int) error {
+func (r *Repository) DeleteGenreByID(ctx context.Context, id int) error {
 	n, err := r.db.Exec(ctx, `DELETE FROM genres WHERE id = $1`, id)
 	if err != nil {
 		return apperrors.Internal(err)

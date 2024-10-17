@@ -31,12 +31,12 @@ func (s *Service) GetGenres(context context.Context) ([]*contracts.Genre, error)
 	return s.Repository.GetGenres(context)
 }
 
-func (s *Service) GetGenreById(ctx context.Context, id int) (*contracts.Genre, error) {
-	return s.Repository.GetGenreById(ctx, id)
+func (s *Service) GetGenreByID(ctx context.Context, id int) (*contracts.Genre, error) {
+	return s.Repository.GetGenreByID(ctx, id)
 }
 
-func (s *Service) UpdateGenreById(ctx context.Context, id int, raq *contracts.UpdateGenreRequest) error {
-	if err := s.Repository.UpdateGenreById(ctx, id, raq); err != nil {
+func (s *Service) UpdateGenreByID(ctx context.Context, id int, raq *contracts.UpdateGenreRequest) error {
+	if err := s.Repository.UpdateGenreByID(ctx, id, raq); err != nil {
 		return err
 	}
 
@@ -44,8 +44,8 @@ func (s *Service) UpdateGenreById(ctx context.Context, id int, raq *contracts.Up
 	return nil
 }
 
-func (s *Service) DeleteGenreById(ctx context.Context, id int) error {
-	if err := s.Repository.DeleteGenreById(ctx, id); err != nil {
+func (s *Service) DeleteGenreByID(ctx context.Context, id int) error {
+	if err := s.Repository.DeleteGenreByID(ctx, id); err != nil {
 		return err
 	}
 
