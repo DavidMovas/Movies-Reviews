@@ -21,8 +21,8 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 
 func (r Repository) Create(ctx context.Context, user *contracts.UserWithPassword) (err error) {
 	err = r.db.QueryRow(ctx,
-		`INSERT INTO users (username, email, pass_hash) 
-    		VALUES ($1, $2, $3) RETURNING id, role, created_at`, user.Username, user.Email, user.PasswordHash).
+		`INSERT INTO users (username, email, pass_hash, role) 
+    		VALUES ($1, $2, $3, $4) RETURNING id, role, created_at`, user.Username, user.Email, user.PasswordHash, user.Role).
 		Scan(&user.ID, &user.Role, &user.CreatedAt)
 
 	switch {

@@ -25,9 +25,27 @@ func (c *Client) GetUserByUsername(username string) (*contracts.UserWithPassword
 func (c *Client) UpdateUserData(req *contracts.AuthenticatedRequest[*contracts.UpdateUserRequest]) error {
 	_, err := c.client.R().
 		SetAuthToken(req.AccessToken).
-		SetHeader("Content-Type", "application/json").
 		SetBody(req.Request).
+		SetHeader("Content-Type", "application/json").
 		Put(c.path("/api/users/%d", req.Request.UserId))
+
+	return err
+}
+
+func (c *Client) UpdateUserRole(req *contracts.AuthenticatedRequest[*contracts.UpdateUserRequest], role string) error {
+	_, err := c.client.R().
+		SetAuthToken(req.AccessToken).
+		SetHeader("Content-Type", "application/json").
+		Put(c.path("/api/users/%d/role/%s", req.Request.UserId, role))
+
+	return err
+}
+
+func (c *Client) DeleteUserById(accessToken string, userId int) error {
+	_, err := c.client.R().
+		SetAuthToken(accessToken).
+		SetHeader("Content-Type", "application/json").
+		Delete(c.path("/api/users/%d", userId))
 
 	return err
 }

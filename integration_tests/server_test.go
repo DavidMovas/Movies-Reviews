@@ -30,7 +30,7 @@ func runServer(t *testing.T, pgConnString string) {
 		Admin: config.AdminConfig{
 			Username: "admin",
 			Email:    "admin@mail.com",
-			Password: "admin",
+			Password: "admin!123D",
 		},
 		Local: true,
 		Logger: config.LoggerConfig{

@@ -64,6 +64,5 @@ func toHttpStatus(code apperrors.Code) int {
 		return http.StatusForbidden
 	default:
 		return http.StatusInternalServerError
-
 	}
 }

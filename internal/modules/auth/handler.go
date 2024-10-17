@@ -54,7 +54,7 @@ func (h *Handler) Login(c echo.Context) error {
 
 	token, err := h.authService.Login(c.Request().Context(), req.Email, req.Password)
 	if err != nil {
-		return c.JSON(http.StatusUnauthorized, err)
+		return err
 	}
 
 	return c.JSON(http.StatusOK, contracts.LoginUserResponse{AccessToken: token})
