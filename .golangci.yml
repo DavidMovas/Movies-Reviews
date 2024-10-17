@@ -8,7 +8,6 @@ linters:
     - revive
     - unused
     - gocritic
-    - deadcode
 
 linters-settings:
   govet:
