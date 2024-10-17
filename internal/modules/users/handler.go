@@ -3,7 +3,6 @@ package users
 import (
 	"errors"
 	"net/http"
-	"strconv"
 
 	"github.com/DavidMovas/Movies-Reviews/contracts"
 	"github.com/DavidMovas/Movies-Reviews/internal/echox"
@@ -21,12 +20,8 @@ func NewHandler(service *Service) *Handler {
 	}
 }
 
-func (h *Handler) GetExistingUsers(c echo.Context) error {
-	return apperrors.BadRequest(errors.New("not implemented"))
-}
-
 func (h *Handler) GetExistingUserById(c echo.Context) error {
-	userId, err := readUserId(c)
+	userId, err := echox.ReadFromParam[int](c, "userId", "invalid userid")
 	if err != nil {
 		return apperrors.BadRequest(err)
 	}
@@ -40,7 +35,10 @@ func (h *Handler) GetExistingUserById(c echo.Context) error {
 }
 
 func (h *Handler) GetExistingUserByUsername(c echo.Context) error {
-	username := c.Param("username")
+	username, err := echox.ReadFromParam[string](c, "username", "invalid username")
+	if err != nil {
+		return apperrors.BadRequest(err)
+	}
 
 	user, err := h.service.GetExistingUserByUsername(c.Request().Context(), username)
 	if err != nil {
@@ -51,7 +49,7 @@ func (h *Handler) GetExistingUserByUsername(c echo.Context) error {
 }
 
 func (h *Handler) UpdateExistingUserById(c echo.Context) error {
-	userId, err := readUserId(c)
+	userId, err := echox.ReadFromParam[int](c, "userId", "invalid userid")
 	if err != nil {
 		return apperrors.BadRequest(err)
 	}
@@ -69,7 +67,7 @@ func (h *Handler) UpdateExistingUserById(c echo.Context) error {
 }
 
 func (h *Handler) UpdateUserRoleById(c echo.Context) error {
-	userId, err := readUserId(c)
+	userId, err := echox.ReadFromParam[int](c, "userId", "invalid userid")
 	if err != nil {
 		return apperrors.BadRequest(err)
 	}
@@ -88,24 +86,10 @@ func (h *Handler) UpdateUserRoleById(c echo.Context) error {
 }
 
 func (h *Handler) DeleteExistingUserById(c echo.Context) error {
-	userId, err := readUserId(c)
+	userId, err := echox.ReadFromParam[int](c, "userId", "invalid userid")
 	if err != nil {
 		return err
 	}
 
 	return h.service.DeleteExistingUserById(c.Request().Context(), userId)
-}
-
-func readUserId(c echo.Context) (int, error) {
-	userId := c.Param("userId")
-	if userId == "" {
-		return 0, echo.NewHTTPError(http.StatusBadRequest, "invalid userid")
-	}
-
-	id, err := strconv.Atoi(userId)
-	if err != nil {
-		return 0, echo.NewHTTPError(http.StatusBadRequest, "invalid userid")
-	}
-
-	return id, nil
 }

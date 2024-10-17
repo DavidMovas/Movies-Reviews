@@ -27,6 +27,11 @@ func requireBadRequestError(t *testing.T, err error, msg string) {
 	requireApiError(t, err, http.StatusBadRequest, msg)
 }
 
+func requireAlreadyExistsError(t *testing.T, err error, subject, key string, value any) {
+	msg := apperrors.AlreadyExists(subject, key, value).Error()
+	requireApiError(t, err, http.StatusConflict, msg)
+}
+
 func requireApiError(t *testing.T, err error, statusCode int, msg string) {
 	var cerr *client.Error
 	ok := errors.As(err, &cerr)

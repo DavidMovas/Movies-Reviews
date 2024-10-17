@@ -119,18 +119,3 @@ func (r Repository) DeleteExistingUserById(ctx context.Context, id int) error {
 
 	return nil
 }
-
-func (r Repository) CheckIsUserExistsById(ctx context.Context, id int) (bool, error) {
-	var count int
-	err := r.db.QueryRow(ctx, `SELECT count(*) FROM users WHERE id = $1 AND deleted_at IS NULL`, id).
-		Scan(&count)
-	if err != nil {
-		return false, apperrors.Internal(err)
-	}
-
-	if count == 0 {
-		return false, apperrors.NotFound("user", "id", id)
-	}
-
-	return count > 0, nil
-}
