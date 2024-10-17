@@ -9,12 +9,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var (
-	genre *contracts.Genre
-)
+var genre *contracts.Genre
 
 func genresApiChecks(t *testing.T, c *client.Client, _ *config.Config) {
-
 	t.Run("genres.GetGenres: nil", func(t *testing.T) {
 		genres, err := c.GetGenres()
 		require.NoError(t, err)

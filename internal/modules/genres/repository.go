@@ -70,7 +70,6 @@ func (r *Repository) CreateGenre(ctx context.Context, raq *contracts.CreateGenre
 func (r *Repository) UpdateGenreById(ctx context.Context, id int, raq *contracts.UpdateGenreRequest) error {
 	n, err := r.db.Exec(ctx, `UPDATE genres SET name = $1 WHERE id = $2 
         AND NOT EXISTS (SELECT 1 FROM genres WHERE name = $1 AND id <> $2)`, raq.Name, id)
-
 	if err != nil {
 		return apperrors.Internal(err)
 	}
