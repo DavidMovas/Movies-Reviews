@@ -70,7 +70,3 @@ func (s *Service) DeleteExistingUserById(ctx context.Context, userId int) error 
 	log.FromContext(ctx).Info("user deleted", "user_id", userId)
 	return nil
 }
-
-func (s *Service) CheckUserExistsById(ctx context.Context, id int) (bool, error) {
-	return s.repo.CheckIsUserExistsById(ctx, id)
-}

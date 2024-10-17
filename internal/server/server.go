@@ -15,6 +15,7 @@ import (
 	"github.com/DavidMovas/Movies-Reviews/internal/jwt"
 	"github.com/DavidMovas/Movies-Reviews/internal/log"
 	"github.com/DavidMovas/Movies-Reviews/internal/modules/auth"
+	"github.com/DavidMovas/Movies-Reviews/internal/modules/genres"
 	"github.com/DavidMovas/Movies-Reviews/internal/modules/users"
 	"github.com/DavidMovas/Movies-Reviews/internal/validation"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -62,6 +63,7 @@ func New(ctx context.Context, cfg *config.Config) (*Server, error) {
 	jwtService := jwt.NewService(cfg.JWT.Secret, cfg.JWT.AccessExpiration)
 	usersModule := users.NewModule(db)
 	authModule := auth.NewModule(jwtService, usersModule.Service)
+	genresModule := genres.NewModule(db)
 
 	if err = createInitialAdminUser(cfg.Admin, authModule.Service); err != nil {
 		return nil, withClosers(closers, fmt.Errorf("create initial admin user: %w", err))
@@ -88,6 +90,13 @@ func New(ctx context.Context, cfg *config.Config) (*Server, error) {
 	api.PUT("/users/:userId", usersModule.Handler.UpdateExistingUserById, auth.Self)
 	api.PUT("/users/:userId/role/:role", usersModule.Handler.UpdateUserRoleById, auth.Admin)
 	api.DELETE("/users/:userId", usersModule.Handler.DeleteExistingUserById, auth.Admin)
+
+	// Genres AOI routers
+	api.GET("/genres", genresModule.Handler.GetGenres)
+	api.GET("/genres/:genreId", genresModule.Handler.GetGenreById)
+	api.POST("/genres", genresModule.Handler.CreateGenre, auth.Editor)
+	api.PUT("/genres/:genreId", genresModule.Handler.UpdateGenreById, auth.Editor)
+	api.DELETE("/genres/:genreId", genresModule.Handler.DeleteGenreById, auth.Editor)
 
 	return &Server{
 		e:       e,
