@@ -19,7 +19,6 @@ func NewService(repo *Repository) *Service {
 
 func (s *Service) CreateGenre(ctx context.Context, raq *contracts.CreateGenreRequest) (*contracts.Genre, error) {
 	genre, err := s.Repository.CreateGenre(ctx, raq)
-
 	if err != nil {
 		return nil, err
 	}
