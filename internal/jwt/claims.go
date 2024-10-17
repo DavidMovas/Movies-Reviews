@@ -5,7 +5,7 @@ import (
 )
 
 type AccessClaims struct {
-	jwt.StandardClaims
+	jwt.RegisteredClaims
 	UserID int    `json:"user_id"`
 	Role   string `json:"role"`
 }

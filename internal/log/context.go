@@ -8,9 +8,7 @@ import (
 
 type contextKey string
 
-const (
-	contextLoggerKey contextKey = "logger"
-)
+const contextLoggerKey contextKey = "logger"
 
 func WithLogger(ctx context.Context, logger *slog.Logger) context.Context {
 	return context.WithValue(ctx, contextLoggerKey, logger)

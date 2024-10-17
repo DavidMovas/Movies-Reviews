@@ -8,15 +8,15 @@ import (
 	"github.com/labstack/echo"
 )
 
-const (
-	tokenContextKey = "token"
-)
+type contextKey string
+
+const tokenContextKey contextKey = "token"
 
 func NewAuthMiddleware(secret string) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			tokenStr := c.Request().Header.Get("Authorization")
-			token, err := jwt.ParseWithClaims(clearToken(tokenStr), &AccessClaims{}, func(token *jwt.Token) (interface{}, error) {
+			token, err := jwt.ParseWithClaims(clearToken(tokenStr), &AccessClaims{}, func(_ *jwt.Token) (interface{}, error) {
 				return []byte(secret), nil
 			})
 
@@ -28,7 +28,7 @@ func NewAuthMiddleware(secret string) echo.MiddlewareFunc {
 				return apperrors.Forbidden("invalid token")
 			}
 
-			c.Set(tokenContextKey, token)
+			c.Set(string(tokenContextKey), token)
 
 			return next(c)
 		}
@@ -36,7 +36,7 @@ func NewAuthMiddleware(secret string) echo.MiddlewareFunc {
 }
 
 func GetClaims(c echo.Context) *AccessClaims {
-	token := c.Get(tokenContextKey)
+	token := c.Get(string(tokenContextKey))
 
 	if token == nil {
 		return nil

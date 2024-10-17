@@ -10,6 +10,13 @@ import (
 	"github.com/labstack/echo"
 )
 
+const (
+	paramUserID     = "userId"
+	paramUsername   = "username"
+	invalidUserID   = "invalid userid"
+	invalidUsername = "invalid username"
+)
+
 type Handler struct {
 	service *Service
 }
@@ -21,7 +28,7 @@ func NewHandler(service *Service) *Handler {
 }
 
 func (h *Handler) GetExistingUserByID(c echo.Context) error {
-	userID, err := echox.ReadFromParam[int](c, "userId", "invalid userid")
+	userID, err := echox.ReadFromParam[int](c, paramUserID, invalidUserID)
 	if err != nil {
 		return apperrors.BadRequest(err)
 	}
@@ -35,7 +42,7 @@ func (h *Handler) GetExistingUserByID(c echo.Context) error {
 }
 
 func (h *Handler) GetExistingUserByUsername(c echo.Context) error {
-	username, err := echox.ReadFromParam[string](c, "username", "invalid username")
+	username, err := echox.ReadFromParam[string](c, paramUsername, invalidUsername)
 	if err != nil {
 		return apperrors.BadRequest(err)
 	}
@@ -49,7 +56,7 @@ func (h *Handler) GetExistingUserByUsername(c echo.Context) error {
 }
 
 func (h *Handler) UpdateExistingUserByID(c echo.Context) error {
-	userID, err := echox.ReadFromParam[int](c, "userId", "invalid userid")
+	userID, err := echox.ReadFromParam[int](c, paramUserID, invalidUserID)
 	if err != nil {
 		return apperrors.BadRequest(err)
 	}
@@ -67,7 +74,7 @@ func (h *Handler) UpdateExistingUserByID(c echo.Context) error {
 }
 
 func (h *Handler) UpdateUserRoleByID(c echo.Context) error {
-	userID, err := echox.ReadFromParam[int](c, "userId", "invalid userid")
+	userID, err := echox.ReadFromParam[int](c, paramUserID, invalidUserID)
 	if err != nil {
 		return apperrors.BadRequest(err)
 	}
@@ -86,7 +93,7 @@ func (h *Handler) UpdateUserRoleByID(c echo.Context) error {
 }
 
 func (h *Handler) DeleteExistingUserByID(c echo.Context) error {
-	userID, err := echox.ReadFromParam[int](c, "userId", "invalid userid")
+	userID, err := echox.ReadFromParam[int](c, paramUserID, invalidUserID)
 	if err != nil {
 		return err
 	}

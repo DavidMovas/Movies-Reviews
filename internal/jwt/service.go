@@ -23,11 +23,11 @@ func NewService(secret string, accessExpiration time.Duration) *Service {
 func (s *Service) GenerateToken(userID int, role string) (string, error) {
 	now := time.Now()
 	claims := &AccessClaims{
-		StandardClaims: jwt.StandardClaims{
-			Id:        uuid.New().String(),
+		RegisteredClaims: jwt.RegisteredClaims{
+			ID:        uuid.New().String(),
 			Subject:   strconv.Itoa(userID),
-			IssuedAt:  now.Unix(),
-			ExpiresAt: now.Add(s.accessExpiration).Unix(),
+			IssuedAt:  jwt.NewNumericDate(now),
+			ExpiresAt: jwt.NewNumericDate(now.Add(s.accessExpiration)),
 		},
 		UserID: userID,
 		Role:   role,

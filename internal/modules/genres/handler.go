@@ -9,6 +9,11 @@ import (
 	"github.com/labstack/echo"
 )
 
+const (
+	paramGenreID   = "genreId"
+	invalidGenreID = "invalid genreId"
+)
+
 type Handler struct {
 	Service *Service
 }
@@ -29,7 +34,7 @@ func (h *Handler) GetGenres(c echo.Context) error {
 }
 
 func (h *Handler) GetGenreByID(c echo.Context) error {
-	genreID, err := echox.ReadFromParam[int](c, "genreId", "invalid genreId")
+	genreID, err := echox.ReadFromParam[int](c, paramGenreID, invalidGenreID)
 	if err != nil {
 		return apperrors.BadRequest(err)
 	}
@@ -57,7 +62,7 @@ func (h *Handler) CreateGenre(c echo.Context) error {
 }
 
 func (h *Handler) UpdateGenreByID(c echo.Context) error {
-	genreID, err := echox.ReadFromParam[int](c, "genreId", "invalid genreId")
+	genreID, err := echox.ReadFromParam[int](c, paramGenreID, invalidGenreID)
 	if err != nil {
 		return apperrors.BadRequest(err)
 	}
@@ -75,7 +80,7 @@ func (h *Handler) UpdateGenreByID(c echo.Context) error {
 }
 
 func (h *Handler) DeleteGenreByID(c echo.Context) error {
-	genreID, err := echox.ReadFromParam[int](c, "genreID", "invalid genreID")
+	genreID, err := echox.ReadFromParam[int](c, paramGenreID, invalidGenreID)
 	if err != nil {
 		return apperrors.BadRequest(err)
 	}
