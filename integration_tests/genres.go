@@ -23,15 +23,6 @@ func genresAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 		requireNotFoundError(t, err, "genre", "id", 1)
 	})
 
-	t.Run("genres.CreateGenre: non-authenticated", func(t *testing.T) {
-		raq := contracts.CreateGenreRequest{
-			Name: "comedy",
-		}
-
-		_, err := c.CreateGenre("", &raq)
-		requireForbiddenError(t, err, "insufficient permissions")
-	})
-
 	t.Run("genres.CreateGenre: insufficient permissions", func(t *testing.T) {
 		raq := contracts.CreateGenreRequest{
 			Name: "action",

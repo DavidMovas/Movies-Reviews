@@ -39,3 +39,7 @@ func requireAPIError(t *testing.T, err error, statusCode int, msg string) {
 	require.Equal(t, statusCode, cerr.Code)
 	require.Contains(t, cerr.Message, msg)
 }
+
+func ptr[T any](value T) *T {
+	return &value
+}

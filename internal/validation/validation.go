@@ -74,7 +74,7 @@ func email(v interface{}, _ string) error {
 func nonzero(v interface{}, _ string) error {
 	s, ok := v.(string)
 	if ok && s == "" {
-		return fmt.Errorf("nonezero must not be empty")
+		return fmt.Errorf("must not be empty")
 	}
 	return nil
 }

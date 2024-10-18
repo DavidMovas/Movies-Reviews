@@ -36,7 +36,7 @@ func (c *Client) CreateStar(req *contracts.AuthenticatedRequest[*contracts.Creat
 	return star, err
 }
 
-func (c *Client) UpdateStarByID(req *contracts.AuthenticatedRequest[*contracts.UpdateStarRequest]) error {
+func (c *Client) UpdateStarByID(req *contracts.AuthenticatedRequest[*contracts.UpdateStarRequest]) (*contracts.Star, error) {
 	var star *contracts.Star
 
 	_, err := c.client.R().
@@ -45,7 +45,7 @@ func (c *Client) UpdateStarByID(req *contracts.AuthenticatedRequest[*contracts.U
 		SetResult(&star).
 		Put(c.path("/api/stars/%d", req.Request.StarID))
 
-	return err
+	return star, err
 }
 
 func (c *Client) DeleteStarByID(accessToken string, starID int) error {
