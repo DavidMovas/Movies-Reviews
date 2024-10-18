@@ -31,7 +31,7 @@ type CreateStarRequest struct {
 
 type UpdateStarRequest struct {
 	StarID     int        `json:"starId" validate:"nonzero"`
-	FirstName  *string    `json:"firstName,omitempty" validate:",max=50"`
+	FirstName  *string    `json:"firstName,omitempty" validate:"max=50"`
 	MiddleName *string    `json:"middleName,omitempty" validate:"max=50"`
 	LastName   *string    `json:"lastName,omitempty" validate:"max=50"`
 	BirthDate  *time.Time `json:"birthDate,omitempty"`
@@ -42,4 +42,47 @@ type UpdateStarRequest struct {
 
 func NewStar() *Star {
 	return &Star{}
+}
+
+func (c *CreateStarRequest) ToStar() *Star {
+	return &Star{
+		FirstName:  c.FirstName,
+		MiddleName: c.MiddleName,
+		LastName:   c.LastName,
+		BirthDate:  c.BirthDate,
+		BirthPlace: c.BirthPlace,
+		DeathDate:  c.DeathDate,
+		Bio:        c.Bio,
+	}
+}
+
+func (s Star) Normalize() *Star {
+	return &Star{
+		ID:         s.ID,
+		FirstName:  s.FirstName,
+		MiddleName: normalizeString(s.MiddleName),
+		LastName:   s.LastName,
+		BirthDate:  s.BirthDate,
+		BirthPlace: normalizeString(s.BirthPlace),
+		DeathDate:  normalizeDate(s.DeathDate),
+		Bio:        normalizeString(s.Bio),
+		CreatedAt:  s.CreatedAt,
+		DeletedAt:  normalizeDate(s.DeletedAt),
+	}
+}
+
+func normalizeString(s *string) *string {
+	if s == nil || *s == "" {
+		return nil
+	}
+
+	return s
+}
+
+func normalizeDate(date *time.Time) *time.Time {
+	if date == nil || date.IsZero() {
+		return nil
+	}
+
+	return date
 }

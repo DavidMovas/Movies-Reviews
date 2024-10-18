@@ -38,7 +38,7 @@ func (r *Repository) GetStars(ctx context.Context) ([]*contracts.Star, error) {
 		if err != nil {
 			return nil, apperrors.InternalWithoutStackTrace(err)
 		}
-		stars = append(stars, star)
+		stars = append(stars, star.Normalize())
 	}
 	return stars, nil
 }
@@ -55,19 +55,21 @@ func (r *Repository) GetStarByID(ctx context.Context, starID int) (*contracts.St
 		return nil, apperrors.InternalWithoutStackTrace(err)
 	}
 
-	return star, nil
+	return star.Normalize(), nil
 }
 
 func (r *Repository) CreateStar(ctx context.Context, req *contracts.CreateStarRequest) (*contracts.Star, error) {
-	star := contracts.NewStar()
-	err := r.db.QueryRow(ctx, `INSERT INTO stars (first_name, middle_name, last_name, birth_date, birth_place, death_date, bio) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, created_at`,
-		req.FirstName, req.MiddleName, req.LastName, req.BirthDate, req.BirthPlace, req.DeathDate, req.Bio).Scan(&star.ID, &star.CreatedAt)
+	star := req.ToStar()
+	err := r.db.QueryRow(ctx, `INSERT INTO stars (first_name, middle_name, last_name, birth_date, birth_place, death_date, bio) 
+									VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, created_at`,
+		req.FirstName, req.MiddleName, req.LastName, req.BirthDate, req.BirthPlace, req.DeathDate, req.Bio).
+		Scan(&star.ID, &star.CreatedAt)
 
 	if err != nil {
 		return nil, apperrors.InternalWithoutStackTrace(err)
 	}
 
-	return star, nil
+	return star.Normalize(), nil
 }
 
 func (r *Repository) UpdateStar(ctx context.Context, starID int, req *contracts.UpdateStarRequest) (*contracts.Star, error) {
@@ -118,11 +120,11 @@ func (r *Repository) UpdateStar(ctx context.Context, starID int, req *contracts.
 		return nil, apperrors.InternalWithoutStackTrace(err)
 	}
 
-	return star, nil
+	return star.Normalize(), nil
 }
 
 func (r *Repository) DeleteStarByID(ctx context.Context, starID int) error {
-	n, err := r.db.Exec(ctx, `UPDATE stars SET deleted_at = NOW() WHERE id = $1`, starID)
+	n, err := r.db.Exec(ctx, `UPDATE stars SET deleted_at = NOW() WHERE id = $1 AND deleted_at IS NULL`, starID)
 	if err != nil {
 		return apperrors.Internal(err)
 	}
