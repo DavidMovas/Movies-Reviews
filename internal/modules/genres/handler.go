@@ -15,12 +15,12 @@ const (
 )
 
 type Handler struct {
-	Service *Service
+	*Service
 }
 
 func NewHandler(service *Service) *Handler {
 	return &Handler{
-		Service: service,
+		service,
 	}
 }
 

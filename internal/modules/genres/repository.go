@@ -91,14 +91,14 @@ func (r *Repository) UpdateGenreByID(ctx context.Context, id int, raq *contracts
 	return nil
 }
 
-func (r *Repository) DeleteGenreByID(ctx context.Context, id int) error {
-	n, err := r.db.Exec(ctx, `DELETE FROM genres WHERE id = $1`, id)
+func (r *Repository) DeleteGenreByID(ctx context.Context, genreID int) error {
+	n, err := r.db.Exec(ctx, `DELETE FROM genres WHERE id = $1`, genreID)
 	if err != nil {
 		return apperrors.Internal(err)
 	}
 
 	if n.RowsAffected() == 0 {
-		return apperrors.NotFound("genre", "id", id)
+		return apperrors.NotFound("genre", "id", genreID)
 	}
 
 	return nil

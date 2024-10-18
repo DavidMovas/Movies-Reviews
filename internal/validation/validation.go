@@ -30,6 +30,7 @@ func SetupValidators() {
 	}{
 		{"email", email},
 		{"password", password},
+		{"nonzero", nonzero},
 	}
 
 	for _, v := range validators {
@@ -68,4 +69,12 @@ func email(v interface{}, _ string) error {
 
 	_, err := mail.ParseAddress(s)
 	return err
+}
+
+func nonzero(v interface{}, _ string) error {
+	s, ok := v.(string)
+	if ok && s == "" {
+		return fmt.Errorf("nonezero must not be empty")
+	}
+	return nil
 }

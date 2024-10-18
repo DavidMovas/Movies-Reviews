@@ -8,6 +8,8 @@ import (
 	"net"
 	"time"
 
+	"github.com/DavidMovas/Movies-Reviews/internal/modules/stars"
+
 	"github.com/DavidMovas/Movies-Reviews/contracts"
 	"github.com/DavidMovas/Movies-Reviews/internal/config"
 	"github.com/DavidMovas/Movies-Reviews/internal/echox"
@@ -34,12 +36,6 @@ type Server struct {
 	closers []func() error
 }
 
-// TODO:
-// 1. Add model for each request and response
-// 2. Add validation for this models ("nonezero/noneempty/required")
-// 3. Write test for new data responses
-// 4. Write API document
-
 func New(ctx context.Context, cfg *config.Config) (*Server, error) {
 	logger, err := log.SetupLogger(cfg.Local, cfg.Logger.Level)
 	if err != nil {
@@ -64,6 +60,7 @@ func New(ctx context.Context, cfg *config.Config) (*Server, error) {
 	usersModule := users.NewModule(db)
 	authModule := auth.NewModule(jwtService, usersModule.Service)
 	genresModule := genres.NewModule(db)
+	starsModule := stars.NewModule(db)
 
 	if err = createInitialAdminUser(cfg.Admin, authModule.Service); err != nil {
 		return nil, withClosers(closers, fmt.Errorf("create initial admin user: %w", err))
@@ -91,12 +88,20 @@ func New(ctx context.Context, cfg *config.Config) (*Server, error) {
 	api.PUT("/users/:userId/role/:role", usersModule.Handler.UpdateUserRoleByID, auth.Admin)
 	api.DELETE("/users/:userId", usersModule.Handler.DeleteExistingUserByID, auth.Admin)
 
-	// Genres AOI routers
+	// Genres API routers
 	api.GET("/genres", genresModule.Handler.GetGenres)
 	api.GET("/genres/:genreId", genresModule.Handler.GetGenreByID)
 	api.POST("/genres", genresModule.Handler.CreateGenre, auth.Editor)
 	api.PUT("/genres/:genreId", genresModule.Handler.UpdateGenreByID, auth.Editor)
 	api.DELETE("/genres/:genreId", genresModule.Handler.DeleteGenreByID, auth.Editor)
+
+	// Stars API routers
+	api.GET("/stars", starsModule.Handler.GetStars)
+	api.GET("/stars/:starId", starsModule.Handler.GetStarByID)
+	api.POST("/stars", starsModule.Handler.CreateStar, auth.Editor)
+	api.PUT("/stars/:starId", starsModule.Handler.UpdateStarByID, auth.Editor)
+	api.DELETE("/stars/:starId", starsModule.Handler.DeleteStarByID, auth.Editor)
+	// Get all stars for a movie
 
 	return &Server{
 		e:       e,
