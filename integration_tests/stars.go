@@ -48,7 +48,7 @@ func starsAPIChecks(t *testing.T, client *client.Client, _ *config.Config) {
 				req: &contracts.CreateStarRequest{
 					FirstName:  "jack",
 					LastName:   "nicholson",
-					BirthDate:  time.Date(1937, 04, 22, 0, 0, 0, 0, time.UTC),
+					BirthDate:  time.Date(1937, 0o4, 22, 0, 0, 0, 0, time.UTC),
 					BirthPlace: ptr("Neptune, New Jersey, USA"),
 					Bio:        ptr("Jack Nicholson, an American actor, producer, director and screenwriter, is a three-time Academy Award winner and twelve-time nominee. Nicholson is also notable for being one of two actors - the other being Michael Caine - who have received an Oscar nomination in every decade from the '60s through the '00s."),
 				},
@@ -89,7 +89,7 @@ func starsAPIChecks(t *testing.T, client *client.Client, _ *config.Config) {
 	t.Run("stars.CreateStar: firstname is empty", func(t *testing.T) {
 		req := &contracts.CreateStarRequest{
 			LastName:  "some",
-			BirthDate: time.Date(1970, 04, 22, 0, 0, 0, 0, time.UTC),
+			BirthDate: time.Date(1970, 0o4, 22, 0, 0, 0, 0, time.UTC),
 		}
 
 		_, err := client.CreateStar(contracts.NewAuthenticated(req, johnMooreToken))

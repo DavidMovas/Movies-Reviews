@@ -64,7 +64,6 @@ func (r *Repository) CreateStar(ctx context.Context, req *contracts.CreateStarRe
 									VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, created_at`,
 		req.FirstName, req.MiddleName, req.LastName, req.BirthDate, req.BirthPlace, req.DeathDate, req.Bio).
 		Scan(&star.ID, &star.CreatedAt)
-
 	if err != nil {
 		return nil, apperrors.InternalWithoutStackTrace(err)
 	}
