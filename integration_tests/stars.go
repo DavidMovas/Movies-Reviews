@@ -18,11 +18,17 @@ var (
 	sophiaStar *contracts.Star
 )
 
+const (
+	testPaginationDefaultSize = 2
+	testPaginationMaxSize     = 10
+)
+
 func starsAPIChecks(t *testing.T, client *client.Client, _ *config.Config) {
 	t.Run("stars.GetStars: empty: success", func(t *testing.T) {
-		stars, err := client.GetStars()
+		req := &contracts.GetStarsRequest{}
+		res, err := client.GetStars(req)
 		require.NoError(t, err)
-		require.Nil(t, stars)
+		require.Equal(t, 0, res.Total)
 	})
 
 	t.Run("stars.GetStarById: not found", func(t *testing.T) {
@@ -96,10 +102,24 @@ func starsAPIChecks(t *testing.T, client *client.Client, _ *config.Config) {
 		requireBadRequestError(t, err, "FirstName: less than min")
 	})
 
-	t.Run("stars.GetStars: not empty: success", func(t *testing.T) {
-		stars, err := client.GetStars()
+	t.Run("stars.GetStars: success", func(t *testing.T) {
+		req := &contracts.GetStarsRequest{}
+		res, err := client.GetStars(req)
 		require.NoError(t, err)
-		require.Equal(t, len([]*contracts.Star{jackStar, denzelStar, sophiaStar}), len(stars))
+
+		require.Equal(t, 3, res.Total)
+		require.Equal(t, 1, res.Page)
+		require.Equal(t, testPaginationDefaultSize, res.Size)
+		require.Equal(t, []*contracts.Star{jackStar, denzelStar}, res.Items)
+
+		req.Page = 2
+		res, err = client.GetStars(req)
+		require.NoError(t, err)
+
+		require.Equal(t, 3, res.Total)
+		require.Equal(t, 2, res.Page)
+		require.Equal(t, testPaginationDefaultSize, res.Size)
+		require.Equal(t, []*contracts.Star{sophiaStar}, res.Items)
 	})
 
 	t.Run("stars.GetStarById: success", func(t *testing.T) {

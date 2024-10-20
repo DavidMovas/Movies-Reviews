@@ -3,6 +3,10 @@ package stars
 import (
 	"net/http"
 
+	"github.com/DavidMovas/Movies-Reviews/internal/config"
+
+	"github.com/DavidMovas/Movies-Reviews/internal/pagination"
+
 	"github.com/DavidMovas/Movies-Reviews/contracts"
 
 	apperrors "github.com/DavidMovas/Movies-Reviews/internal/error"
@@ -19,21 +23,31 @@ const (
 
 type Handler struct {
 	*Service
+	paginationConfig *config.PaginationConfig
 }
 
-func NewHandler(service *Service) *Handler {
+func NewHandler(service *Service, paginationConfig *config.PaginationConfig) *Handler {
 	return &Handler{
 		service,
+		paginationConfig,
 	}
 }
 
 func (h *Handler) GetStars(c echo.Context) error {
-	stars, err := h.Service.GetStars(c.Request().Context())
+	req, err := echox.BindAndValidate[contracts.GetStarsRequest](c)
 	if err != nil {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, stars)
+	pagination.SetDefaults(&req.PaginatedRequest, h.paginationConfig)
+	offset, limit := pagination.OffsetLimit(&req.PaginatedRequest)
+
+	stars, total, err := h.Service.GetStarsPaginated(c.Request().Context(), offset, limit)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, pagination.Response[*contracts.Star](&req.PaginatedRequest, total, stars))
 }
 
 func (h *Handler) GetStarByID(c echo.Context) error {

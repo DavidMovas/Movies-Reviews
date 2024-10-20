@@ -4,11 +4,12 @@ import (
 	"github.com/DavidMovas/Movies-Reviews/contracts"
 )
 
-func (c *Client) GetStars() ([]*contracts.Star, error) {
-	var stars []*contracts.Star
+func (c *Client) GetStars(req *contracts.GetStarsRequest) (*contracts.PaginatedResponse[*contracts.Star], error) {
+	var stars *contracts.PaginatedResponse[*contracts.Star]
 
 	_, err := c.client.R().
 		SetResult(&stars).
+		SetQueryParams(req.ToQueryParams()).
 		Get(c.path("/api/stars"))
 
 	return stars, err

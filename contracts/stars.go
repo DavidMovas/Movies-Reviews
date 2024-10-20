@@ -19,6 +19,10 @@ type GetStarRequest struct {
 	StarID int `json:"starId" validate:"nonzero"`
 }
 
+type GetStarsRequest struct {
+	PaginatedRequest
+}
+
 type CreateStarRequest struct {
 	FirstName  string     `json:"firstName" validate:"min=1,max=50"`
 	MiddleName *string    `json:"middleName,omitempty" validate:"max=50"`

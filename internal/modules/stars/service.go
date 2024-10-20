@@ -26,6 +26,10 @@ func (s *Service) GetStarByID(ctx context.Context, starID int) (*contracts.Star,
 	return s.repo.GetStarByID(ctx, starID)
 }
 
+func (s *Service) GetStarsPaginated(ctx context.Context, offset int, limit int) ([]*contracts.Star, int, error) {
+	return s.repo.GetStarsPaginated(ctx, offset, limit)
+}
+
 func (s *Service) CreateStar(ctx context.Context, req *contracts.CreateStarRequest) (*contracts.Star, error) {
 	star, err := s.repo.CreateStar(ctx, req)
 	if err != nil {

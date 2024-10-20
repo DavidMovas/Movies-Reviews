@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/jackc/pgx/v5"
+
 	"github.com/DavidMovas/Movies-Reviews/internal/dbx"
 
 	apperrors "github.com/DavidMovas/Movies-Reviews/internal/error"
@@ -41,6 +43,40 @@ func (r *Repository) GetStars(ctx context.Context) ([]*contracts.Star, error) {
 		stars = append(stars, star.Normalize())
 	}
 	return stars, nil
+}
+
+func (r *Repository) GetStarsPaginated(ctx context.Context, offset int, limit int) ([]*contracts.Star, int, error) {
+	b := &pgx.Batch{}
+	b.Queue(`SELECT id, first_name, middle_name, last_name, birth_date, birth_place, death_date, bio, created_at, deleted_at FROM stars WHERE deleted_at IS NULL ORDER BY id LIMIT $1 OFFSET $2`, limit, offset)
+	b.Queue(`SELECT COUNT(*) FROM stars WHERE deleted_at IS NULL`)
+	br := r.db.SendBatch(ctx, b)
+	defer br.Close()
+
+	rows, err := br.Query()
+	if err != nil {
+		return nil, 0, apperrors.Internal(err)
+	}
+	defer rows.Close()
+
+	var stars []*contracts.Star
+	for rows.Next() {
+		star := contracts.NewStar()
+		if err = rows.Scan(&star.ID, &star.FirstName, &star.MiddleName, &star.LastName, &star.BirthDate, &star.BirthPlace, &star.DeathDate, &star.Bio, &star.CreatedAt, &star.DeletedAt); err != nil {
+			return nil, 0, apperrors.Internal(err)
+		}
+		stars = append(stars, star.Normalize())
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, 0, apperrors.Internal(err)
+	}
+
+	var total int
+	if err = br.QueryRow().Scan(&total); err != nil {
+		return nil, 0, apperrors.Internal(err)
+	}
+
+	return stars, total, nil
 }
 
 func (r *Repository) GetStarByID(ctx context.Context, starID int) (*contracts.Star, error) {

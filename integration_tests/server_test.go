@@ -32,6 +32,10 @@ func runServer(t *testing.T, pgConnString string) {
 			Email:    "admin@mail.com",
 			Password: "admin!123D",
 		},
+		Pagination: config.PaginationConfig{
+			DefaultSize: testPaginationDefaultSize,
+			MaxSize:     testPaginationMaxSize,
+		},
 		Local: true,
 		Logger: config.LoggerConfig{
 			Level: "info",
