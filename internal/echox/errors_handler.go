@@ -62,7 +62,7 @@ func toHTTPStatus(code apperrors.Code) int {
 		return http.StatusUnauthorized
 	case apperrors.ForbiddenCode:
 		return http.StatusForbidden
-	case apperrors.AlreadyExistsCode:
+	case apperrors.AlreadyExistsCode, apperrors.VersionMismatchCode:
 		return http.StatusConflict
 	default:
 		return http.StatusInternalServerError
