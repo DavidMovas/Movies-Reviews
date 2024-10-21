@@ -80,7 +80,6 @@ func (r *Repository) CreateMovie(ctx context.Context, req *contracts.CreateMovie
 	var movie contracts.MovieDetails
 	err := r.db.QueryRow(ctx, `INSERT INTO movies (title, description, release_date) VALUES ($1, $2, $3) RETURNING id, title, description, release_date, created_at, version`, req.Title, req.Description, req.ReleaseDate).
 		Scan(&movie.ID, &movie.Title, &movie.Description, &movie.ReleaseDate, &movie.CreatedAt, &movie.Version)
-
 	if err != nil {
 		return nil, apperrors.InternalWithoutStackTrace(err)
 	}
