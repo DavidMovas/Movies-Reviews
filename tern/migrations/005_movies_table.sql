@@ -6,7 +6,8 @@ CREATE TABLE movies (
     description TEXT NOT NULL,
     release_date DATE NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    deleted_at TIMESTAMP
+    deleted_at TIMESTAMP,
+    version INT NOT NULL DEFAULT 0
 );
 
 ---- create above / drop below ----

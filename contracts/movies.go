@@ -8,6 +8,7 @@ type Movie struct {
 	ReleaseDate time.Time  `json:"releaseDate"`
 	CreatedAt   time.Time  `json:"createdAt"`
 	DeletedAt   *time.Time `json:"deletedAt,omitempty"`
+	Version     int        `json:"version"`
 }
 
 type MovieDetails struct {
