@@ -34,7 +34,7 @@ type CreateStarRequest struct {
 }
 
 type UpdateStarRequest struct {
-	StarID     int        `json:"starId" validate:"nonzero"`
+	StarID     int        `json:"-" param:"starId" validate:"nonzero"`
 	FirstName  *string    `json:"firstName,omitempty" validate:"max=50"`
 	MiddleName *string    `json:"middleName,omitempty" validate:"max=50"`
 	LastName   *string    `json:"lastName,omitempty" validate:"max=50"`
@@ -42,6 +42,10 @@ type UpdateStarRequest struct {
 	BirthPlace *string    `json:"birthPlace,omitempty" validate:"max=100"`
 	DeathDate  *time.Time `json:"deathDate,omitempty"`
 	Bio        *string    `json:"bio,omitempty"`
+}
+
+type DeleteStarRequest struct {
+	StarID int `json:"-" param:"starId" validate:"nonzero"`
 }
 
 func NewStar() *Star {

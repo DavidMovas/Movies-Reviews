@@ -112,7 +112,7 @@ func starsAPIChecks(t *testing.T, client *client.Client, _ *config.Config) {
 		require.Equal(t, testPaginationDefaultSize, res.Size)
 		require.Equal(t, []*contracts.Star{jackStar, denzelStar}, res.Items)
 
-		req.Page = 2
+		req.Page = res.Page + 1
 		res, err = client.GetStars(req)
 		require.NoError(t, err)
 

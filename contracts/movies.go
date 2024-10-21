@@ -31,10 +31,12 @@ type CreateMovieRequest struct {
 }
 
 type UpdateMovieRequest struct {
-	MovieID int `json:"MovieId" validate:"nonzero"`
-	CreateMovieRequest
+	MovieID     int        `json:"-" param:"movieId" validate:"nonzero"`
+	Title       *string    `json:"title,omitempty" validate:"max=100"`
+	ReleaseDate *time.Time `json:"releaseDate,omitempty"`
+	Description *string    `json:"description,omitempty"`
 }
 
 type DeleteMovieRequest struct {
-	MovieID int `json:"MovieId" validate:"nonzero"`
+	MovieID int `json:"-" param:"movieId" validate:"nonzero"`
 }
