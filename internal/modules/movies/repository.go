@@ -26,10 +26,14 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 }
 
 func (r *Repository) GetMovies(ctx context.Context, offset int, limit int, sort, order string) ([]*contracts.Movie, int, error) {
-	b := &pgx.Batch{}
-	b.Queue(`SELECT id, title, release_date, created_at, deleted_at FROM movies WHERE deleted_at IS NULL ORDER BY $1 $2 LIMIT $3 OFFSET $4`, sort, order, limit, offset)
-	b.Queue(`SELECT COUNT(*) FROM movies WHERE deleted_at IS NULL`)
+	query := fmt.Sprintf(`SELECT id, title, release_date, created_at, deleted_at 
+    FROM movies 
+    WHERE deleted_at IS NULL 
+    ORDER BY %s %s LIMIT $1 OFFSET $2`, sort, order)
 
+	b := &pgx.Batch{}
+	b.Queue(query, limit, offset)
+	b.Queue(`SELECT COUNT(*) FROM movies WHERE deleted_at IS NULL`)
 	br := r.db.SendBatch(ctx, b)
 	defer br.Close()
 
@@ -110,8 +114,8 @@ func (r *Repository) UpdateMovieByID(ctx context.Context, movieID int, req *cont
 		index++
 	}
 
-	query := fmt.Sprintf(`UPDATE movies SET %s, version = version + 1  WHERE id = $%d AND deleted_at IS NULL AND version = $%d  RETURNING id, title, description, release_date, created_at, deleted_at, version`, strings.Join(setClauses, ", "), index, req.Version)
-	values = append(values, movieID)
+	query := fmt.Sprintf(`UPDATE movies SET %s, version = version + 1  WHERE id = $%d AND deleted_at IS NULL AND version = $%d  RETURNING id, title, description, release_date, created_at, deleted_at, version`, strings.Join(setClauses, ", "), index, index+1)
+	values = append(values, movieID, req.Version)
 
 	var movie contracts.MovieDetails
 	err := r.db.QueryRow(ctx, query, values...).
@@ -119,7 +123,11 @@ func (r *Repository) UpdateMovieByID(ctx context.Context, movieID int, req *cont
 
 	switch {
 	case dbx.IsNoRows(err):
-		return nil, apperrors.NotFound("movie", "id", movieID)
+		if _, err = r.GetMovieByID(ctx, movieID); err != nil {
+			return nil, apperrors.NotFound("movie", "id", movieID)
+		} else {
+			return nil, apperrors.VersionMismatch("movie", "id", movieID, req.Version)
+		}
 	case err != nil:
 		return nil, apperrors.InternalWithoutStackTrace(err)
 	}

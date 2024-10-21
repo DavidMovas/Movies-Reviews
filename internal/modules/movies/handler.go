@@ -11,6 +11,11 @@ import (
 	"github.com/labstack/echo"
 )
 
+const (
+	paramMovieID   = "movieId"
+	invalidMovieID = "invalid movie id"
+)
+
 type Handler struct {
 	service          *Service
 	paginationConfig *config.PaginationConfig
@@ -31,6 +36,9 @@ func (h *Handler) GetMovies(c echo.Context) error {
 
 	pagination.SetDefaultsOrdered(&req.PaginatedRequestOrdered, h.paginationConfig)
 	offset, limit := pagination.OffsetLimit(&req.PaginatedRequest)
+	if err = contracts.ValidateSortRequest(req.Sort); err != nil {
+		req.Sort = "id"
+	}
 
 	movies, total, err := h.service.GetMovies(c.Request().Context(), offset, limit, req.Sort, req.Order)
 	if err != nil {
@@ -41,12 +49,12 @@ func (h *Handler) GetMovies(c echo.Context) error {
 }
 
 func (h *Handler) GetMovieByID(c echo.Context) error {
-	req, err := echox.BindAndValidate[contracts.GetMovieRequest](c)
+	movieID, err := echox.ReadFromParam[int](c, paramMovieID, invalidMovieID)
 	if err != nil {
 		return err
 	}
 
-	movie, err := h.service.GetMovieByID(c.Request().Context(), req.MovieID)
+	movie, err := h.service.GetMovieByID(c.Request().Context(), movieID)
 	if err != nil {
 		return err
 	}
@@ -69,12 +77,17 @@ func (h *Handler) CreateMovie(c echo.Context) error {
 }
 
 func (h *Handler) UpdateMovieByID(c echo.Context) error {
+	movieID, err := echox.ReadFromParam[int](c, paramMovieID, invalidMovieID)
+	if err != nil {
+		return err
+	}
+
 	req, err := echox.BindAndValidate[contracts.UpdateMovieRequest](c)
 	if err != nil {
 		return err
 	}
 
-	movie, err := h.service.UpdateMovieByID(c.Request().Context(), req.MovieID, req)
+	movie, err := h.service.UpdateMovieByID(c.Request().Context(), movieID, req)
 	if err != nil {
 		return err
 	}
@@ -83,12 +96,12 @@ func (h *Handler) UpdateMovieByID(c echo.Context) error {
 }
 
 func (h *Handler) DeleteMovieByID(c echo.Context) error {
-	req, err := echox.BindAndValidate[contracts.DeleteMovieRequest](c)
+	movieID, err := echox.ReadFromParam[int](c, paramMovieID, invalidMovieID)
 	if err != nil {
 		return err
 	}
 
-	if err = h.service.DeleteMovieByID(c.Request().Context(), req.MovieID); err != nil {
+	if err = h.service.DeleteMovieByID(c.Request().Context(), movieID); err != nil {
 		return err
 	}
 

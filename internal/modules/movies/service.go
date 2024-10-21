@@ -19,10 +19,6 @@ func NewService(repo *Repository) *Service {
 }
 
 func (s *Service) GetMovies(ctx context.Context, offset int, limit int, sort, order string) ([]*contracts.Movie, int, error) {
-	if err := contracts.ValidateSortRequest(sort); err != nil {
-		sort = "id"
-	}
-
 	return s.repo.GetMovies(ctx, offset, limit, sort, order)
 }
 
