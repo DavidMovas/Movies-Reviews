@@ -1,6 +1,9 @@
 package contracts
 
-import "time"
+import (
+	"errors"
+	"time"
+)
 
 type Movie struct {
 	ID          int        `json:"id"`
@@ -17,11 +20,11 @@ type MovieDetails struct {
 }
 
 type GetMovieRequest struct {
-	MovieID int `json:"MovieId" validate:"nonzero"`
+	MovieID int `json:"movieId" validate:"nonzero"`
 }
 
 type GetMoviesRequest struct {
-	PaginatedRequest
+	PaginatedRequestOrdered
 }
 
 type CreateMovieRequest struct {
@@ -35,8 +38,17 @@ type UpdateMovieRequest struct {
 	Title       *string    `json:"title,omitempty" validate:"max=100"`
 	ReleaseDate *time.Time `json:"releaseDate,omitempty"`
 	Description *string    `json:"description,omitempty"`
+	Version     int        `json:"version"`
 }
 
 type DeleteMovieRequest struct {
 	MovieID int `json:"-" param:"movieId" validate:"nonzero"`
+}
+
+func ValidateSortRequest(sort string) error {
+	if sort != "id" && sort != "title" && sort != "releaseDate" && sort != "created_at" {
+		return errors.New("invalid sort field")
+	}
+
+	return nil
 }

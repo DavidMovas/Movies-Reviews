@@ -103,7 +103,7 @@ func (h *Handler) DeleteStarByID(c echo.Context) error {
 		return apperrors.BadRequest(err)
 	}
 
-	if err := h.Service.DeleteStarByID(c.Request().Context(), starID); err != nil {
+	if err = h.Service.DeleteStarByID(c.Request().Context(), starID); err != nil {
 		return err
 	}
 
