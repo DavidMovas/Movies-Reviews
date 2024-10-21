@@ -16,7 +16,7 @@ func NewHandler(service *Service) *Handler {
 	}
 }
 
-func (h *Handler) GetsMovies(c echo.Context) error {
+func (h *Handler) GetMovies(c echo.Context) error {
 	return c.String(http.StatusOK, "not implemented")
 }
 
