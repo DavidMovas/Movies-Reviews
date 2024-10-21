@@ -8,10 +8,33 @@ type Movie struct {
 	ReleaseDate time.Time  `json:"releaseDate"`
 	CreatedAt   time.Time  `json:"createdAt"`
 	DeletedAt   *time.Time `json:"deletedAt,omitempty"`
-	Version     int        `json:"version"`
 }
 
 type MovieDetails struct {
 	Movie
 	Description string `json:"description"`
+	Version     int    `json:"version"`
+}
+
+type GetMovieRequest struct {
+	MovieID int `json:"MovieId" validate:"nonzero"`
+}
+
+type GetMoviesRequest struct {
+	PaginatedRequest
+}
+
+type CreateMovieRequest struct {
+	Title       string    `json:"title" validate:"min=1,max=100"`
+	ReleaseDate time.Time `json:"releaseDate" validate:"nonzero"`
+	Description string    `json:"description"`
+}
+
+type UpdateMovieRequest struct {
+	MovieID int `json:"MovieId" validate:"nonzero"`
+	CreateMovieRequest
+}
+
+type DeleteMovieRequest struct {
+	MovieID int `json:"MovieId" validate:"nonzero"`
 }
