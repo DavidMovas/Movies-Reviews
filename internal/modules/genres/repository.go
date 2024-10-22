@@ -65,10 +65,7 @@ func (r *Repository) GetGenreByID(ctx context.Context, id int) (*Genre, error) {
 }
 
 func (r *Repository) GetGenresByMovieID(ctx context.Context, movieID int) ([]*Genre, error) {
-	rows, err := r.db.Query(ctx, `SELECT g.id, g.name FROM genres g
-			INNER JOIN movie_genres mg ON mg.genre_id = g.id
-			WHERE mg.genre_id = $1	
-			ORDER BY mg.order_no`, movieID)
+	rows, err := r.db.Query(ctx, `SELECT id, name FROM genres INNER JOIN movie_genres ON genre_id = id WHERE movie_id = $1 ORDER BY order_no`, movieID)
 	if err != nil {
 		return nil, apperrors.Internal(err)
 	}

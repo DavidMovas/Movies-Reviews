@@ -84,10 +84,10 @@ func (r *Repository) GetMovieByID(ctx context.Context, movieID int) (*MovieDetai
 	return &movie, nil
 }
 
-func (r *Repository) CreateMovie(ctx context.Context, movie *MovieDetails) (*MovieDetails, error) {
+func (r *Repository) CreateMovie(ctx context.Context, movie *MovieDetails) error {
 	err := dbx.InTransaction(ctx, r.db, func(ctx context.Context, _ pgx.Tx) error {
-		err := r.db.QueryRow(ctx, `INSERT INTO movies (title, description, release_date) VALUES ($1, $2, $3) RETURNING id, title, description, release_date, created_at, version`, movie.Title, movie.Description, movie.ReleaseDate).
-			Scan(&movie.ID, &movie.Title, &movie.Description, &movie.ReleaseDate, &movie.CreatedAt, &movie.Version)
+		err := r.db.QueryRow(ctx, `INSERT INTO movies (title, description, release_date) VALUES ($1, $2, $3) RETURNING id, created_at`, movie.Title, movie.Description, movie.ReleaseDate).
+			Scan(&movie.ID, &movie.CreatedAt)
 		if err != nil {
 			return err
 		}
@@ -102,10 +102,10 @@ func (r *Repository) CreateMovie(ctx context.Context, movie *MovieDetails) (*Mov
 		return r.updateGenres(ctx, nil, nextGenres)
 	})
 	if err != nil {
-		return nil, apperrors.Internal(err)
+		return apperrors.Internal(err)
 	}
 
-	return movie, nil
+	return nil
 }
 
 func (r *Repository) UpdateMovieByID(ctx context.Context, movieID int, req *UpdateMovieRequest) (*MovieDetails, error) {
@@ -116,32 +116,8 @@ func (r *Repository) UpdateMovieByID(ctx context.Context, movieID int, req *Upda
 		genresIDs = append(genresIDs, *genre)
 	}
 
-	fields := make(map[string]interface{})
-
-	if req.Title != nil {
-		fields["title"] = *req.Title
-	}
-	if req.ReleaseDate != nil {
-		fields["release_date"] = *req.ReleaseDate
-	}
-	if req.Description != nil {
-		fields["description"] = *req.Description
-	}
-
-	var setClauses []string
-	var values []interface{}
-	index := 1
-
-	for column, value := range fields {
-		setClauses = append(setClauses, fmt.Sprintf("%s = $%d", column, index))
-		values = append(values, value)
-		index++
-	}
-
-	query := fmt.Sprintf(`UPDATE movies SET %s, version = version + 1  WHERE id = $%d AND deleted_at IS NULL AND version = $%d  RETURNING id, title, description, release_date, created_at, deleted_at, version`, strings.Join(setClauses, ", "), index, index+1)
-	values = append(values, movieID, req.Version)
-
 	err := dbx.InTransaction(ctx, r.db, func(ctx context.Context, _ pgx.Tx) error {
+		query, values := r.prepareQueryForUpdateRequest(movieID, req)
 		err := r.db.QueryRow(ctx, query, values...).
 			Scan(&movie.ID, &movie.Title, &movie.Description, &movie.ReleaseDate, &movie.CreatedAt, &movie.DeletedAt, &movie.Version)
 
@@ -153,23 +129,28 @@ func (r *Repository) UpdateMovieByID(ctx context.Context, movieID int, req *Upda
 				return apperrors.VersionMismatch("movie", "id", movieID, req.Version)
 			}
 		case err != nil:
-			return apperrors.InternalWithoutStackTrace(err)
+			return apperrors.Internal(err)
 		}
 
-		currentGenres, err := r.genresRepo.GetRelationsByMovieID(ctx, movieID)
-		if err != nil {
-			return err
-		}
-
-		nextGenres := slices.MapIndex(genresIDs, func(i, genreID int) *genres.MovieGenreRelation {
-			return &genres.MovieGenreRelation{
-				MovieID: movieID,
-				GenreID: genreID,
-				OrderNo: i,
+		if req.GenreIDs != nil {
+			var currentGenres []*genres.MovieGenreRelation
+			currentGenres, err = r.genresRepo.GetRelationsByMovieID(ctx, movieID)
+			if err != nil {
+				return err
 			}
-		})
 
-		return r.updateGenres(ctx, currentGenres, nextGenres)
+			nextGenres := slices.MapIndex(genresIDs, func(i, genreID int) *genres.MovieGenreRelation {
+				return &genres.MovieGenreRelation{
+					MovieID: movieID,
+					GenreID: genreID,
+					OrderNo: i,
+				}
+			})
+
+			return r.updateGenres(ctx, currentGenres, nextGenres)
+		}
+
+		return err
 	})
 	if err != nil {
 		return nil, apperrors.EnsureInternal(err)
@@ -205,4 +186,33 @@ func (r *Repository) updateGenres(ctx context.Context, current, next []*genres.M
 	}
 
 	return dbx.AdjustRelation(current, next, addFunc, removeFunc)
+}
+
+func (r *Repository) prepareQueryForUpdateRequest(movieID int, req *UpdateMovieRequest) (string, []any) {
+	fields := make(map[string]interface{})
+
+	if req.Title != nil {
+		fields["title"] = *req.Title
+	}
+	if req.ReleaseDate != nil {
+		fields["release_date"] = *req.ReleaseDate
+	}
+	if req.Description != nil {
+		fields["description"] = *req.Description
+	}
+
+	var setClauses []string
+	var values []interface{}
+	index := 1
+
+	for column, value := range fields {
+		setClauses = append(setClauses, fmt.Sprintf("%s = $%d", column, index))
+		values = append(values, value)
+		index++
+	}
+
+	query := fmt.Sprintf(`UPDATE movies SET %s, version = version + 1 WHERE id = $%d AND deleted_at IS NULL AND version = $%d  RETURNING id, title, description, release_date, created_at, deleted_at, version`, strings.Join(setClauses, ", "), index, index+1)
+	values = append(values, movieID, req.Version)
+
+	return query, values
 }

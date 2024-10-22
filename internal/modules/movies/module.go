@@ -14,7 +14,7 @@ type Module struct {
 
 func NewModule(db *pgxpool.Pool, genresRepo *genres.Repository, paginationConfig config.PaginationConfig) *Module {
 	repo := NewRepository(db, genresRepo)
-	service := NewService(repo)
+	service := NewService(repo, genresRepo)
 	handler := NewHandler(service, &paginationConfig)
 
 	return &Module{

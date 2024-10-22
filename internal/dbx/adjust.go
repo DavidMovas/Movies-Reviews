@@ -9,7 +9,8 @@ type Keyer interface {
 func AdjustRelation[S interface {
 	Keyer
 	comparable
-}](prev, next []S,
+}](
+	prev, next []S,
 	addFn, removeFn ChangeRelationFunc[S],
 ) error {
 	prevM, nextM := toMap(prev), toMap(next)

@@ -27,7 +27,6 @@ func (c *Client) GetMovieByID(movieID int) (*contracts.MovieDetails, error) {
 
 func (c *Client) CreateMovie(accessToken string, req *contracts.CreateMovieRequest) (*contracts.MovieDetails, error) {
 	var movie *contracts.MovieDetails
-
 	_, err := c.client.R().
 		SetAuthToken(accessToken).
 		SetResult(&movie).
