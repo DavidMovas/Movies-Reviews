@@ -55,7 +55,7 @@ func runMigrations(t *testing.T, connString string) {
 	conn, err := pgx.Connect(context.Background(), connString)
 	require.NoError(t, err)
 
-	migrator, err := migrate.NewMigrator(context.Background(), conn, "schema_version")
+	migrator, err := migrate.NewMigrator(context.Background(), conn, "migrations")
 	require.NoError(t, err)
 
 	err = migrator.LoadMigrations("../tern/migrations")

@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 
-	"github.com/DavidMovas/Movies-Reviews/contracts"
 	apperrors "github.com/DavidMovas/Movies-Reviews/internal/error"
 	"github.com/DavidMovas/Movies-Reviews/internal/jwt"
 	"github.com/DavidMovas/Movies-Reviews/internal/modules/users"
@@ -23,13 +22,13 @@ func NewService(service *users.Service, jwtService *jwt.Service) *Service {
 	}
 }
 
-func (s *Service) Register(ctx context.Context, user *contracts.User, password string) error {
+func (s *Service) Register(ctx context.Context, user *users.User, password string) error {
 	passHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return apperrors.Internal(err)
 	}
 
-	userWithPassword := &contracts.UserWithPassword{
+	userWithPassword := &users.UserWithPassword{
 		User:         user,
 		PasswordHash: string(passHash),
 	}
@@ -43,7 +42,7 @@ func (s *Service) Login(ctx context.Context, email, password string) (token stri
 		return "", err
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err != nil {
+	if err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err != nil {
 		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
 			return "", apperrors.Unauthorized("invalid password")
 		}

@@ -11,7 +11,6 @@ import (
 
 	apperrors "github.com/DavidMovas/Movies-Reviews/internal/error"
 
-	"github.com/DavidMovas/Movies-Reviews/contracts"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -25,8 +24,8 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 	}
 }
 
-func (r *Repository) GetStars(ctx context.Context) ([]*contracts.Star, error) {
-	var stars []*contracts.Star
+func (r *Repository) GetStars(ctx context.Context) ([]*Star, error) {
+	var stars []*Star
 	rows, err := r.db.Query(ctx, `SELECT id, first_name, middle_name, last_name, birth_date, birth_place, death_date, bio, created_at FROM stars WHERE deleted_at IS NULL`)
 	if err != nil {
 		return nil, apperrors.InternalWithoutStackTrace(err)
@@ -35,7 +34,7 @@ func (r *Repository) GetStars(ctx context.Context) ([]*contracts.Star, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		star := contracts.NewStar()
+		star := NewStar()
 		err = rows.Scan(&star.ID, &star.FirstName, &star.MiddleName, &star.LastName, &star.BirthDate, &star.BirthPlace, &star.DeathDate, &star.Bio, &star.CreatedAt)
 		if err != nil {
 			return nil, apperrors.InternalWithoutStackTrace(err)
@@ -45,7 +44,7 @@ func (r *Repository) GetStars(ctx context.Context) ([]*contracts.Star, error) {
 	return stars, nil
 }
 
-func (r *Repository) GetStarsPaginated(ctx context.Context, offset int, limit int) ([]*contracts.Star, int, error) {
+func (r *Repository) GetStarsPaginated(ctx context.Context, offset int, limit int) ([]*Star, int, error) {
 	b := &pgx.Batch{}
 	b.Queue(`SELECT id, first_name, middle_name, last_name, birth_date, birth_place, death_date, bio, created_at, deleted_at FROM stars WHERE deleted_at IS NULL ORDER BY id LIMIT $1 OFFSET $2`, limit, offset)
 	b.Queue(`SELECT COUNT(*) FROM stars WHERE deleted_at IS NULL`)
@@ -58,9 +57,9 @@ func (r *Repository) GetStarsPaginated(ctx context.Context, offset int, limit in
 	}
 	defer rows.Close()
 
-	var stars []*contracts.Star
+	var stars []*Star
 	for rows.Next() {
-		star := contracts.NewStar()
+		star := NewStar()
 		if err = rows.Scan(&star.ID, &star.FirstName, &star.MiddleName, &star.LastName, &star.BirthDate, &star.BirthPlace, &star.DeathDate, &star.Bio, &star.CreatedAt, &star.DeletedAt); err != nil {
 			return nil, 0, apperrors.Internal(err)
 		}
@@ -79,8 +78,8 @@ func (r *Repository) GetStarsPaginated(ctx context.Context, offset int, limit in
 	return stars, total, nil
 }
 
-func (r *Repository) GetStarByID(ctx context.Context, starID int) (*contracts.Star, error) {
-	star := contracts.NewStar()
+func (r *Repository) GetStarByID(ctx context.Context, starID int) (*Star, error) {
+	star := NewStar()
 	err := r.db.QueryRow(ctx, `SELECT id, first_name, middle_name, last_name, birth_date, birth_place, death_date, bio, created_at FROM stars WHERE id = $1 AND deleted_at IS NULL`, starID).
 		Scan(&star.ID, &star.FirstName, &star.MiddleName, &star.LastName, &star.BirthDate, &star.BirthPlace, &star.DeathDate, &star.Bio, &star.CreatedAt)
 
@@ -94,7 +93,7 @@ func (r *Repository) GetStarByID(ctx context.Context, starID int) (*contracts.St
 	return star.Normalize(), nil
 }
 
-func (r *Repository) CreateStar(ctx context.Context, req *contracts.CreateStarRequest) (*contracts.Star, error) {
+func (r *Repository) CreateStar(ctx context.Context, req *CreateStarRequest) (*Star, error) {
 	star := req.ToStar()
 	err := r.db.QueryRow(ctx, `INSERT INTO stars (first_name, middle_name, last_name, birth_date, birth_place, death_date, bio) 
 									VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, created_at`,
@@ -107,7 +106,7 @@ func (r *Repository) CreateStar(ctx context.Context, req *contracts.CreateStarRe
 	return star.Normalize(), nil
 }
 
-func (r *Repository) UpdateStar(ctx context.Context, starID int, req *contracts.UpdateStarRequest) (*contracts.Star, error) {
+func (r *Repository) UpdateStar(ctx context.Context, starID int, req *UpdateStarRequest) (*Star, error) {
 	fields := make(map[string]interface{})
 
 	if req.FirstName != nil {
@@ -145,7 +144,7 @@ func (r *Repository) UpdateStar(ctx context.Context, starID int, req *contracts.
 	query := fmt.Sprintf(`UPDATE stars SET %s WHERE id = $%d RETURNING id, first_name, middle_name, last_name, birth_date, birth_place, death_date, bio, created_at`, strings.Join(setClauses, ", "), index)
 	values = append(values, starID)
 
-	star := contracts.NewStar()
+	star := NewStar()
 	err := r.db.QueryRow(ctx, query, values...).Scan(&star.ID, &star.FirstName, &star.MiddleName, &star.LastName, &star.BirthDate, &star.BirthPlace, &star.DeathDate, &star.Bio, &star.CreatedAt)
 
 	switch {

@@ -3,6 +3,8 @@ package auth
 import (
 	"net/http"
 
+	"github.com/DavidMovas/Movies-Reviews/internal/modules/users"
+
 	"github.com/DavidMovas/Movies-Reviews/contracts"
 	"github.com/DavidMovas/Movies-Reviews/internal/echox"
 	apperrors "github.com/DavidMovas/Movies-Reviews/internal/error"
@@ -21,21 +23,21 @@ func NewHandler(authService *Service) *Handler {
 }
 
 func (h *Handler) Register(c echo.Context) error {
-	req, err := echox.BindAndValidate[contracts.RegisterUserRequest](c)
+	req, err := echox.BindAndValidate[RegisterUserRequest](c)
 	if err != nil {
 		return err
 	}
-	if err := validator.Validate(&req); err != nil {
+	if err = validator.Validate(&req); err != nil {
 		return apperrors.BadRequestHidden(err, "invalid email or password")
 	}
 
-	user := &contracts.User{
+	user := &users.User{
 		Username: req.Username,
 		Email:    req.Email,
 		Role:     contracts.UserRole,
 	}
 
-	if err := h.authService.Register(c.Request().Context(), user, req.Password); err != nil {
+	if err = h.authService.Register(c.Request().Context(), user, req.Password); err != nil {
 		return err
 	}
 
@@ -43,7 +45,7 @@ func (h *Handler) Register(c echo.Context) error {
 }
 
 func (h *Handler) Login(c echo.Context) error {
-	req, err := echox.BindAndValidate[contracts.LoginUserRequest](c)
+	req, err := echox.BindAndValidate[LoginUserRequest](c)
 	if err != nil {
 		return err
 	}
@@ -57,5 +59,5 @@ func (h *Handler) Login(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, contracts.LoginUserResponse{AccessToken: token})
+	return c.JSON(http.StatusOK, LoginUserResponse{AccessToken: token})
 }

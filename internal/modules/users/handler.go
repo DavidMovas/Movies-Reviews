@@ -61,7 +61,7 @@ func (h *Handler) UpdateExistingUserByID(c echo.Context) error {
 		return apperrors.BadRequest(err)
 	}
 
-	raq, err := echox.BindAndValidate[contracts.UpdateUserRequest](c)
+	raq, err := echox.BindAndValidate[UpdateUserRequest](c)
 	if err != nil {
 		return err
 	}

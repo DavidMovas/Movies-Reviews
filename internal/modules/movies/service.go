@@ -4,8 +4,6 @@ import (
 	"context"
 
 	"github.com/DavidMovas/Movies-Reviews/internal/log"
-
-	"github.com/DavidMovas/Movies-Reviews/contracts"
 )
 
 type Service struct {
@@ -18,16 +16,16 @@ func NewService(repo *Repository) *Service {
 	}
 }
 
-func (s *Service) GetMovies(ctx context.Context, offset int, limit int, sort, order string) ([]*contracts.Movie, int, error) {
+func (s *Service) GetMovies(ctx context.Context, offset int, limit int, sort, order string) ([]*Movie, int, error) {
 	return s.repo.GetMovies(ctx, offset, limit, sort, order)
 }
 
-func (s *Service) GetMovieByID(ctx context.Context, movieID int) (*contracts.MovieDetails, error) {
+func (s *Service) GetMovieByID(ctx context.Context, movieID int) (*MovieDetails, error) {
 	return s.repo.GetMovieByID(ctx, movieID)
 }
 
-func (s *Service) CreateMovie(ctx context.Context, req *contracts.CreateMovieRequest) (*contracts.MovieDetails, error) {
-	movie, err := s.repo.CreateMovie(ctx, req)
+func (s *Service) CreateMovie(ctx context.Context, movie *MovieDetails) (*MovieDetails, error) {
+	movie, err := s.repo.CreateMovie(ctx, movie)
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +34,7 @@ func (s *Service) CreateMovie(ctx context.Context, req *contracts.CreateMovieReq
 	return movie, nil
 }
 
-func (s *Service) UpdateMovieByID(ctx context.Context, movieID int, req *contracts.UpdateMovieRequest) (*contracts.MovieDetails, error) {
+func (s *Service) UpdateMovieByID(ctx context.Context, movieID int, req *UpdateMovieRequest) (*MovieDetails, error) {
 	movie, err := s.repo.UpdateMovieByID(ctx, movieID, req)
 	if err != nil {
 		return nil, err

@@ -4,8 +4,10 @@ import (
 	"net/http"
 
 	"github.com/DavidMovas/Movies-Reviews/contracts"
+
 	"github.com/DavidMovas/Movies-Reviews/internal/config"
 	"github.com/DavidMovas/Movies-Reviews/internal/echox"
+	"github.com/DavidMovas/Movies-Reviews/internal/modules/genres"
 	"github.com/DavidMovas/Movies-Reviews/internal/pagination"
 
 	"github.com/labstack/echo"
@@ -29,7 +31,7 @@ func NewHandler(service *Service, paginationConfig *config.PaginationConfig) *Ha
 }
 
 func (h *Handler) GetMovies(c echo.Context) error {
-	req, err := echox.BindAndValidate[contracts.GetMoviesRequest](c)
+	req, err := echox.BindAndValidate[GetMoviesRequest](c)
 	if err != nil {
 		return err
 	}
@@ -45,7 +47,7 @@ func (h *Handler) GetMovies(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, pagination.ResponseOrdered[*contracts.Movie](&req.PaginatedRequestOrdered, total, movies))
+	return c.JSON(http.StatusOK, pagination.ResponseOrdered[*Movie](&req.PaginatedRequestOrdered, total, movies))
 }
 
 func (h *Handler) GetMovieByID(c echo.Context) error {
@@ -63,12 +65,26 @@ func (h *Handler) GetMovieByID(c echo.Context) error {
 }
 
 func (h *Handler) CreateMovie(c echo.Context) error {
-	req, err := echox.BindAndValidate[contracts.CreateMovieRequest](c)
+	req, err := echox.BindAndValidate[CreateMovieRequest](c)
 	if err != nil {
 		return err
 	}
 
-	movie, err := h.service.CreateMovie(c.Request().Context(), req)
+	movie := &MovieDetails{
+		Movie: Movie{
+			Title:       req.Title,
+			ReleaseDate: req.ReleaseDate,
+		},
+		Description: req.Description,
+	}
+
+	for _, genreID := range req.GenreIDs {
+		movie.Genres = append(movie.Genres, &genres.Genre{
+			ID: genreID,
+		})
+	}
+
+	movie, err = h.service.CreateMovie(c.Request().Context(), movie)
 	if err != nil {
 		return err
 	}
@@ -82,7 +98,7 @@ func (h *Handler) UpdateMovieByID(c echo.Context) error {
 		return err
 	}
 
-	req, err := echox.BindAndValidate[contracts.UpdateMovieRequest](c)
+	req, err := echox.BindAndValidate[UpdateMovieRequest](c)
 	if err != nil {
 		return err
 	}

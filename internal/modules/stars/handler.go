@@ -7,8 +7,6 @@ import (
 
 	"github.com/DavidMovas/Movies-Reviews/internal/pagination"
 
-	"github.com/DavidMovas/Movies-Reviews/contracts"
-
 	apperrors "github.com/DavidMovas/Movies-Reviews/internal/error"
 
 	"github.com/DavidMovas/Movies-Reviews/internal/echox"
@@ -34,7 +32,7 @@ func NewHandler(service *Service, paginationConfig *config.PaginationConfig) *Ha
 }
 
 func (h *Handler) GetStars(c echo.Context) error {
-	req, err := echox.BindAndValidate[contracts.GetStarsRequest](c)
+	req, err := echox.BindAndValidate[GetStarsRequest](c)
 	if err != nil {
 		return err
 	}
@@ -47,7 +45,7 @@ func (h *Handler) GetStars(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, pagination.Response[*contracts.Star](&req.PaginatedRequest, total, stars))
+	return c.JSON(http.StatusOK, pagination.Response[*Star](&req.PaginatedRequest, total, stars))
 }
 
 func (h *Handler) GetStarByID(c echo.Context) error {
@@ -65,7 +63,7 @@ func (h *Handler) GetStarByID(c echo.Context) error {
 }
 
 func (h *Handler) CreateStar(c echo.Context) error {
-	raq, err := echox.BindAndValidate[contracts.CreateStarRequest](c)
+	raq, err := echox.BindAndValidate[CreateStarRequest](c)
 	if err != nil {
 		return err
 	}
@@ -84,7 +82,7 @@ func (h *Handler) UpdateStarByID(c echo.Context) error {
 		return apperrors.BadRequest(err)
 	}
 
-	raq, err := echox.BindAndValidate[contracts.UpdateStarRequest](c)
+	raq, err := echox.BindAndValidate[UpdateStarRequest](c)
 	if err != nil {
 		return err
 	}
