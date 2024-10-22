@@ -47,6 +47,7 @@ func moviesAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 					Title:       "The Godfather",
 					ReleaseDate: time.Date(1972, 3, 24, 0, 0, 0, 0, time.UTC),
 					Description: "The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son.",
+					GenreIDs:    []int{dramaGenre.ID, actionGenre.ID},
 				},
 				addr: &godFather,
 			},
@@ -55,6 +56,7 @@ func moviesAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 					Title:       "Star Wars: Episode IV - A New Hope",
 					ReleaseDate: time.Date(1977, 5, 25, 0, 0, 0, 0, time.UTC),
 					Description: "A young Luke Skywalker has been chosen as a pilot. However, his past leads him to become a legendary pilot of the Star Wars warship, the Imperial Starfleet.",
+					GenreIDs:    []int{actionGenre.ID, dramaGenre.ID},
 				},
 				addr: &starWars,
 			},
@@ -74,7 +76,8 @@ func moviesAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 
 			*cc.addr = movie
 			require.NotEmpty(t, movie.ID)
-			require.NotEmpty(t, movie.CreatedAt)
+			require.Equal(t, cc.req.Title, movie.Title)
+			require.Equal(t, len(cc.req.GenreIDs), len(movie.Genres))
 		}
 	})
 
@@ -91,6 +94,7 @@ func moviesAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 		movie, err := c.GetMovieByID(godFather.ID)
 		require.NoError(t, err)
 		require.Equal(t, godFather, movie)
+		require.Equal(t, godFather.Genres, movie.Genres)
 	})
 
 	t.Run("movies.GetMovies: success", func(t *testing.T) {
@@ -133,11 +137,17 @@ func moviesAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 		req := &contracts.UpdateMovieRequest{
 			Title:       ptr("The Godfather 2"),
 			ReleaseDate: releaseTime,
+			GenreIDs:    []*int{&actionGenre.ID, &dramaGenre.ID, &comedyGenre.ID},
 		}
 		movie, err := c.UpdateMovieByID(johnMooreToken, req, godFather.ID)
 		require.NoError(t, err)
 		require.Equal(t, "The Godfather 2", movie.Title)
 		require.Equal(t, *releaseTime, movie.ReleaseDate)
+		var movieGenreName []string
+		for _, genre := range movie.Genres {
+			movieGenreName = append(movieGenreName, genre.Name)
+		}
+		require.Equal(t, []string{actionGenre.Name, dramaGenre.Name, comedyGenre.Name}, movieGenreName)
 	})
 
 	t.Run("movies.DeleteMovie: insufficient permissions", func(t *testing.T) {

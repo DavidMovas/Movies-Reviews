@@ -1,4 +1,4 @@
--- Write your migrate up statements here. If this migration is irreversible
+-- Write your migrate up statements here
 
 CREATE TYPE role AS ENUM ('admin', 'editor', 'user');
 
@@ -12,7 +12,7 @@ CREATE TABLE users (
     deleted_at TIMESTAMP
 );
 
----- create above / drop below  ----
+---- create above / drop below ----
 
 DROP TABLE IF EXISTS users;
 DROP TYPE IF EXISTS role;

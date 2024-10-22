@@ -1,11 +1,10 @@
 package pagination
 
 import (
-	"github.com/DavidMovas/Movies-Reviews/contracts"
 	"github.com/DavidMovas/Movies-Reviews/internal/config"
 )
 
-func SetDefaults(r *contracts.PaginatedRequest, cfg *config.PaginationConfig) {
+func SetDefaults(r *PaginatedRequest, cfg *config.PaginationConfig) {
 	if r.Page == 0 {
 		r.Page = 1
 	}
@@ -19,7 +18,7 @@ func SetDefaults(r *contracts.PaginatedRequest, cfg *config.PaginationConfig) {
 	}
 }
 
-func SetDefaultsOrdered(r *contracts.PaginatedRequestOrdered, cfg *config.PaginationConfig) {
+func SetDefaultsOrdered(r *PaginatedRequestOrdered, cfg *config.PaginationConfig) {
 	SetDefaults(&r.PaginatedRequest, cfg)
 
 	if r.Sort == "" {
@@ -31,14 +30,14 @@ func SetDefaultsOrdered(r *contracts.PaginatedRequestOrdered, cfg *config.Pagina
 	}
 }
 
-func OffsetLimit(r *contracts.PaginatedRequest) (int, int) {
+func OffsetLimit(r *PaginatedRequest) (int, int) {
 	offset := (r.Page - 1) * r.Size
 	limit := r.Size
 	return offset, limit
 }
 
-func Response[T any](r *contracts.PaginatedRequest, total int, items []T) *contracts.PaginatedResponse[T] {
-	return &contracts.PaginatedResponse[T]{
+func Response[T any](r *PaginatedRequest, total int, items []T) *PaginatedResponse[T] {
+	return &PaginatedResponse[T]{
 		Page:  r.Page,
 		Size:  r.Size,
 		Total: total,
@@ -46,9 +45,9 @@ func Response[T any](r *contracts.PaginatedRequest, total int, items []T) *contr
 	}
 }
 
-func ResponseOrdered[T any](r *contracts.PaginatedRequestOrdered, total int, items []T) *contracts.PaginatedResponseOrdered[T] {
-	return &contracts.PaginatedResponseOrdered[T]{
-		PaginatedResponse: contracts.PaginatedResponse[T]{
+func ResponseOrdered[T any](r *PaginatedRequestOrdered, total int, items []T) *PaginatedResponseOrdered[T] {
+	return &PaginatedResponseOrdered[T]{
+		PaginatedResponse: PaginatedResponse[T]{
 			Page:  r.Page,
 			Size:  r.Size,
 			Total: total,

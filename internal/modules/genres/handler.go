@@ -3,7 +3,6 @@ package genres
 import (
 	"net/http"
 
-	"github.com/DavidMovas/Movies-Reviews/contracts"
 	"github.com/DavidMovas/Movies-Reviews/internal/echox"
 	apperrors "github.com/DavidMovas/Movies-Reviews/internal/error"
 	"github.com/labstack/echo"
@@ -48,7 +47,7 @@ func (h *Handler) GetGenreByID(c echo.Context) error {
 }
 
 func (h *Handler) CreateGenre(c echo.Context) error {
-	raq, err := echox.BindAndValidate[contracts.CreateGenreRequest](c)
+	raq, err := echox.BindAndValidate[CreateGenreRequest](c)
 	if err != nil {
 		return err
 	}
@@ -67,7 +66,7 @@ func (h *Handler) UpdateGenreByID(c echo.Context) error {
 		return apperrors.BadRequest(err)
 	}
 
-	raq, err := echox.BindAndValidate[contracts.UpdateGenreRequest](c)
+	raq, err := echox.BindAndValidate[UpdateGenreRequest](c)
 	if err != nil {
 		return err
 	}

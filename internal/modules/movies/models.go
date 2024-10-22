@@ -1,8 +1,11 @@
-package contracts
+package movies
 
 import (
-	"errors"
 	"time"
+
+	"github.com/DavidMovas/Movies-Reviews/internal/modules/genres"
+
+	"github.com/DavidMovas/Movies-Reviews/internal/pagination"
 )
 
 type Movie struct {
@@ -15,9 +18,9 @@ type Movie struct {
 
 type MovieDetails struct {
 	Movie
-	Description string   `json:"description"`
-	Version     int      `json:"version"`
-	Genres      []*Genre `json:"genres"`
+	Description string          `json:"description"`
+	Version     int             `json:"version"`
+	Genres      []*genres.Genre `json:"genres"`
 }
 
 type GetMovieRequest struct {
@@ -25,7 +28,7 @@ type GetMovieRequest struct {
 }
 
 type GetMoviesRequest struct {
-	PaginatedRequestOrdered
+	pagination.PaginatedRequestOrdered
 }
 
 type CreateMovieRequest struct {
@@ -46,12 +49,4 @@ type UpdateMovieRequest struct {
 
 type DeleteMovieRequest struct {
 	MovieID int `json:"-" param:"movieId" validate:"nonzero"`
-}
-
-func ValidateSortRequest(sort string) error {
-	if sort != "id" && sort != "title" && sort != "releaseDate" && sort != "created_at" {
-		return errors.New("invalid sort field")
-	}
-
-	return nil
 }

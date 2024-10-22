@@ -4,8 +4,6 @@ import (
 	"context"
 
 	"github.com/DavidMovas/Movies-Reviews/internal/log"
-
-	"github.com/DavidMovas/Movies-Reviews/contracts"
 )
 
 type Service struct {
@@ -18,19 +16,19 @@ func NewService(repo *Repository) *Service {
 	}
 }
 
-func (s *Service) GetStars(ctx context.Context) ([]*contracts.Star, error) {
+func (s *Service) GetStars(ctx context.Context) ([]*Star, error) {
 	return s.repo.GetStars(ctx)
 }
 
-func (s *Service) GetStarByID(ctx context.Context, starID int) (*contracts.Star, error) {
+func (s *Service) GetStarByID(ctx context.Context, starID int) (*Star, error) {
 	return s.repo.GetStarByID(ctx, starID)
 }
 
-func (s *Service) GetStarsPaginated(ctx context.Context, offset int, limit int) ([]*contracts.Star, int, error) {
+func (s *Service) GetStarsPaginated(ctx context.Context, offset int, limit int) ([]*Star, int, error) {
 	return s.repo.GetStarsPaginated(ctx, offset, limit)
 }
 
-func (s *Service) CreateStar(ctx context.Context, req *contracts.CreateStarRequest) (*contracts.Star, error) {
+func (s *Service) CreateStar(ctx context.Context, req *CreateStarRequest) (*Star, error) {
 	star, err := s.repo.CreateStar(ctx, req)
 	if err != nil {
 		return nil, err
@@ -40,7 +38,7 @@ func (s *Service) CreateStar(ctx context.Context, req *contracts.CreateStarReque
 	return star, nil
 }
 
-func (s *Service) UpdateStar(ctx context.Context, starID int, req *contracts.UpdateStarRequest) (*contracts.Star, error) {
+func (s *Service) UpdateStar(ctx context.Context, starID int, req *UpdateStarRequest) (*Star, error) {
 	star, err := s.repo.UpdateStar(ctx, starID, req)
 	if err != nil {
 		return nil, err

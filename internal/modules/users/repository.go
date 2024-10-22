@@ -3,7 +3,6 @@ package users
 import (
 	"context"
 
-	"github.com/DavidMovas/Movies-Reviews/contracts"
 	"github.com/DavidMovas/Movies-Reviews/internal/dbx"
 	apperrors "github.com/DavidMovas/Movies-Reviews/internal/error"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -19,7 +18,7 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 	}
 }
 
-func (r Repository) Create(ctx context.Context, user *contracts.UserWithPassword) (err error) {
+func (r Repository) Create(ctx context.Context, user *UserWithPassword) (err error) {
 	err = r.db.QueryRow(ctx,
 		`INSERT INTO users (username, email, pass_hash, role) 
     		VALUES ($1, $2, $3, $4) RETURNING id, role, created_at`, user.Username, user.Email, user.PasswordHash, user.Role).
@@ -37,8 +36,8 @@ func (r Repository) Create(ctx context.Context, user *contracts.UserWithPassword
 	return nil
 }
 
-func (r Repository) GetExistingUserByEmail(ctx context.Context, email string) (*contracts.UserWithPassword, error) {
-	user := contracts.NewUserWithPassword()
+func (r Repository) GetExistingUserByEmail(ctx context.Context, email string) (*UserWithPassword, error) {
+	user := NewUserWithPassword()
 	err := r.db.QueryRow(ctx, `SELECT id, username, email, pass_hash, role, created_at, deleted_at FROM users WHERE email = $1 AND deleted_at IS NULL`, email).
 		Scan(&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.Role, &user.CreatedAt, &user.DeletedAt)
 
@@ -51,8 +50,8 @@ func (r Repository) GetExistingUserByEmail(ctx context.Context, email string) (*
 	return user, nil
 }
 
-func (r Repository) GetExistingUserByID(ctx context.Context, id int) (*contracts.UserWithPassword, error) {
-	user := contracts.NewUserWithPassword()
+func (r Repository) GetExistingUserByID(ctx context.Context, id int) (*UserWithPassword, error) {
+	user := NewUserWithPassword()
 	err := r.db.QueryRow(ctx, `SELECT id, username, email, pass_hash, role, created_at, deleted_at FROM users WHERE id = $1 AND deleted_at IS NULL`, id).
 		Scan(&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.Role, &user.CreatedAt, &user.DeletedAt)
 
@@ -66,8 +65,8 @@ func (r Repository) GetExistingUserByID(ctx context.Context, id int) (*contracts
 	return user, nil
 }
 
-func (r Repository) GetExistingUserByUsername(ctx context.Context, username string) (*contracts.UserWithPassword, error) {
-	user := contracts.NewUserWithPassword()
+func (r Repository) GetExistingUserByUsername(ctx context.Context, username string) (*UserWithPassword, error) {
+	user := NewUserWithPassword()
 	err := r.db.QueryRow(ctx, `SELECT id, username, email, pass_hash, role, created_at FROM users WHERE username = $1 AND deleted_at IS NULL`, username).
 		Scan(&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.Role, &user.CreatedAt)
 

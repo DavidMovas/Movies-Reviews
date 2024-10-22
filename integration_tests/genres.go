@@ -9,7 +9,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var genre *contracts.Genre
+var (
+	actionGenre  *contracts.Genre
+	dramaGenre   *contracts.Genre
+	romanceGenre *contracts.Genre
+	comedyGenre  *contracts.Genre
+)
 
 func genresAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 	t.Run("genres.GetGenres: nil", func(t *testing.T) {
@@ -37,28 +42,43 @@ func genresAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 		raq := contracts.CreateGenreRequest{
 			Name: "action",
 		}
-		genre, err = c.CreateGenre(johnMooreToken, &raq)
+		actionGenre, err = c.CreateGenre(johnMooreToken, &raq)
 		require.NoError(t, err)
-		require.NotNil(t, genre)
+		require.NotNil(t, actionGenre)
 	})
 
 	t.Run("genres.CreateGenre: create 3 genres: success", func(t *testing.T) {
-		raqs := []contracts.CreateGenreRequest{
+		cases := []struct {
+			req  contracts.CreateGenreRequest
+			addr **contracts.Genre
+		}{
 			{
-				Name: "comedy",
+				req: contracts.CreateGenreRequest{
+					Name: "drama",
+				},
+				addr: &dramaGenre,
 			},
 			{
-				Name: "drama",
+				req: contracts.CreateGenreRequest{
+					Name: "romance",
+				},
+				addr: &romanceGenre,
 			},
 			{
-				Name: "romance",
+				req: contracts.CreateGenreRequest{
+					Name: "comedy",
+				},
+				addr: &comedyGenre,
 			},
 		}
 
-		for _, raq := range raqs {
-			_, err := c.CreateGenre(johnMooreToken, &raq)
+		for _, cc := range cases {
+			genre, err := c.CreateGenre(johnMooreToken, &cc.req)
 			require.NoError(t, err)
-			require.NotNil(t, genre)
+			require.NotNil(t, cc.addr)
+			*cc.addr = genre
+			require.NotEmpty(t, genre.ID)
+			require.NotEmpty(t, genre.Name)
 		}
 	})
 
@@ -87,8 +107,9 @@ func genresAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 	})
 
 	t.Run("genres.GetGenreById: success", func(t *testing.T) {
-		requestedGenre, err := c.GetGenreByID(genre.ID)
+		requestedGenre, err := c.GetGenreByID(actionGenre.ID)
 		require.NoError(t, err)
+		require.Equal(t, actionGenre.ID, requestedGenre.ID)
 		require.NotNil(t, requestedGenre)
 	})
 
@@ -96,7 +117,7 @@ func genresAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 		raq := contracts.UpdateGenreRequest{
 			Name: "horror",
 		}
-		err := c.UpdateGenreByID("", &raq, genre.ID)
+		err := c.UpdateGenreByID("", &raq, actionGenre.ID)
 		requireForbiddenError(t, err, "insufficient permissions")
 	})
 
@@ -110,34 +131,34 @@ func genresAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 
 	t.Run("genres.UpdateGenreById: already exists", func(t *testing.T) {
 		raq := contracts.UpdateGenreRequest{
-			Name: genre.Name,
+			Name: actionGenre.Name,
 		}
-		err := c.UpdateGenreByID(johnMooreToken, &raq, genre.ID+1)
-		requireAlreadyExistsError(t, err, "genre", "name", genre.Name)
+		err := c.UpdateGenreByID(johnMooreToken, &raq, actionGenre.ID+1)
+		requireAlreadyExistsError(t, err, "genre", "name", actionGenre.Name)
 	})
 
 	t.Run("genres.UpdateGenreById: success", func(t *testing.T) {
 		var err error
 		raq := contracts.UpdateGenreRequest{
-			Name: "horror",
+			Name: "romance 2",
 		}
-		err = c.UpdateGenreByID(johnMooreToken, &raq, genre.ID)
+		err = c.UpdateGenreByID(johnMooreToken, &raq, romanceGenre.ID)
 		require.NoError(t, err)
-		genre.Name = raq.Name
+		romanceGenre.Name = raq.Name
 	})
 
 	t.Run("genres.DeleteGenreById: insufficient permissions", func(t *testing.T) {
-		err := c.DeleteGenreByID("", genre.ID)
+		err := c.DeleteGenreByID("", romanceGenre.ID)
 		requireForbiddenError(t, err, "insufficient permissions")
 	})
 
 	t.Run("genres.DeleteGenreById: not found", func(t *testing.T) {
-		err := c.DeleteGenreByID(johnMooreToken, genre.ID+100)
-		requireNotFoundError(t, err, "genre", "id", genre.ID+100)
+		err := c.DeleteGenreByID(johnMooreToken, romanceGenre.ID+100)
+		requireNotFoundError(t, err, "genre", "id", romanceGenre.ID+100)
 	})
 
 	t.Run("genres.DeleteGenreById: success", func(t *testing.T) {
-		err := c.DeleteGenreByID(johnMooreToken, genre.ID+3)
+		err := c.DeleteGenreByID(johnMooreToken, romanceGenre.ID)
 		require.NoError(t, err)
 	})
 }

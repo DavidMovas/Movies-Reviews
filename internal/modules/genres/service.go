@@ -3,7 +3,6 @@ package genres
 import (
 	"context"
 
-	"github.com/DavidMovas/Movies-Reviews/contracts"
 	"github.com/DavidMovas/Movies-Reviews/internal/log"
 )
 
@@ -17,7 +16,7 @@ func NewService(repo *Repository) *Service {
 	}
 }
 
-func (s *Service) CreateGenre(ctx context.Context, raq *contracts.CreateGenreRequest) (*contracts.Genre, error) {
+func (s *Service) CreateGenre(ctx context.Context, raq *CreateGenreRequest) (*Genre, error) {
 	genre, err := s.Repository.CreateGenre(ctx, raq)
 	if err != nil {
 		return nil, err
@@ -27,15 +26,15 @@ func (s *Service) CreateGenre(ctx context.Context, raq *contracts.CreateGenreReq
 	return genre, nil
 }
 
-func (s *Service) GetGenres(context context.Context) ([]*contracts.Genre, error) {
+func (s *Service) GetGenres(context context.Context) ([]*Genre, error) {
 	return s.Repository.GetGenres(context)
 }
 
-func (s *Service) GetGenreByID(ctx context.Context, id int) (*contracts.Genre, error) {
+func (s *Service) GetGenreByID(ctx context.Context, id int) (*Genre, error) {
 	return s.Repository.GetGenreByID(ctx, id)
 }
 
-func (s *Service) UpdateGenreByID(ctx context.Context, id int, raq *contracts.UpdateGenreRequest) error {
+func (s *Service) UpdateGenreByID(ctx context.Context, id int, raq *UpdateGenreRequest) error {
 	if err := s.Repository.UpdateGenreByID(ctx, id, raq); err != nil {
 		return err
 	}
