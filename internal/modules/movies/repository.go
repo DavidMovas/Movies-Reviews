@@ -95,7 +95,6 @@ func (r *Repository) GetMovieByID(ctx context.Context, movieID int) (*MovieDetai
 		Where(squirrel.Eq{"id": movieID}, squirrel.Eq{"deleted_at": nil}).
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
-
 	if err != nil {
 		return nil, apperrors.Internal(err)
 	}
@@ -121,7 +120,6 @@ func (r *Repository) CreateMovie(ctx context.Context, movie *MovieDetails) error
 		Suffix("RETURNING id, created_at").
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
-
 	if err != nil {
 		return apperrors.Internal(err)
 	}
@@ -225,7 +223,6 @@ func (r *Repository) DeleteMovieByID(ctx context.Context, movieID int) error {
 		Where(squirrel.Eq{"id": movieID}, squirrel.Eq{"deleted_at": nil}).
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
-
 	if err != nil {
 		return apperrors.Internal(err)
 	}

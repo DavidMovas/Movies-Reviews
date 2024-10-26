@@ -30,7 +30,6 @@ func (r *Repository) GetStars(ctx context.Context) ([]*Star, error) {
 		Where(squirrel.Eq{"deleted_at": nil}).
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
-
 	if err != nil {
 		return nil, apperrors.Internal(err)
 	}
@@ -51,7 +50,6 @@ func (r *Repository) GetRelationsByMovieID(ctx context.Context, movieID int) ([]
 		OrderBy("order_no").
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
-
 	if err != nil {
 		return nil, apperrors.Internal(err)
 	}
@@ -83,7 +81,6 @@ func (r *Repository) GetStarsPaginated(ctx context.Context, offset int, limit in
 		Limit(uint64(limit)).
 		Offset(uint64(offset)).
 		ToSql()
-
 	if err != nil {
 		return nil, 0, apperrors.Internal(err)
 	}
@@ -93,7 +90,6 @@ func (r *Repository) GetStarsPaginated(ctx context.Context, offset int, limit in
 		Where(squirrel.Eq{"deleted_at": nil}).
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
-
 	if err != nil {
 		return nil, 0, apperrors.Internal(err)
 	}
@@ -132,7 +128,6 @@ func (r *Repository) GetStarByID(ctx context.Context, starID int) (*Star, error)
 		Where(squirrel.Eq{"id": starID}, squirrel.Eq{"deleted_at": nil}).
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
-
 	if err != nil {
 		return nil, apperrors.Internal(err)
 	}
@@ -159,7 +154,6 @@ func (r *Repository) GetStarsByMovieID(ctx context.Context, movieID int) ([]*Mov
 		OrderBy("order_no").
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
-
 	if err != nil {
 		return nil, apperrors.Internal(err)
 	}
@@ -194,7 +188,6 @@ func (r *Repository) CreateStar(ctx context.Context, req *CreateStarRequest) (*S
 		Suffix("RETURNING id, created_at").
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
-
 	if err != nil {
 		return nil, apperrors.Internal(err)
 	}
@@ -249,7 +242,6 @@ func (r *Repository) UpdateStar(ctx context.Context, starID int, req *UpdateStar
 	}
 
 	query, args, err := builder.ToSql()
-
 	if err != nil {
 		return nil, apperrors.Internal(err)
 	}
@@ -273,7 +265,6 @@ func (r *Repository) DeleteStarByID(ctx context.Context, starID int) error {
 		Where(squirrel.Eq{"id": starID}, squirrel.Eq{"deleted_at": nil}).
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
-
 	if err != nil {
 		return apperrors.Internal(err)
 	}

@@ -27,7 +27,6 @@ func (r Repository) Create(ctx context.Context, user *UserWithPassword) (err err
 		Suffix("RETURNING id, role, created_at").
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
-
 	if err != nil {
 		return apperrors.Internal(err)
 	}
@@ -52,7 +51,6 @@ func (r Repository) GetExistingUserByEmail(ctx context.Context, email string) (*
 		Where("email = ? AND deleted_at IS NULL", email).
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
-
 	if err != nil {
 		return nil, apperrors.Internal(err)
 	}
@@ -75,7 +73,6 @@ func (r Repository) GetExistingUserByID(ctx context.Context, id int) (*UserWithP
 		Where("id = ? AND deleted_at IS NULL", id).
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
-
 	if err != nil {
 		return nil, apperrors.Internal(err)
 	}
@@ -99,7 +96,6 @@ func (r Repository) GetExistingUserByUsername(ctx context.Context, username stri
 		Where("username = ? AND deleted_at IS NULL", username).
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
-
 	if err != nil {
 		return nil, apperrors.Internal(err)
 	}
@@ -124,7 +120,6 @@ func (r Repository) UpdateExistingUserByID(ctx context.Context, id int, newUsern
 		Where(squirrel.Eq{"id": id}).
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
-
 	if err != nil {
 		return apperrors.Internal(err)
 	}
@@ -147,7 +142,6 @@ func (r Repository) UpdateUserRoleByID(ctx context.Context, id int, newRole stri
 		Where(squirrel.Eq{"id": id}).
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
-
 	if err != nil {
 		return apperrors.Internal(err)
 	}
@@ -170,7 +164,6 @@ func (r Repository) DeleteExistingUserByID(ctx context.Context, id int) error {
 		Where(squirrel.Eq{"id": id}).
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
-
 	if err != nil {
 		return apperrors.Internal(err)
 	}

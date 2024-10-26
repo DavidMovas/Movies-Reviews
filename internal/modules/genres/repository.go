@@ -26,13 +26,11 @@ func (r *Repository) GetGenres(ctx context.Context) ([]*Genre, error) {
 	query, args, err := squirrel.Select("id, name").
 		From("genres").
 		ToSql()
-
 	if err != nil {
 		return nil, apperrors.Internal(err)
 	}
 
 	rows, err := r.db.Query(ctx, query, args...)
-
 	if err != nil {
 		return nil, apperrors.InternalWithoutStackTrace(err)
 	}
@@ -49,7 +47,6 @@ func (r *Repository) GetRelationsByMovieID(ctx context.Context, movieID int) ([]
 		OrderBy("order_no").
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
-
 	if err != nil {
 		return nil, apperrors.Internal(err)
 	}
@@ -77,7 +74,6 @@ func (r *Repository) GetGenreByID(ctx context.Context, id int) (*Genre, error) {
 		From("genres").
 		Where("id = $1", id).
 		ToSql()
-
 	if err != nil {
 		return nil, apperrors.Internal(err)
 	}
@@ -103,7 +99,6 @@ func (r *Repository) GetGenresByMovieID(ctx context.Context, movieID int) ([]*Ge
 		OrderBy("order_no").
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
-
 	if err != nil {
 		return nil, apperrors.Internal(err)
 	}
@@ -123,7 +118,6 @@ func (r *Repository) CreateGenre(ctx context.Context, raq *CreateGenreRequest) (
 		Suffix("ON CONFLICT (name) DO NOTHING RETURNING id, name").
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
-
 	if err != nil {
 		return nil, apperrors.Internal(err)
 	}
@@ -147,7 +141,6 @@ func (r *Repository) UpdateGenreByID(ctx context.Context, id int, raq *UpdateGen
 		Where("id = $2 AND NOT EXISTS (SELECT 1 FROM genres WHERE name = $1 AND id <> $2) ", id).
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
-
 	if err != nil {
 		return apperrors.Internal(err)
 	}
@@ -179,7 +172,6 @@ func (r *Repository) DeleteGenreByID(ctx context.Context, genreID int) error {
 		Where("id = $1", genreID).
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
-
 	if err != nil {
 		return apperrors.Internal(err)
 	}

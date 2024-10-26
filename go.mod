@@ -3,6 +3,7 @@ module github.com/DavidMovas/Movies-Reviews
 go 1.23.0
 
 require (
+	github.com/Masterminds/squirrel v1.5.4
 	github.com/caarlos0/env/v11 v11.2.2
 	github.com/go-resty/resty/v2 v2.15.3
 	github.com/golang-jwt/jwt v3.2.2+incompatible
@@ -28,7 +29,6 @@ require (
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver v1.5.0 // indirect
 	github.com/Masterminds/sprig v2.22.0+incompatible // indirect
-	github.com/Masterminds/squirrel v1.5.4 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/containerd/containerd v1.7.18 // indirect
