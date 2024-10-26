@@ -2,6 +2,7 @@ package movies
 
 import (
 	"context"
+	"github.com/DavidMovas/Movies-Reviews/internal/modules/stars"
 
 	"github.com/DavidMovas/Movies-Reviews/internal/modules/genres"
 
@@ -11,12 +12,14 @@ import (
 type Service struct {
 	repo       *Repository
 	genresRepo *genres.Repository
+	starsRepo  *stars.Repository
 }
 
-func NewService(repo *Repository, genresRepo *genres.Repository) *Service {
+func NewService(repo *Repository, genresRepo *genres.Repository, starsRepo *stars.Repository) *Service {
 	return &Service{
 		repo:       repo,
 		genresRepo: genresRepo,
+		starsRepo:  starsRepo,
 	}
 }
 
@@ -70,6 +73,11 @@ func (s *Service) DeleteMovieByID(ctx context.Context, movieID int) error {
 
 func (s *Service) assemble(ctx context.Context, movie *MovieDetails) error {
 	var err error
-	movie.Genres, err = s.genresRepo.GetGenresByMovieID(ctx, movie.ID)
+	if movie.Genres, err = s.genresRepo.GetGenresByMovieID(ctx, movie.ID); err != nil {
+		return err
+	}
+	if movie.Cast, err = s.starsRepo.GetStarsByMovieID(ctx, movie.ID); err != nil {
+		return err
+	}
 	return err
 }

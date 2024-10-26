@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/DavidMovas/Movies-Reviews/internal/modules/movies"
+
 	"github.com/jackc/pgx/v5"
 
 	"github.com/DavidMovas/Movies-Reviews/internal/dbx"
@@ -58,13 +60,7 @@ func (r *Repository) GetStarsPaginated(ctx context.Context, offset int, limit in
 	defer rows.Close()
 
 	var stars []*Star
-	for rows.Next() {
-		star := NewStar()
-		if err = rows.Scan(&star.ID, &star.FirstName, &star.MiddleName, &star.LastName, &star.BirthDate, &star.BirthPlace, &star.DeathDate, &star.Bio, &star.CreatedAt, &star.DeletedAt); err != nil {
-			return nil, 0, apperrors.Internal(err)
-		}
-		stars = append(stars, star.Normalize())
-	}
+	stars, err = r.scanStars(rows)
 
 	if err = rows.Err(); err != nil {
 		return nil, 0, apperrors.Internal(err)
@@ -91,6 +87,31 @@ func (r *Repository) GetStarByID(ctx context.Context, starID int) (*Star, error)
 	}
 
 	return star.Normalize(), nil
+}
+
+func (r *Repository) GetStarsByMovieID(ctx context.Context, movieID int) ([]*movies.MovieCredit, error) {
+	rows, err := r.db.Query(ctx, `SELECT s.id, s.first_name, s.middle_name, s.last_name, s.birth_date, s.birth_place, s.death_date, s.bio, s.created_at, ms.role, ms.details
+						FROM stars s INNER JOIN movie_stars ms ON star_id = id WHERE movie_id = $1 ORDER BY order_no`, movieID)
+	if err != nil {
+		return nil, apperrors.Internal(err)
+	}
+	defer rows.Close()
+
+	var credits []*movies.MovieCredit
+
+	for rows.Next() {
+		credit := &movies.MovieCredit{
+			Star: Star{},
+		}
+
+		err = rows.Scan(&credit.Star.ID, &credit.Star.FirstName, &credit.Star.MiddleName, &credit.Star.LastName, &credit.Star.BirthDate, &credit.Star.BirthPlace, &credit.Star.DeathDate, &credit.Star.Bio, &credit.Star.CreatedAt, &credit.Role, &credit.Details)
+		if err != nil {
+			return nil, apperrors.Internal(err)
+		}
+		credits = append(credits, credit)
+	}
+
+	return credits, nil
 }
 
 func (r *Repository) CreateStar(ctx context.Context, req *CreateStarRequest) (*Star, error) {
@@ -168,4 +189,17 @@ func (r *Repository) DeleteStarByID(ctx context.Context, starID int) error {
 	}
 
 	return nil
+}
+
+func (r *Repository) scanStars(rows pgx.Rows) ([]*Star, error) {
+	var stars []*Star
+	for rows.Next() {
+		star := NewStar()
+		err := rows.Scan(&star.ID, &star.FirstName, &star.MiddleName, &star.LastName, &star.BirthDate, &star.BirthPlace, &star.DeathDate, &star.Bio, &star.CreatedAt, &star.DeletedAt)
+		if err != nil {
+			return nil, apperrors.Internal(err)
+		}
+		stars = append(stars, star.Normalize())
+	}
+	return stars, nil
 }

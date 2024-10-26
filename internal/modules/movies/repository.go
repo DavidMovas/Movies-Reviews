@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/DavidMovas/Movies-Reviews/internal/modules/stars"
+
 	"github.com/DavidMovas/Movies-Reviews/internal/modules/genres"
 	"github.com/DavidMovas/Movies-Reviews/internal/slices"
 
@@ -92,6 +94,7 @@ func (r *Repository) CreateMovie(ctx context.Context, movie *MovieDetails) error
 			return err
 		}
 
+		// Insert genres
 		nextGenres := slices.MapIndex(movie.Genres, func(i int, genre *genres.Genre) *genres.MovieGenreRelation {
 			return &genres.MovieGenreRelation{
 				MovieID: movie.ID,
@@ -99,7 +102,19 @@ func (r *Repository) CreateMovie(ctx context.Context, movie *MovieDetails) error
 				OrderNo: i,
 			}
 		})
-		return r.updateGenres(ctx, nil, nextGenres)
+		if err = r.updateGenres(ctx, nil, nextGenres); err != nil {
+			return err
+		}
+
+		nextCast := slices.MapIndex(movie.Cast, func(i int, credit *MovieCredit) *stars.MovieStarsRelation {
+			return &stars.MovieStarsRelation{MovieID: movie.ID,
+				StarID:  credit.Star.ID,
+				Role:    credit.Role,
+				Details: credit.Details,
+				OrderNo: i,
+			}
+		})
+		return r.updateStars(ctx, nil, nextCast)
 	})
 	if err != nil {
 		return apperrors.Internal(err)
@@ -182,6 +197,23 @@ func (r *Repository) updateGenres(ctx context.Context, current, next []*genres.M
 
 	removeFunc := func(mgo *genres.MovieGenreRelation) error {
 		_, err := q.Exec(ctx, `DELETE FROM movie_genres WHERE movie_id = $1 AND genre_id = $2`, mgo.MovieID, mgo.GenreID)
+		return err
+	}
+
+	return dbx.AdjustRelation(current, next, addFunc, removeFunc)
+}
+
+func (r *Repository) updateStars(ctx context.Context, current, next []*stars.MovieStarsRelation) error {
+	q := dbx.FromContext(ctx, r.db)
+
+	addFunc := func(mgo *stars.MovieStarsRelation) error {
+		_, err := q.Exec(ctx, `INSERT INTO movies_stars (movie_id, star_id, role, details, order_no) VALUES ($1, $2, $3, $4, $5)`,
+			mgo.MovieID, mgo.StarID, mgo.Role, mgo.Details, mgo.OrderNo)
+		return err
+	}
+
+	removeFunc := func(mgo *stars.MovieStarsRelation) error {
+		_, err := q.Exec(ctx, `DELETE FROM movies_stars WHERE movie_id = $1 AND star_id = $2 AND role = $3 AND details = $4`, mgo.MovieID, mgo.StarID, mgo.Role, mgo.Details)
 		return err
 	}
 
