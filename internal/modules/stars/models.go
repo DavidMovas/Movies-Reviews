@@ -44,6 +44,12 @@ func (m MovieStarsRelation) Key() any {
 	return MovieStarsRelationKey{m.MovieID, m.StarID, m.Role}
 }
 
+type MovieCredit struct {
+	Star    Star
+	Role    string
+	Details string
+}
+
 type CreateStarRequest struct {
 	FirstName  string     `json:"firstName" validate:"min=1,max=50"`
 	MiddleName *string    `json:"middleName,omitempty" validate:"max=50"`

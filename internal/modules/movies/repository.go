@@ -107,7 +107,8 @@ func (r *Repository) CreateMovie(ctx context.Context, movie *MovieDetails) error
 		}
 
 		nextCast := slices.MapIndex(movie.Cast, func(i int, credit *MovieCredit) *stars.MovieStarsRelation {
-			return &stars.MovieStarsRelation{MovieID: movie.ID,
+			return &stars.MovieStarsRelation{
+				MovieID: movie.ID,
 				StarID:  credit.Star.ID,
 				Role:    credit.Role,
 				Details: credit.Details,

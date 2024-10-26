@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/DavidMovas/Movies-Reviews/internal/modules/movies"
-
 	"github.com/jackc/pgx/v5"
 
 	"github.com/DavidMovas/Movies-Reviews/internal/dbx"
@@ -27,23 +25,13 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 }
 
 func (r *Repository) GetStars(ctx context.Context) ([]*Star, error) {
-	var stars []*Star
-	rows, err := r.db.Query(ctx, `SELECT id, first_name, middle_name, last_name, birth_date, birth_place, death_date, bio, created_at FROM stars WHERE deleted_at IS NULL`)
+	rows, err := r.db.Query(ctx, `SELECT id, first_name, middle_name, last_name, birth_date, birth_place, death_date, bio, created_at, deleted_at FROM stars WHERE deleted_at IS NULL`)
 	if err != nil {
 		return nil, apperrors.InternalWithoutStackTrace(err)
 	}
 
 	defer rows.Close()
-
-	for rows.Next() {
-		star := NewStar()
-		err = rows.Scan(&star.ID, &star.FirstName, &star.MiddleName, &star.LastName, &star.BirthDate, &star.BirthPlace, &star.DeathDate, &star.Bio, &star.CreatedAt)
-		if err != nil {
-			return nil, apperrors.InternalWithoutStackTrace(err)
-		}
-		stars = append(stars, star.Normalize())
-	}
-	return stars, nil
+	return r.scanStars(rows)
 }
 
 func (r *Repository) GetStarsPaginated(ctx context.Context, offset int, limit int) ([]*Star, int, error) {
@@ -59,8 +47,7 @@ func (r *Repository) GetStarsPaginated(ctx context.Context, offset int, limit in
 	}
 	defer rows.Close()
 
-	var stars []*Star
-	stars, err = r.scanStars(rows)
+	stars, _ := r.scanStars(rows)
 
 	if err = rows.Err(); err != nil {
 		return nil, 0, apperrors.Internal(err)
@@ -89,7 +76,7 @@ func (r *Repository) GetStarByID(ctx context.Context, starID int) (*Star, error)
 	return star.Normalize(), nil
 }
 
-func (r *Repository) GetStarsByMovieID(ctx context.Context, movieID int) ([]*movies.MovieCredit, error) {
+func (r *Repository) GetStarsByMovieID(ctx context.Context, movieID int) ([]*MovieCredit, error) {
 	rows, err := r.db.Query(ctx, `SELECT s.id, s.first_name, s.middle_name, s.last_name, s.birth_date, s.birth_place, s.death_date, s.bio, s.created_at, ms.role, ms.details
 						FROM stars s INNER JOIN movie_stars ms ON star_id = id WHERE movie_id = $1 ORDER BY order_no`, movieID)
 	if err != nil {
@@ -97,10 +84,10 @@ func (r *Repository) GetStarsByMovieID(ctx context.Context, movieID int) ([]*mov
 	}
 	defer rows.Close()
 
-	var credits []*movies.MovieCredit
+	var credits []*MovieCredit
 
 	for rows.Next() {
-		credit := &movies.MovieCredit{
+		credit := &MovieCredit{
 			Star: Star{},
 		}
 

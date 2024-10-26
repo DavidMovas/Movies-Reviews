@@ -8,10 +8,6 @@ import (
 	"net"
 	"time"
 
-	"github.com/DavidMovas/Movies-Reviews/internal/modules/movies"
-
-	"github.com/DavidMovas/Movies-Reviews/internal/modules/stars"
-
 	"github.com/DavidMovas/Movies-Reviews/contracts"
 	"github.com/DavidMovas/Movies-Reviews/internal/config"
 	"github.com/DavidMovas/Movies-Reviews/internal/echox"
@@ -20,6 +16,8 @@ import (
 	"github.com/DavidMovas/Movies-Reviews/internal/log"
 	"github.com/DavidMovas/Movies-Reviews/internal/modules/auth"
 	"github.com/DavidMovas/Movies-Reviews/internal/modules/genres"
+	"github.com/DavidMovas/Movies-Reviews/internal/modules/movies"
+	"github.com/DavidMovas/Movies-Reviews/internal/modules/stars"
 	"github.com/DavidMovas/Movies-Reviews/internal/modules/users"
 	"github.com/DavidMovas/Movies-Reviews/internal/validation"
 	"github.com/jackc/pgx/v5/pgxpool"

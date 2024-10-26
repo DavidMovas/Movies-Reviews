@@ -2,6 +2,8 @@ package movies
 
 import (
 	"context"
+	"github.com/DavidMovas/Movies-Reviews/internal/slices"
+
 	"github.com/DavidMovas/Movies-Reviews/internal/modules/stars"
 
 	"github.com/DavidMovas/Movies-Reviews/internal/modules/genres"
@@ -76,8 +78,18 @@ func (s *Service) assemble(ctx context.Context, movie *MovieDetails) error {
 	if movie.Genres, err = s.genresRepo.GetGenresByMovieID(ctx, movie.ID); err != nil {
 		return err
 	}
-	if movie.Cast, err = s.starsRepo.GetStarsByMovieID(ctx, movie.ID); err != nil {
+	credits, err := s.starsRepo.GetStarsByMovieID(ctx, movie.ID)
+	if err != nil {
 		return err
 	}
+
+	movie.Cast = slices.CastSlice(credits, func(credit *stars.MovieCredit) *MovieCredit {
+		return &MovieCredit{
+			Star:    credit.Star,
+			Role:    credit.Role,
+			Details: credit.Details,
+		}
+	})
+
 	return err
 }
