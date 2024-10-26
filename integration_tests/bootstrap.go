@@ -61,22 +61,6 @@ func runMigrations(t *testing.T, connString string) {
 	err = migrator.LoadMigrations("../tern/migrations")
 	require.NoError(t, err)
 
-	/*
-		migrator.Migrations = append(migrator.Migrations, &migrate.Migration{
-			UpSQL: `CREATE TYPE role AS ENUM ('admin', 'editor', 'user');
-							CREATE TABLE users (
-			    				id SERIAL PRIMARY KEY,
-			    				username VARCHAR(24) UNIQUE NOT NULL,
-			    				email VARCHAR(128) UNIQUE NOT NULL,
-			    				pass_hash VARCHAR(60) NOT NULL,
-			    				role role NOT NULL DEFAULT 'user',
-			    				created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-			    				deleted_at TIMESTAMP);`,
-			DownSQL: `DROP TABLE IF EXISTS users;
-							DROP TYPE IF EXISTS role;`,
-		})
-	*/
-
 	err = migrator.Migrate(context.Background())
 	require.NoError(t, err)
 }
