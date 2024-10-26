@@ -48,6 +48,23 @@ func moviesAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 					ReleaseDate: time.Date(1972, 3, 24, 0, 0, 0, 0, time.UTC),
 					Description: "The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son.",
 					GenreIDs:    []int{dramaGenre.ID, actionGenre.ID},
+					Cast: []contracts.MovieCreditInfo{
+						{
+							StarID:  jackStar.ID,
+							Role:    "director",
+							Details: "Director of the movie",
+						},
+						{
+							StarID:  jackStar.ID,
+							Role:    "actor",
+							Details: "Actor of the movie",
+						},
+						{
+							StarID:  denzelStar.ID,
+							Role:    "actor",
+							Details: "Actor of the movie",
+						},
+					},
 				},
 				addr: &godFather,
 			},
@@ -57,6 +74,18 @@ func moviesAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 					ReleaseDate: time.Date(1977, 5, 25, 0, 0, 0, 0, time.UTC),
 					Description: "A young Luke Skywalker has been chosen as a pilot. However, his past leads him to become a legendary pilot of the Star Wars warship, the Imperial Starfleet.",
 					GenreIDs:    []int{actionGenre.ID, dramaGenre.ID},
+					Cast: []contracts.MovieCreditInfo{
+						{
+							StarID:  denzelStar.ID,
+							Role:    "director",
+							Details: "Director of the movie",
+						},
+						{
+							StarID:  sophiaStar.ID,
+							Role:    "actor",
+							Details: "Actor of the movie",
+						},
+					},
 				},
 				addr: &starWars,
 			},
@@ -65,6 +94,13 @@ func moviesAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 					Title:       "Titanic",
 					ReleaseDate: time.Date(1997, 12, 19, 0, 0, 0, 0, time.UTC),
 					Description: "A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.",
+					Cast: []contracts.MovieCreditInfo{
+						{
+							StarID:  denzelStar.ID,
+							Role:    "voice actor",
+							Details: "Voice actor of the movie",
+						},
+					},
 				},
 				addr: &titanic,
 			},
@@ -78,6 +114,8 @@ func moviesAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 			require.NotEmpty(t, movie.ID)
 			require.Equal(t, cc.req.Title, movie.Title)
 			require.Equal(t, len(cc.req.GenreIDs), len(movie.Genres))
+			require.Equal(t, len(cc.req.Cast), len(movie.Cast))
+			require.Equal(t, cc.req.Cast[0].StarID, movie.Cast[0].Star.ID)
 		}
 	})
 
@@ -95,6 +133,7 @@ func moviesAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 		require.NoError(t, err)
 		require.Equal(t, godFather, movie)
 		require.Equal(t, godFather.Genres, movie.Genres)
+		require.Equal(t, godFather.Cast, movie.Cast)
 	})
 
 	t.Run("movies.GetMovies: success", func(t *testing.T) {
@@ -138,6 +177,18 @@ func moviesAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 			Title:       ptr("The Godfather 2"),
 			ReleaseDate: releaseTime,
 			GenreIDs:    []*int{&actionGenre.ID, &dramaGenre.ID, &comedyGenre.ID},
+			Cast: []*contracts.MovieCreditInfo{
+				{
+					StarID:  denzelStar.ID,
+					Role:    "director",
+					Details: "Director of the movie",
+				},
+				{
+					StarID:  sophiaStar.ID,
+					Role:    "actor",
+					Details: "actor of the movie",
+				},
+			},
 		}
 		movie, err := c.UpdateMovieByID(johnMooreToken, req, godFather.ID)
 		require.NoError(t, err)
@@ -148,6 +199,9 @@ func moviesAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 			movieGenreName = append(movieGenreName, genre.Name)
 		}
 		require.Equal(t, []string{actionGenre.Name, dramaGenre.Name, comedyGenre.Name}, movieGenreName)
+		for i, cast := range movie.Cast {
+			require.Equal(t, req.Cast[i].StarID, cast.Star.ID)
+		}
 	})
 
 	t.Run("movies.DeleteMovie: insufficient permissions", func(t *testing.T) {
