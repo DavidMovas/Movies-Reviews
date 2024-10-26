@@ -21,4 +21,4 @@ before-push:
 	gofumpt -l -w . && \
 	go build ./... && \
 	golangci-lint run ./... && \
-	go test ./integration_tests/...cls
+	go test ./integration_tests/...
