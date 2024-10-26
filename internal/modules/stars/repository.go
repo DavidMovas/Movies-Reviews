@@ -102,7 +102,9 @@ func (r *Repository) GetStarsPaginated(ctx context.Context, offset int, limit in
 	b.Queue(selectQuery, selectArgs...)
 	b.Queue(countQuery, countArgs...)
 	br := r.db.SendBatch(ctx, b)
-	defer br.Close()
+	defer func() {
+		_ = br.Close()
+	}()
 
 	rows, err := br.Query()
 	if err != nil {
