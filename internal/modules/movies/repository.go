@@ -37,7 +37,6 @@ func (r *Repository) GetMovies(ctx context.Context, offset int, limit int, sort,
 	selectQuery, args, err := squirrel.Select("id, title, release_date, created_at, deleted_at").
 		From("movies").
 		Where(squirrel.Eq{"deleted_at": nil}).
-		PlaceholderFormat(squirrel.Dollar).
 		OrderBy(sort + " " + order).
 		Limit(uint64(limit)).
 		Offset(uint64(offset)).
@@ -92,7 +91,8 @@ func (r *Repository) GetMovies(ctx context.Context, offset int, limit int, sort,
 func (r *Repository) GetMovieByID(ctx context.Context, movieID int) (*MovieDetails, error) {
 	query, args, err := squirrel.Select("id, title, description, release_date, created_at, version").
 		From("movies").
-		Where(squirrel.Eq{"id": movieID}, squirrel.Eq{"deleted_at": nil}).
+		Where(squirrel.Eq{"id": movieID}).
+		Where(squirrel.Eq{"deleted_at": nil}).
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
 	if err != nil {
@@ -155,7 +155,10 @@ func (r *Repository) CreateMovie(ctx context.Context, movie *MovieDetails) error
 		})
 		return r.updateStars(ctx, nil, nextCast)
 	})
-	if err != nil {
+	switch {
+	case dbx.NotValidEnumType(err):
+		return apperrors.BadRequestHidden(err, "role type unknown")
+	case err != nil:
 		return apperrors.Internal(err)
 	}
 
@@ -166,7 +169,9 @@ func (r *Repository) UpdateMovieByID(ctx context.Context, movieID int, req *Upda
 	var movie MovieDetails
 	builder := squirrel.Update("movies").
 		Set("version", squirrel.Expr("version + 1")).
-		Where(squirrel.Eq{"id": movieID}, squirrel.Eq{"deleted_at": nil}, squirrel.Eq{"version": req.Version}).
+		Where(squirrel.Eq{"id": movieID}).
+		Where(squirrel.Eq{"deleted_at": nil}).
+		Where(squirrel.Eq{"version": req.Version}).
 		Suffix("RETURNING id, title, description, release_date, created_at, deleted_at, version").
 		PlaceholderFormat(squirrel.Dollar)
 
@@ -190,6 +195,8 @@ func (r *Repository) UpdateMovieByID(ctx context.Context, movieID int, req *Upda
 			Scan(&movie.ID, &movie.Title, &movie.Description, &movie.ReleaseDate, &movie.CreatedAt, &movie.DeletedAt, &movie.Version)
 
 		switch {
+		case dbx.NotValidEnumType(err):
+			return apperrors.BadRequestHidden(err, "role type unknown")
 		case dbx.IsNoRows(err):
 			if _, err = r.GetMovieByID(ctx, movieID); err != nil {
 				return apperrors.NotFound("movie", "id", movieID)
@@ -220,7 +227,7 @@ func (r *Repository) UpdateMovieByID(ctx context.Context, movieID int, req *Upda
 func (r *Repository) DeleteMovieByID(ctx context.Context, movieID int) error {
 	query, args, err := squirrel.Update("movies").
 		Set("deleted_at", squirrel.Expr("NOW()")).
-		Where(squirrel.Eq{"id": movieID}, squirrel.Eq{"deleted_at": nil}).
+		Where(squirrel.Eq{"id": movieID}).
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
 	if err != nil {

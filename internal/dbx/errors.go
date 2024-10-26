@@ -24,3 +24,11 @@ func IsNoRows(err error) bool {
 	}
 	return errors.Is(err, pgx.ErrNoRows)
 }
+
+func NotValidEnumType(err error) bool {
+	var pgError *pgconn.PgError
+	if errors.As(err, &pgError) {
+		return pgError.Code == pgerrcode.InvalidTextRepresentation
+	}
+	return false
+}

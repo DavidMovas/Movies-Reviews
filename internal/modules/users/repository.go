@@ -48,7 +48,8 @@ func (r Repository) Create(ctx context.Context, user *UserWithPassword) (err err
 func (r Repository) GetExistingUserByEmail(ctx context.Context, email string) (*UserWithPassword, error) {
 	query, args, err := squirrel.Select("id, username, email, pass_hash, role, created_at, deleted_at").
 		From("users").
-		Where("email = ? AND deleted_at IS NULL", email).
+		Where(squirrel.Eq{"email": email}).
+		Where(squirrel.Eq{"deleted_at": nil}).
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
 	if err != nil {
@@ -70,7 +71,8 @@ func (r Repository) GetExistingUserByEmail(ctx context.Context, email string) (*
 func (r Repository) GetExistingUserByID(ctx context.Context, id int) (*UserWithPassword, error) {
 	query, args, err := squirrel.Select("id, username, email, pass_hash, role, created_at, deleted_at").
 		From("users").
-		Where("id = ? AND deleted_at IS NULL", id).
+		Where(squirrel.Eq{"id": id}).
+		Where(squirrel.Eq{"deleted_at": nil}).
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
 	if err != nil {
@@ -93,7 +95,8 @@ func (r Repository) GetExistingUserByID(ctx context.Context, id int) (*UserWithP
 func (r Repository) GetExistingUserByUsername(ctx context.Context, username string) (*UserWithPassword, error) {
 	query, args, err := squirrel.Select("id, username, email, pass_hash, role, created_at, deleted_at").
 		From("users").
-		Where("username = ? AND deleted_at IS NULL", username).
+		Where(squirrel.Eq{"username": username}).
+		Where(squirrel.Eq{"deleted_at": nil}).
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
 	if err != nil {

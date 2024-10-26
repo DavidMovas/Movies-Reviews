@@ -25,10 +25,9 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 }
 
 func (r *Repository) GetStars(ctx context.Context) ([]*Star, error) {
-	query, args, err := squirrel.Select("id, first_name, middle_name, last_name, birth_date, birth_place, death_date, bio, created_at, deleted_at").
+	query, args, err := squirrel.Select("id", "first_name", "middle_name", "last_name", "birth_date", "birth_place", "death_date", "bio", "created_at", "deleted_at").
 		From("stars").
 		Where(squirrel.Eq{"deleted_at": nil}).
-		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
 	if err != nil {
 		return nil, apperrors.Internal(err)
@@ -76,10 +75,10 @@ func (r *Repository) GetStarsPaginated(ctx context.Context, offset int, limit in
 	selectQuery, selectArgs, err := squirrel.Select("id, first_name, middle_name, last_name, birth_date, birth_place, death_date, bio, created_at, deleted_at").
 		From("stars").
 		Where(squirrel.Eq{"deleted_at": nil}).
-		PlaceholderFormat(squirrel.Dollar).
 		OrderBy("id").
 		Limit(uint64(limit)).
 		Offset(uint64(offset)).
+		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
 	if err != nil {
 		return nil, 0, apperrors.Internal(err)
@@ -125,7 +124,8 @@ func (r *Repository) GetStarsPaginated(ctx context.Context, offset int, limit in
 func (r *Repository) GetStarByID(ctx context.Context, starID int) (*Star, error) {
 	query, args, err := squirrel.Select("id, first_name, middle_name, last_name, birth_date, birth_place, death_date, bio, created_at").
 		From("stars").
-		Where(squirrel.Eq{"id": starID}, squirrel.Eq{"deleted_at": nil}).
+		Where(squirrel.Eq{"id": starID}).
+		Where(squirrel.Eq{"deleted_at": nil}).
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
 	if err != nil {
@@ -262,7 +262,7 @@ func (r *Repository) UpdateStar(ctx context.Context, starID int, req *UpdateStar
 func (r *Repository) DeleteStarByID(ctx context.Context, starID int) error {
 	query, args, err := squirrel.Update("stars").
 		Set("deleted_at", squirrel.Expr("NOW()")).
-		Where(squirrel.Eq{"id": starID}, squirrel.Eq{"deleted_at": nil}).
+		Where(squirrel.Eq{"id": starID}).
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
 	if err != nil {
