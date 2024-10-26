@@ -2,8 +2,8 @@ package stars
 
 import (
 	"context"
-	"fmt"
-	"strings"
+
+	"github.com/Masterminds/squirrel"
 
 	"github.com/jackc/pgx/v5"
 
@@ -25,31 +25,82 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 }
 
 func (r *Repository) GetStars(ctx context.Context) ([]*Star, error) {
-	var stars []*Star
-	rows, err := r.db.Query(ctx, `SELECT id, first_name, middle_name, last_name, birth_date, birth_place, death_date, bio, created_at FROM stars WHERE deleted_at IS NULL`)
+	query, args, err := squirrel.Select("id, first_name, middle_name, last_name, birth_date, birth_place, death_date, bio, created_at, deleted_at").
+		From("stars").
+		Where(squirrel.Eq{"deleted_at": nil}).
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+	if err != nil {
+		return nil, apperrors.Internal(err)
+	}
+
+	rows, err := r.db.Query(ctx, query, args...)
 	if err != nil {
 		return nil, apperrors.InternalWithoutStackTrace(err)
 	}
 
 	defer rows.Close()
+	return r.scanStars(rows)
+}
 
-	for rows.Next() {
-		star := NewStar()
-		err = rows.Scan(&star.ID, &star.FirstName, &star.MiddleName, &star.LastName, &star.BirthDate, &star.BirthPlace, &star.DeathDate, &star.Bio, &star.CreatedAt)
-		if err != nil {
-			return nil, apperrors.InternalWithoutStackTrace(err)
-		}
-		stars = append(stars, star.Normalize())
+func (r *Repository) GetRelationsByMovieID(ctx context.Context, movieID int) ([]*MovieStarsRelation, error) {
+	query, args, err := squirrel.Select("movie_id, star_id, role, details, order_no").
+		From("movie_stars").
+		Where("movie_id = ?", movieID).
+		OrderBy("order_no").
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+	if err != nil {
+		return nil, apperrors.Internal(err)
 	}
-	return stars, nil
+
+	rows, err := dbx.FromContext(ctx, r.db).Query(ctx, query, args...)
+	if err != nil {
+		return nil, apperrors.Internal(err)
+	}
+	defer rows.Close()
+
+	var relations []*MovieStarsRelation
+	for rows.Next() {
+		var relation MovieStarsRelation
+		if err = rows.Scan(&relation.MovieID, &relation.StarID, &relation.Role, &relation.Details, &relation.OrderNo); err != nil {
+			return nil, apperrors.Internal(err)
+		}
+		relations = append(relations, &relation)
+	}
+
+	return relations, nil
 }
 
 func (r *Repository) GetStarsPaginated(ctx context.Context, offset int, limit int) ([]*Star, int, error) {
+	selectQuery, selectArgs, err := squirrel.Select("id, first_name, middle_name, last_name, birth_date, birth_place, death_date, bio, created_at, deleted_at").
+		From("stars").
+		Where(squirrel.Eq{"deleted_at": nil}).
+		PlaceholderFormat(squirrel.Dollar).
+		OrderBy("id").
+		Limit(uint64(limit)).
+		Offset(uint64(offset)).
+		ToSql()
+	if err != nil {
+		return nil, 0, apperrors.Internal(err)
+	}
+
+	countQuery, countArgs, err := squirrel.Select("COUNT(*)").
+		From("stars").
+		Where(squirrel.Eq{"deleted_at": nil}).
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+	if err != nil {
+		return nil, 0, apperrors.Internal(err)
+	}
+
 	b := &pgx.Batch{}
-	b.Queue(`SELECT id, first_name, middle_name, last_name, birth_date, birth_place, death_date, bio, created_at, deleted_at FROM stars WHERE deleted_at IS NULL ORDER BY id LIMIT $1 OFFSET $2`, limit, offset)
-	b.Queue(`SELECT COUNT(*) FROM stars WHERE deleted_at IS NULL`)
+	b.Queue(selectQuery, selectArgs...)
+	b.Queue(countQuery, countArgs...)
 	br := r.db.SendBatch(ctx, b)
-	defer br.Close()
+	defer func() {
+		_ = br.Close()
+	}()
 
 	rows, err := br.Query()
 	if err != nil {
@@ -57,14 +108,7 @@ func (r *Repository) GetStarsPaginated(ctx context.Context, offset int, limit in
 	}
 	defer rows.Close()
 
-	var stars []*Star
-	for rows.Next() {
-		star := NewStar()
-		if err = rows.Scan(&star.ID, &star.FirstName, &star.MiddleName, &star.LastName, &star.BirthDate, &star.BirthPlace, &star.DeathDate, &star.Bio, &star.CreatedAt, &star.DeletedAt); err != nil {
-			return nil, 0, apperrors.Internal(err)
-		}
-		stars = append(stars, star.Normalize())
-	}
+	stars, _ := r.scanStars(rows)
 
 	if err = rows.Err(); err != nil {
 		return nil, 0, apperrors.Internal(err)
@@ -79,8 +123,17 @@ func (r *Repository) GetStarsPaginated(ctx context.Context, offset int, limit in
 }
 
 func (r *Repository) GetStarByID(ctx context.Context, starID int) (*Star, error) {
+	query, args, err := squirrel.Select("id, first_name, middle_name, last_name, birth_date, birth_place, death_date, bio, created_at").
+		From("stars").
+		Where(squirrel.Eq{"id": starID}, squirrel.Eq{"deleted_at": nil}).
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+	if err != nil {
+		return nil, apperrors.Internal(err)
+	}
+
 	star := NewStar()
-	err := r.db.QueryRow(ctx, `SELECT id, first_name, middle_name, last_name, birth_date, birth_place, death_date, bio, created_at FROM stars WHERE id = $1 AND deleted_at IS NULL`, starID).
+	err = r.db.QueryRow(ctx, query, args...).
 		Scan(&star.ID, &star.FirstName, &star.MiddleName, &star.LastName, &star.BirthDate, &star.BirthPlace, &star.DeathDate, &star.Bio, &star.CreatedAt)
 
 	switch {
@@ -93,12 +146,54 @@ func (r *Repository) GetStarByID(ctx context.Context, starID int) (*Star, error)
 	return star.Normalize(), nil
 }
 
+func (r *Repository) GetStarsByMovieID(ctx context.Context, movieID int) ([]*MovieCredit, error) {
+	query, args, err := squirrel.Select("id, first_name, middle_name, last_name, birth_date, birth_place, death_date, bio, created_at, role, details").
+		From("stars").
+		InnerJoin("movie_stars ON star_id = id").
+		Where(squirrel.Eq{"movie_id": movieID}).
+		OrderBy("order_no").
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+	if err != nil {
+		return nil, apperrors.Internal(err)
+	}
+
+	rows, err := r.db.Query(ctx, query, args...)
+	if err != nil {
+		return nil, apperrors.Internal(err)
+	}
+	defer rows.Close()
+
+	var credits []*MovieCredit
+
+	for rows.Next() {
+		credit := &MovieCredit{
+			Star: Star{},
+		}
+
+		err = rows.Scan(&credit.Star.ID, &credit.Star.FirstName, &credit.Star.MiddleName, &credit.Star.LastName, &credit.Star.BirthDate, &credit.Star.BirthPlace, &credit.Star.DeathDate, &credit.Star.Bio, &credit.Star.CreatedAt, &credit.Role, &credit.Details)
+		if err != nil {
+			return nil, apperrors.Internal(err)
+		}
+		credits = append(credits, credit)
+	}
+
+	return credits, nil
+}
+
 func (r *Repository) CreateStar(ctx context.Context, req *CreateStarRequest) (*Star, error) {
+	query, args, err := squirrel.Insert("stars").
+		Columns("first_name", "middle_name", "last_name", "birth_date", "birth_place", "death_date", "bio").
+		Values(req.FirstName, req.MiddleName, req.LastName, req.BirthDate, req.BirthPlace, req.DeathDate, req.Bio).
+		Suffix("RETURNING id, created_at").
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+	if err != nil {
+		return nil, apperrors.Internal(err)
+	}
+
 	star := req.ToStar()
-	err := r.db.QueryRow(ctx, `INSERT INTO stars (first_name, middle_name, last_name, birth_date, birth_place, death_date, bio) 
-									VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, created_at`,
-		req.FirstName, req.MiddleName, req.LastName, req.BirthDate, req.BirthPlace, req.DeathDate, req.Bio).
-		Scan(&star.ID, &star.CreatedAt)
+	err = r.db.QueryRow(ctx, query, args...).Scan(&star.ID, &star.CreatedAt)
 	if err != nil {
 		return nil, apperrors.InternalWithoutStackTrace(err)
 	}
@@ -107,45 +202,52 @@ func (r *Repository) CreateStar(ctx context.Context, req *CreateStarRequest) (*S
 }
 
 func (r *Repository) UpdateStar(ctx context.Context, starID int, req *UpdateStarRequest) (*Star, error) {
-	fields := make(map[string]interface{})
+	builder := squirrel.Update("stars").
+		Where(squirrel.Eq{"id": starID}).
+		Suffix("RETURNING id, first_name, middle_name, last_name, birth_date, birth_place, death_date, bio, created_at").
+		PlaceholderFormat(squirrel.Dollar)
 
+	hasSet := false
 	if req.FirstName != nil {
-		fields["first_name"] = *req.FirstName
+		builder = builder.Set("first_name", *req.FirstName)
+		hasSet = true
 	}
 	if req.MiddleName != nil {
-		fields["middle_name"] = *req.MiddleName
+		builder = builder.Set("middle_name", *req.MiddleName)
+		hasSet = true
 	}
 	if req.LastName != nil {
-		fields["last_name"] = *req.LastName
+		builder = builder.Set("last_name", *req.LastName)
+		hasSet = true
 	}
 	if req.BirthDate != nil {
-		fields["birth_date"] = *req.BirthDate
+		builder = builder.Set("birth_date", *req.BirthDate)
+		hasSet = true
 	}
 	if req.BirthPlace != nil {
-		fields["birth_place"] = *req.BirthPlace
+		builder = builder.Set("birth_place", *req.BirthPlace)
+		hasSet = true
 	}
 	if req.DeathDate != nil {
-		fields["death_date"] = *req.DeathDate
+		builder = builder.Set("death_date", *req.DeathDate)
+		hasSet = true
 	}
 	if req.Bio != nil {
-		fields["bio"] = *req.Bio
+		builder = builder.Set("bio", *req.Bio)
+		hasSet = true
 	}
 
-	var setClauses []string
-	var values []interface{}
-	index := 1
-
-	for column, value := range fields {
-		setClauses = append(setClauses, fmt.Sprintf("%s = $%d", column, index))
-		values = append(values, value)
-		index++
+	if !hasSet {
+		builder = builder.Set("id", starID)
 	}
 
-	query := fmt.Sprintf(`UPDATE stars SET %s WHERE id = $%d RETURNING id, first_name, middle_name, last_name, birth_date, birth_place, death_date, bio, created_at`, strings.Join(setClauses, ", "), index)
-	values = append(values, starID)
+	query, args, err := builder.ToSql()
+	if err != nil {
+		return nil, apperrors.Internal(err)
+	}
 
 	star := NewStar()
-	err := r.db.QueryRow(ctx, query, values...).Scan(&star.ID, &star.FirstName, &star.MiddleName, &star.LastName, &star.BirthDate, &star.BirthPlace, &star.DeathDate, &star.Bio, &star.CreatedAt)
+	err = r.db.QueryRow(ctx, query, args...).Scan(&star.ID, &star.FirstName, &star.MiddleName, &star.LastName, &star.BirthDate, &star.BirthPlace, &star.DeathDate, &star.Bio, &star.CreatedAt)
 
 	switch {
 	case dbx.IsNoRows(err):
@@ -158,7 +260,16 @@ func (r *Repository) UpdateStar(ctx context.Context, starID int, req *UpdateStar
 }
 
 func (r *Repository) DeleteStarByID(ctx context.Context, starID int) error {
-	n, err := r.db.Exec(ctx, `UPDATE stars SET deleted_at = NOW() WHERE id = $1 AND deleted_at IS NULL`, starID)
+	query, args, err := squirrel.Update("stars").
+		Set("deleted_at", squirrel.Expr("NOW()")).
+		Where(squirrel.Eq{"id": starID}, squirrel.Eq{"deleted_at": nil}).
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+	if err != nil {
+		return apperrors.Internal(err)
+	}
+
+	n, err := r.db.Exec(ctx, query, args...)
 	if err != nil {
 		return apperrors.Internal(err)
 	}
@@ -168,4 +279,17 @@ func (r *Repository) DeleteStarByID(ctx context.Context, starID int) error {
 	}
 
 	return nil
+}
+
+func (r *Repository) scanStars(rows pgx.Rows) ([]*Star, error) {
+	var stars []*Star
+	for rows.Next() {
+		star := NewStar()
+		err := rows.Scan(&star.ID, &star.FirstName, &star.MiddleName, &star.LastName, &star.BirthDate, &star.BirthPlace, &star.DeathDate, &star.Bio, &star.CreatedAt, &star.DeletedAt)
+		if err != nil {
+			return nil, apperrors.Internal(err)
+		}
+		stars = append(stars, star.Normalize())
+	}
+	return stars, nil
 }

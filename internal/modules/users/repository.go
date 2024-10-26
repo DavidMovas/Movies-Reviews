@@ -3,6 +3,8 @@ package users
 import (
 	"context"
 
+	"github.com/Masterminds/squirrel"
+
 	"github.com/DavidMovas/Movies-Reviews/internal/dbx"
 	apperrors "github.com/DavidMovas/Movies-Reviews/internal/error"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -19,10 +21,17 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 }
 
 func (r Repository) Create(ctx context.Context, user *UserWithPassword) (err error) {
-	err = r.db.QueryRow(ctx,
-		`INSERT INTO users (username, email, pass_hash, role) 
-    		VALUES ($1, $2, $3, $4) RETURNING id, role, created_at`, user.Username, user.Email, user.PasswordHash, user.Role).
-		Scan(&user.ID, &user.Role, &user.CreatedAt)
+	query, args, err := squirrel.Insert("users").
+		Columns("username", "email", "pass_hash", "role").
+		Values(user.Username, user.Email, user.PasswordHash, user.Role).
+		Suffix("RETURNING id, role, created_at").
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+	if err != nil {
+		return apperrors.Internal(err)
+	}
+
+	err = r.db.QueryRow(ctx, query, args...).Scan(&user.ID, &user.Role, &user.CreatedAt)
 
 	switch {
 	case dbx.IsUniqueViolation(err, "email"):
@@ -37,9 +46,17 @@ func (r Repository) Create(ctx context.Context, user *UserWithPassword) (err err
 }
 
 func (r Repository) GetExistingUserByEmail(ctx context.Context, email string) (*UserWithPassword, error) {
+	query, args, err := squirrel.Select("id, username, email, pass_hash, role, created_at, deleted_at").
+		From("users").
+		Where("email = ? AND deleted_at IS NULL", email).
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+	if err != nil {
+		return nil, apperrors.Internal(err)
+	}
+
 	user := NewUserWithPassword()
-	err := r.db.QueryRow(ctx, `SELECT id, username, email, pass_hash, role, created_at, deleted_at FROM users WHERE email = $1 AND deleted_at IS NULL`, email).
-		Scan(&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.Role, &user.CreatedAt, &user.DeletedAt)
+	err = r.db.QueryRow(ctx, query, args...).Scan(&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.Role, &user.CreatedAt, &user.DeletedAt)
 
 	switch {
 	case dbx.IsNoRows(err):
@@ -51,9 +68,17 @@ func (r Repository) GetExistingUserByEmail(ctx context.Context, email string) (*
 }
 
 func (r Repository) GetExistingUserByID(ctx context.Context, id int) (*UserWithPassword, error) {
+	query, args, err := squirrel.Select("id, username, email, pass_hash, role, created_at, deleted_at").
+		From("users").
+		Where("id = ? AND deleted_at IS NULL", id).
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+	if err != nil {
+		return nil, apperrors.Internal(err)
+	}
+
 	user := NewUserWithPassword()
-	err := r.db.QueryRow(ctx, `SELECT id, username, email, pass_hash, role, created_at, deleted_at FROM users WHERE id = $1 AND deleted_at IS NULL`, id).
-		Scan(&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.Role, &user.CreatedAt, &user.DeletedAt)
+	err = r.db.QueryRow(ctx, query, args...).Scan(&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.Role, &user.CreatedAt, &user.DeletedAt)
 
 	switch {
 	case dbx.IsNoRows(err):
@@ -66,9 +91,17 @@ func (r Repository) GetExistingUserByID(ctx context.Context, id int) (*UserWithP
 }
 
 func (r Repository) GetExistingUserByUsername(ctx context.Context, username string) (*UserWithPassword, error) {
+	query, args, err := squirrel.Select("id, username, email, pass_hash, role, created_at, deleted_at").
+		From("users").
+		Where("username = ? AND deleted_at IS NULL", username).
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+	if err != nil {
+		return nil, apperrors.Internal(err)
+	}
+
 	user := NewUserWithPassword()
-	err := r.db.QueryRow(ctx, `SELECT id, username, email, pass_hash, role, created_at FROM users WHERE username = $1 AND deleted_at IS NULL`, username).
-		Scan(&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.Role, &user.CreatedAt)
+	err = r.db.QueryRow(ctx, query, args...).Scan(&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.Role, &user.CreatedAt, &user.DeletedAt)
 
 	switch {
 	case dbx.IsNoRows(err):
@@ -81,7 +114,17 @@ func (r Repository) GetExistingUserByUsername(ctx context.Context, username stri
 }
 
 func (r Repository) UpdateExistingUserByID(ctx context.Context, id int, newUsername string, newPassword string) error {
-	n, err := r.db.Exec(ctx, `UPDATE users SET username = $1, pass_hash = $2 WHERE id = $3`, newUsername, newPassword, id)
+	query, args, err := squirrel.Update("users").
+		Set("username", newUsername).
+		Set("pass_hash", newPassword).
+		Where(squirrel.Eq{"id": id}).
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+	if err != nil {
+		return apperrors.Internal(err)
+	}
+
+	n, err := r.db.Exec(ctx, query, args...)
 	if err != nil {
 		return apperrors.Internal(err)
 	}
@@ -94,7 +137,16 @@ func (r Repository) UpdateExistingUserByID(ctx context.Context, id int, newUsern
 }
 
 func (r Repository) UpdateUserRoleByID(ctx context.Context, id int, newRole string) error {
-	n, err := r.db.Exec(ctx, `UPDATE users SET role = $1 WHERE id = $2`, newRole, id)
+	query, args, err := squirrel.Update("users").
+		Set("role", newRole).
+		Where(squirrel.Eq{"id": id}).
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+	if err != nil {
+		return apperrors.Internal(err)
+	}
+
+	n, err := r.db.Exec(ctx, query, args...)
 	if err != nil {
 		return apperrors.Internal(err)
 	}
@@ -107,7 +159,16 @@ func (r Repository) UpdateUserRoleByID(ctx context.Context, id int, newRole stri
 }
 
 func (r Repository) DeleteExistingUserByID(ctx context.Context, id int) error {
-	n, err := r.db.Exec(ctx, `UPDATE users SET deleted_at = NOW() WHERE id = $1 AND deleted_at IS NULL`, id)
+	query, args, err := squirrel.Update("users").
+		Set("deleted_at", squirrel.Expr("NOW()")).
+		Where(squirrel.Eq{"id": id}).
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+	if err != nil {
+		return apperrors.Internal(err)
+	}
+
+	n, err := r.db.Exec(ctx, query, args...)
 	if err != nil {
 		return apperrors.Internal(err)
 	}

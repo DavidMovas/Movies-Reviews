@@ -27,6 +27,29 @@ type GetStarsRequest struct {
 	pagination.PaginatedRequest
 }
 
+type MovieStarsRelation struct {
+	MovieID int
+	StarID  int
+	Role    string
+	Details string
+	OrderNo int
+}
+
+func (m MovieStarsRelation) Key() any {
+	type MovieStarsRelationKey struct {
+		MovieID, StarID int
+		Role            string
+	}
+
+	return MovieStarsRelationKey{m.MovieID, m.StarID, m.Role}
+}
+
+type MovieCredit struct {
+	Star    Star
+	Role    string
+	Details string
+}
+
 type CreateStarRequest struct {
 	FirstName  string     `json:"firstName" validate:"min=1,max=50"`
 	MiddleName *string    `json:"middleName,omitempty" validate:"max=50"`

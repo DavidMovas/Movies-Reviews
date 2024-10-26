@@ -3,6 +3,8 @@ package movies
 import (
 	"net/http"
 
+	"github.com/DavidMovas/Movies-Reviews/internal/modules/stars"
+
 	"github.com/DavidMovas/Movies-Reviews/contracts"
 
 	"github.com/DavidMovas/Movies-Reviews/internal/config"
@@ -81,6 +83,16 @@ func (h *Handler) CreateMovie(c echo.Context) error {
 	for _, genreID := range req.GenreIDs {
 		movie.Genres = append(movie.Genres, &genres.Genre{
 			ID: genreID,
+		})
+	}
+
+	for _, creditID := range req.Cast {
+		movie.Cast = append(movie.Cast, &MovieCredit{
+			Star: stars.Star{
+				ID: creditID.StarID,
+			},
+			Role:    creditID.Role,
+			Details: creditID.Details,
 		})
 	}
 

@@ -3,6 +3,8 @@ package genres
 import (
 	"context"
 
+	"github.com/Masterminds/squirrel"
+
 	"github.com/jackc/pgx/v5"
 
 	"github.com/DavidMovas/Movies-Reviews/internal/dbx"
@@ -21,7 +23,14 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 }
 
 func (r *Repository) GetGenres(ctx context.Context) ([]*Genre, error) {
-	rows, err := r.db.Query(ctx, `SELECT id, name FROM genres`)
+	query, args, err := squirrel.Select("id, name").
+		From("genres").
+		ToSql()
+	if err != nil {
+		return nil, apperrors.Internal(err)
+	}
+
+	rows, err := r.db.Query(ctx, query, args...)
 	if err != nil {
 		return nil, apperrors.InternalWithoutStackTrace(err)
 	}
@@ -32,8 +41,18 @@ func (r *Repository) GetGenres(ctx context.Context) ([]*Genre, error) {
 }
 
 func (r *Repository) GetRelationsByMovieID(ctx context.Context, movieID int) ([]*MovieGenreRelation, error) {
+	query, args, err := squirrel.Select("movie_id, genre_id, order_no").
+		From("movie_genres").
+		Where("movie_id = $1", movieID).
+		OrderBy("order_no").
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+	if err != nil {
+		return nil, apperrors.Internal(err)
+	}
+
 	rows, err := dbx.FromContext(ctx, r.db).
-		Query(ctx, `SELECT movie_id, genre_id, order_no FROM movie_genres WHERE movie_id = $1 ORDER BY order_no`, movieID)
+		Query(ctx, query, args...)
 	if err != nil {
 		return nil, apperrors.Internal(err)
 	}
@@ -51,8 +70,16 @@ func (r *Repository) GetRelationsByMovieID(ctx context.Context, movieID int) ([]
 }
 
 func (r *Repository) GetGenreByID(ctx context.Context, id int) (*Genre, error) {
+	query, args, err := squirrel.Select("id, name").
+		From("genres").
+		Where("id = $1", id).
+		ToSql()
+	if err != nil {
+		return nil, apperrors.Internal(err)
+	}
+
 	var genre Genre
-	err := r.db.QueryRow(ctx, `SELECT id, name FROM genres WHERE id = $1`, id).
+	err = r.db.QueryRow(ctx, query, args...).
 		Scan(&genre.ID, &genre.Name)
 
 	switch {
@@ -65,7 +92,18 @@ func (r *Repository) GetGenreByID(ctx context.Context, id int) (*Genre, error) {
 }
 
 func (r *Repository) GetGenresByMovieID(ctx context.Context, movieID int) ([]*Genre, error) {
-	rows, err := r.db.Query(ctx, `SELECT id, name FROM genres INNER JOIN movie_genres ON genre_id = id WHERE movie_id = $1 ORDER BY order_no`, movieID)
+	query, args, err := squirrel.Select("id, name").
+		From("genres").
+		InnerJoin("movie_genres ON genre_id = id").
+		Where("movie_id = $1", movieID).
+		OrderBy("order_no").
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+	if err != nil {
+		return nil, apperrors.Internal(err)
+	}
+
+	rows, err := r.db.Query(ctx, query, args...)
 	if err != nil {
 		return nil, apperrors.Internal(err)
 	}
@@ -75,8 +113,17 @@ func (r *Repository) GetGenresByMovieID(ctx context.Context, movieID int) ([]*Ge
 }
 
 func (r *Repository) CreateGenre(ctx context.Context, raq *CreateGenreRequest) (*Genre, error) {
+	query, args, err := squirrel.Insert("genres(name)").
+		Values(raq.Name).
+		Suffix("ON CONFLICT (name) DO NOTHING RETURNING id, name").
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+	if err != nil {
+		return nil, apperrors.Internal(err)
+	}
+
 	var genre Genre
-	err := r.db.QueryRow(ctx, `INSERT INTO genres(name) VALUES($1) ON CONFLICT (name) DO NOTHING  RETURNING id, name`, raq.Name).
+	err = r.db.QueryRow(ctx, query, args...).
 		Scan(&genre.ID, &genre.Name)
 
 	switch {
@@ -89,8 +136,16 @@ func (r *Repository) CreateGenre(ctx context.Context, raq *CreateGenreRequest) (
 }
 
 func (r *Repository) UpdateGenreByID(ctx context.Context, id int, raq *UpdateGenreRequest) error {
-	n, err := r.db.Exec(ctx, `UPDATE genres SET name = $1 WHERE id = $2 
-        AND NOT EXISTS (SELECT 1 FROM genres WHERE name = $1 AND id <> $2)`, raq.Name, id)
+	query, args, err := squirrel.Update("genres").
+		Set("name = $1", raq.Name).
+		Where("id = $2 AND NOT EXISTS (SELECT 1 FROM genres WHERE name = $1 AND id <> $2) ", id).
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+	if err != nil {
+		return apperrors.Internal(err)
+	}
+
+	n, err := r.db.Exec(ctx, query, args...)
 	if err != nil {
 		return apperrors.Internal(err)
 	}
@@ -113,7 +168,15 @@ func (r *Repository) UpdateGenreByID(ctx context.Context, id int, raq *UpdateGen
 }
 
 func (r *Repository) DeleteGenreByID(ctx context.Context, genreID int) error {
-	n, err := r.db.Exec(ctx, `DELETE FROM genres WHERE id = $1`, genreID)
+	query, args, err := squirrel.Delete("genres").
+		Where("id = $1", genreID).
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+	if err != nil {
+		return apperrors.Internal(err)
+	}
+
+	n, err := r.db.Exec(ctx, query, args...)
 	if err != nil {
 		return apperrors.Internal(err)
 	}

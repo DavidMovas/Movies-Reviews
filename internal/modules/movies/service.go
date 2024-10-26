@@ -3,6 +3,10 @@ package movies
 import (
 	"context"
 
+	"github.com/DavidMovas/Movies-Reviews/internal/slices"
+
+	"github.com/DavidMovas/Movies-Reviews/internal/modules/stars"
+
 	"github.com/DavidMovas/Movies-Reviews/internal/modules/genres"
 
 	"github.com/DavidMovas/Movies-Reviews/internal/log"
@@ -11,12 +15,14 @@ import (
 type Service struct {
 	repo       *Repository
 	genresRepo *genres.Repository
+	starsRepo  *stars.Repository
 }
 
-func NewService(repo *Repository, genresRepo *genres.Repository) *Service {
+func NewService(repo *Repository, genresRepo *genres.Repository, starsRepo *stars.Repository) *Service {
 	return &Service{
 		repo:       repo,
 		genresRepo: genresRepo,
+		starsRepo:  starsRepo,
 	}
 }
 
@@ -70,6 +76,21 @@ func (s *Service) DeleteMovieByID(ctx context.Context, movieID int) error {
 
 func (s *Service) assemble(ctx context.Context, movie *MovieDetails) error {
 	var err error
-	movie.Genres, err = s.genresRepo.GetGenresByMovieID(ctx, movie.ID)
+	if movie.Genres, err = s.genresRepo.GetGenresByMovieID(ctx, movie.ID); err != nil {
+		return err
+	}
+	credits, err := s.starsRepo.GetStarsByMovieID(ctx, movie.ID)
+	if err != nil {
+		return err
+	}
+
+	movie.Cast = slices.CastSlice(credits, func(credit *stars.MovieCredit) *MovieCredit {
+		return &MovieCredit{
+			Star:    credit.Star,
+			Role:    credit.Role,
+			Details: credit.Details,
+		}
+	})
+
 	return err
 }
