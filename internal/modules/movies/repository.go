@@ -208,13 +208,13 @@ func (r *Repository) updateStars(ctx context.Context, current, next []*stars.Mov
 	q := dbx.FromContext(ctx, r.db)
 
 	addFunc := func(mgo *stars.MovieStarsRelation) error {
-		_, err := q.Exec(ctx, `INSERT INTO movies_stars (movie_id, star_id, role, details, order_no) VALUES ($1, $2, $3, $4, $5)`,
+		_, err := q.Exec(ctx, `INSERT INTO movie_stars (movie_id, star_id, role, details, order_no) VALUES ($1, $2, $3, $4, $5)`,
 			mgo.MovieID, mgo.StarID, mgo.Role, mgo.Details, mgo.OrderNo)
 		return err
 	}
 
 	removeFunc := func(mgo *stars.MovieStarsRelation) error {
-		_, err := q.Exec(ctx, `DELETE FROM movies_stars WHERE movie_id = $1 AND star_id = $2 AND role = $3 AND details = $4`, mgo.MovieID, mgo.StarID, mgo.Role, mgo.Details)
+		_, err := q.Exec(ctx, `DELETE FROM movie_stars WHERE movie_id = $1 AND star_id = $2 AND role = $3 AND details = $4`, mgo.MovieID, mgo.StarID, mgo.Role, mgo.Details)
 		return err
 	}
 
