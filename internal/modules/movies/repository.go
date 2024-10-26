@@ -22,12 +22,14 @@ import (
 type Repository struct {
 	db         *pgxpool.Pool
 	genresRepo *genres.Repository
+	starsRepo  *stars.Repository
 }
 
-func NewRepository(db *pgxpool.Pool, genresRepo *genres.Repository) *Repository {
+func NewRepository(db *pgxpool.Pool, genresRepo *genres.Repository, starsRepo *stars.Repository) *Repository {
 	return &Repository{
 		db:         db,
 		genresRepo: genresRepo,
+		starsRepo:  starsRepo,
 	}
 }
 
@@ -106,6 +108,7 @@ func (r *Repository) CreateMovie(ctx context.Context, movie *MovieDetails) error
 			return err
 		}
 
+		// Insert stars
 		nextCast := slices.MapIndex(movie.Cast, func(i int, credit *MovieCredit) *stars.MovieStarsRelation {
 			return &stars.MovieStarsRelation{
 				MovieID: movie.ID,
@@ -127,11 +130,6 @@ func (r *Repository) CreateMovie(ctx context.Context, movie *MovieDetails) error
 func (r *Repository) UpdateMovieByID(ctx context.Context, movieID int, req *UpdateMovieRequest) (*MovieDetails, error) {
 	var movie MovieDetails
 
-	var genresIDs []int
-	for _, genre := range req.GenreIDs {
-		genresIDs = append(genresIDs, *genre)
-	}
-
 	err := dbx.InTransaction(ctx, r.db, func(ctx context.Context, _ pgx.Tx) error {
 		query, values := r.prepareQueryForUpdateRequest(movieID, req)
 		err := r.db.QueryRow(ctx, query, values...).
@@ -148,22 +146,12 @@ func (r *Repository) UpdateMovieByID(ctx context.Context, movieID int, req *Upda
 			return apperrors.Internal(err)
 		}
 
-		if req.GenreIDs != nil {
-			var currentGenres []*genres.MovieGenreRelation
-			currentGenres, err = r.genresRepo.GetRelationsByMovieID(ctx, movieID)
-			if err != nil {
-				return err
-			}
+		if err = r.genresUpdateRequest(ctx, req.GenreIDs, movieID); err != nil {
+			return err
+		}
 
-			nextGenres := slices.MapIndex(genresIDs, func(i, genreID int) *genres.MovieGenreRelation {
-				return &genres.MovieGenreRelation{
-					MovieID: movieID,
-					GenreID: genreID,
-					OrderNo: i,
-				}
-			})
-
-			return r.updateGenres(ctx, currentGenres, nextGenres)
+		if err = r.starsUpdateRequest(ctx, req.Cast, movieID); err != nil {
+			return err
 		}
 
 		return err
@@ -248,4 +236,61 @@ func (r *Repository) prepareQueryForUpdateRequest(movieID int, req *UpdateMovieR
 	values = append(values, movieID, req.Version)
 
 	return query, values
+}
+
+func (r *Repository) genresUpdateRequest(ctx context.Context, ids []*int, movieID int) error {
+	if ids != nil {
+		var err error
+		var genresIDs []int
+		for _, genre := range ids {
+			genresIDs = append(genresIDs, *genre)
+		}
+
+		var currentGenres []*genres.MovieGenreRelation
+		currentGenres, err = r.genresRepo.GetRelationsByMovieID(ctx, movieID)
+		if err != nil {
+			return err
+		}
+
+		nextGenres := slices.MapIndex(genresIDs, func(i, genreID int) *genres.MovieGenreRelation {
+			return &genres.MovieGenreRelation{
+				MovieID: movieID,
+				GenreID: genreID,
+				OrderNo: i,
+			}
+		})
+
+		return r.updateGenres(ctx, currentGenres, nextGenres)
+	}
+
+	return nil
+}
+
+func (r *Repository) starsUpdateRequest(ctx context.Context, cast []*MovieCreditInfo, movieID int) error {
+	if cast != nil {
+		var err error
+		var starsIDs []int
+		for _, star := range cast {
+			starsIDs = append(starsIDs, star.StarID)
+		}
+
+		var currenCast []*stars.MovieStarsRelation
+		currenCast, err = r.starsRepo.GetRelationsByMovieID(ctx, movieID)
+		if err != nil {
+			return err
+		}
+
+		nextCast := slices.MapIndex(starsIDs, func(i, starID int) *stars.MovieStarsRelation {
+			return &stars.MovieStarsRelation{
+				MovieID: movieID,
+				StarID:  starID,
+				Role:    cast[i].Role,
+				Details: cast[i].Details,
+				OrderNo: i,
+			}
+		})
+
+		return r.updateStars(ctx, currenCast, nextCast)
+	}
+	return nil
 }

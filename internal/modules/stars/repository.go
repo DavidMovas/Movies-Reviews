@@ -34,6 +34,26 @@ func (r *Repository) GetStars(ctx context.Context) ([]*Star, error) {
 	return r.scanStars(rows)
 }
 
+func (r *Repository) GetRelationsByMovieID(ctx context.Context, movieID int) ([]*MovieStarsRelation, error) {
+	rows, err := dbx.FromContext(ctx, r.db).
+		Query(ctx, `SELECT movie_id, star_id, role, details, order_no FROM movie_stars WHERE movie_id = $1 ORDER BY order_no `, movieID)
+	if err != nil {
+		return nil, apperrors.Internal(err)
+	}
+	defer rows.Close()
+
+	var relations []*MovieStarsRelation
+	for rows.Next() {
+		var relation MovieStarsRelation
+		if err = rows.Scan(&relation.MovieID, &relation.StarID, &relation.Role, &relation.Details, &relation.OrderNo); err != nil {
+			return nil, apperrors.Internal(err)
+		}
+		relations = append(relations, &relation)
+	}
+
+	return relations, nil
+}
+
 func (r *Repository) GetStarsPaginated(ctx context.Context, offset int, limit int) ([]*Star, int, error) {
 	b := &pgx.Batch{}
 	b.Queue(`SELECT id, first_name, middle_name, last_name, birth_date, birth_place, death_date, bio, created_at, deleted_at FROM stars WHERE deleted_at IS NULL ORDER BY id LIMIT $1 OFFSET $2`, limit, offset)
