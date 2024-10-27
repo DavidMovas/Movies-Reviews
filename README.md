@@ -1,3 +1,5 @@
+<div align="center">
+
 [![go.mod Go version](https://img.shields.io/badge/Go-v1.23.0-blue)](https://github.com/DavidMovas/Movies-Reviews)
 ![Codecov](https://img.shields.io/codecov/c/github/DavidMovas/Movies-Reviews?logoColor=violet)
 [![Go Report Card](https://goreportcard.com/badge/github.com/DavidMovas/Movies-Reviews)](https://goreportcard.com/report/github.com/DavidMovas/Movies-Reviews)
@@ -5,13 +7,22 @@
 [![Go Modules](https://img.shields.io/badge/go--modules-enabled-brightgreen)](https://blog.golang.org/using-go-modules)
 [![License](https://img.shields.io/badge/license-Apache%20License%202.0-E91E63.svg?style=flat-square)](LICENSE)
 
-# Movies-Reviews
+</div>
 
-An API for managing movies reviews.
+# Movies-Reviews Service API
 
-### Usage
+I have developed a service in Go using the [Echo](https://echo.labstack.com/) framework that serves as an API for handling requests. 
+This is a movie service where users can authenticate and authorize using JWT tokens. 
+OpenAPI documentation is available at the special endpoint [OpenAPI](#OpenAPI).
 
-You can use this API to manage movies reviews. You can create, read, update and delete movies and reviews.
+The service operates with a PostgresSQL database and is organized through Docker, allowing it to be deployed in isolated containers for both the server and the database. 
+This setup ensures ease of managing dependencies and the ability to scale the application effortlessly.
+
+Key features of the service include user management: retrieving, creating, editing, and deleting user profiles.
+Additionally, it supports working with users, genres, movies, movie stars and movie reviews. 
+
+Moreover, the application includes a substantial number of integration tests that ensure its stability and reliability. 
+These tests help identify potential issues and provide confidence in the correct operation of the service after code changes.
 
 ------------------------------------------------------------------------------------------------
 ### Routes
@@ -62,6 +73,44 @@ You can use this API to manage movies reviews. You can create, read, update and 
 | Method | Endpoint | Description  | Auth  |
 |--------|----------|--------------|-------|
 | GET    | /swagger | OpenAPI spec | admin |
+
+------------------------------------------------------------------------------------------------
+### Environment Variables
+
+For the service to function correctly, you need to set environment variables in a `.env` file. Below is a list of available variables and their descriptions:
+##### Database Configuration
+
+- `DB_USER=user`  # Database username
+- `DB_PASSWORD=password` # Database user password
+- `DB_NAME=dbname` # Name of the database used by the service
+
+##### Server Configuration
+
+- `LOCAL=true` # Indicates whether the server runs in local mode
+- `PORT=port` # Port on which the server will run (Default: 8000)
+- `EXTERNAL_PORT=port` # Port used for external requests
+- `DB_URL=postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}` # URL for connecting to the database
+
+##### JWT Configuration
+
+- `JWT_SECRET=secret` # Secret key for signing JWT
+- `JWT_ACCESS_EXPIRATION=5m` # Access token lifetime
+- `JWT_REFRESH_EXPIRATION=10m` # Refresh token lifetime
+
+##### Logging Configuration
+
+- `LOG_LEVEL=info` # Logging level (info, debug, warn, error)
+
+##### Admin Configuration (initial creation)
+
+- `ADMIN_USERNAME=name` # Admin username
+- `ADMIN_EMAIL=email` # Admin email
+- `ADMIN_PASSWORD=password` # Admin password
+
+##### Pagination Configuration (optional)
+
+- `PAGINATION_DEFAULT_SIZE=10` # Size of the default page (amount of items per page) (Default: 10) 
+- `PAGINATION_MAX_SIZE=20` # Default page size limit (amount of items per page) (Default: 20)
 
 ------------------------------------------------------------------------------------------------
 ### OpenAPI

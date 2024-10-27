@@ -20,7 +20,7 @@ func NewConfig() (*Config, error) {
 
 type Config struct {
 	DBUrl      string           `env:"DB_URL"`
-	Port       int              `env:"PORT" envDefault:"8000" envRequired:"true"`
+	Port       int              `env:"PORT" envDefault:"8000"`
 	Local      bool             `env:"LOCAL" envDefault:"true"`
 	JWT        JWTConfig        `envPrefix:"JWT_"`
 	Admin      AdminConfig      `envPrefix:"ADMIN_"`
