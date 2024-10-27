@@ -76,6 +76,27 @@ definitions:
       username:
         type: string
     type: object
+  genres.CreateGenreRequest:
+    properties:
+      name:
+        maxLength: 32
+        minLength: 3
+        type: string
+    type: object
+  genres.Genre:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  genres.UpdateGenreRequest:
+    properties:
+      name:
+        maxLength: 32
+        minLength: 3
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -154,6 +175,149 @@ paths:
             $ref: '#/definitions/apperrors.Error'
       tags:
       - auth
+  /genres:
+    get:
+      description: Get all genres
+      operationId: get-genres
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Genres, or nil if none found
+          schema:
+            items:
+              $ref: '#/definitions/genres.Genre'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      tags:
+      - genres
+    post:
+      description: Create new genre
+      operationId: create-genre
+      parameters:
+      - description: Genre
+        in: body
+        name: genre
+        required: true
+        schema:
+          $ref: '#/definitions/genres.CreateGenreRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Genre
+          schema:
+            $ref: '#/definitions/genres.Genre'
+        "400":
+          description: Invalid parameter or missing parameter
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "409":
+          description: Genre with that name already exists
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      tags:
+      - genres
+  /genres/{genreId}:
+    delete:
+      description: Delete genre by id
+      operationId: delete-genre-by-id
+      parameters:
+      - description: Genre ID
+        in: path
+        name: genreId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Genre deleted (softly deleting)
+        "400":
+          description: Invalid genre id, invalid parameter or missing parameter
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "404":
+          description: Genre not found
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      tags:
+      - genres
+    get:
+      description: Get genre by id
+      operationId: get-genre-by-id
+      parameters:
+      - description: Genre ID
+        in: path
+        name: genreId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Genre
+          schema:
+            $ref: '#/definitions/genres.Genre'
+        "400":
+          description: Invalid genre id, invalid parameter or missing parameter
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "404":
+          description: Genre not found
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      tags:
+      - genres
+    put:
+      description: Update genre by id
+      operationId: update-genre-by-id
+      parameters:
+      - description: Genre ID
+        in: path
+        name: genreId
+        required: true
+        type: integer
+      - description: Genre
+        in: body
+        name: genre
+        required: true
+        schema:
+          $ref: '#/definitions/genres.UpdateGenreRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Genre updated
+        "400":
+          description: Invalid genre id, invalid parameter or missing parameter
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "404":
+          description: Genre not found
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      tags:
+      - genres
   /users/{userId}:
     delete:
       description: Delete existing user by id
@@ -168,7 +332,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: User deleted (softly deleting)
         "400":
           description: Invalid user id, invalid parameter or missing parameter
           schema:
@@ -238,7 +402,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: User updated
         "400":
           description: Invalid user id, invalid parameter or missing parameter
           schema:
@@ -272,7 +436,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: User role updated
         "400":
           description: Invalid user id, invalid parameter or missing parameter
           schema:
