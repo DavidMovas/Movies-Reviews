@@ -10,8 +10,6 @@ import (
 	apperrors "github.com/DavidMovas/Movies-Reviews/internal/error"
 	"github.com/labstack/echo"
 	"gopkg.in/validator.v2"
-
-	_ "github.com/DavidMovas/Movies-Reviews/docs"
 )
 
 type Handler struct {

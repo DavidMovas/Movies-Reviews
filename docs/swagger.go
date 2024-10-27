@@ -33,7 +33,7 @@ type Config struct {
 // https://swagger.io/docs/open-source-tools/swagger-ui/usage/oauth2/ for further details.
 type OAuthConfig struct {
 	// The ID of the client sent to the OAuth2 IAM provider.
-	ClientId string
+	ClientID string
 
 	// The OAuth2 realm that the client should operate in. If not applicable, use empty string.
 	Realm string
@@ -104,7 +104,7 @@ func echoWrapHandler(options ...func(*Config)) echo.HandlerFunc {
 	// create a template with name
 	index, _ := template.New("swagger_index.html").Parse(indexTemplate)
 
-	var re = regexp.MustCompile(`^(.*/)([^?].*)?[?|.]*$`)
+	re := regexp.MustCompile(`^(.*/)([^?].*)?[?|.]*$`)
 
 	return func(c echo.Context) error {
 		if c.Request().Method != http.MethodGet {
@@ -294,7 +294,7 @@ window.onload = function() {
 
   {{if .OAuth}}
   ui.initOAuth({
-    clientId: "{{.OAuth.ClientId}}",
+    clientId: "{{.OAuth.ClientID}}",
     realm: "{{.OAuth.Realm}}",
     appName: "{{.OAuth.AppName}}"
   })

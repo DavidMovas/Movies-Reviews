@@ -6,8 +6,6 @@ import (
 	"github.com/DavidMovas/Movies-Reviews/internal/echox"
 	apperrors "github.com/DavidMovas/Movies-Reviews/internal/error"
 	"github.com/labstack/echo"
-
-	_ "github.com/DavidMovas/Movies-Reviews/docs"
 )
 
 const (

@@ -13,8 +13,6 @@ import (
 	"github.com/DavidMovas/Movies-Reviews/internal/pagination"
 
 	"github.com/labstack/echo"
-
-	_ "github.com/DavidMovas/Movies-Reviews/docs"
 )
 
 const (
@@ -40,7 +38,7 @@ func NewHandler(service *Service, paginationConfig *config.PaginationConfig) *Ha
 // @ID           get-movies
 // @Tags         movies
 // @Produce      json
-// @Param        request body contracts.PaginatedRequestOrdered true "Request, if request body empty, default values will be used"
+// @Param        request body contracts.PaginatedRequestOrdered false "Request, if request body empty, default values will be used"
 // @Success      200 {object} pagination.PaginatedResponseOrdered[contracts.Movie] "PaginatedResponse of Movies, total number of movies, or nil if none found"
 // @Failure      400 {object} apperrors.Error "Invalid request, invalid parameter or missing parameter"
 // @Failure      500 {object} apperrors.Error "Internal server error"

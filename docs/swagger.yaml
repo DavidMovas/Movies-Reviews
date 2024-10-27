@@ -582,7 +582,6 @@ paths:
       - description: Request, if request body empty, default values will be used
         in: body
         name: request
-        required: true
         schema:
           $ref: '#/definitions/contracts.PaginatedRequestOrdered'
       produces:
@@ -755,7 +754,6 @@ paths:
       - description: Request, if request body empty, default values will be used
         in: body
         name: request
-        required: true
         schema:
           $ref: '#/definitions/contracts.PaginatedRequest'
       produces:

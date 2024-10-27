@@ -372,7 +372,6 @@ const docTemplate = `{
                         "description": "Request, if request body empty, default values will be used",
                         "name": "request",
                         "in": "body",
-                        "required": true,
                         "schema": {
                             "$ref": "#/definitions/contracts.PaginatedRequestOrdered"
                         }
@@ -628,7 +627,6 @@ const docTemplate = `{
                         "description": "Request, if request body empty, default values will be used",
                         "name": "request",
                         "in": "body",
-                        "required": true,
                         "schema": {
                             "$ref": "#/definitions/contracts.PaginatedRequest"
                         }

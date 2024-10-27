@@ -12,8 +12,6 @@ import (
 	"github.com/DavidMovas/Movies-Reviews/internal/echox"
 
 	"github.com/labstack/echo"
-
-	_ "github.com/DavidMovas/Movies-Reviews/docs"
 )
 
 const (
@@ -39,7 +37,7 @@ func NewHandler(service *Service, paginationConfig *config.PaginationConfig) *Ha
 // @ID           get-stars
 // @Tags         stars
 // @Produce      json
-// @Param        request body contracts.PaginatedRequest true "Request, if request body empty, default values will be used"
+// @Param        request body contracts.PaginatedRequest false "Request, if request body empty, default values will be used"
 // @Success      200 {object} pagination.PaginatedResponse[contracts.Star] "PaginatedResponse of Stars, total number of stars, or nil if none found"
 // @Failure      400 {object} apperrors.Error "Invalid request, invalid parameter or missing parameter"
 // @Failure      500 {object} apperrors.Error "Internal server error"
