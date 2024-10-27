@@ -1,7 +1,7 @@
 <div align="center">
 
 [![go.mod Go version](https://img.shields.io/badge/Go-v1.23.0-blue)](https://github.com/DavidMovas/Movies-Reviews)
-![Codecov](https://img.shields.io/codecov/c/github/DavidMovas/Movies-Reviews?logoColor=violet)
+[![codecov](https://codecov.io/gh/DavidMovas/Movies-Reviews/graph/badge.svg?token=RI6OY6VZC3)](https://codecov.io/gh/DavidMovas/Movies-Reviews)
 [![Go Report Card](https://goreportcard.com/badge/github.com/DavidMovas/Movies-Reviews)](https://goreportcard.com/report/github.com/DavidMovas/Movies-Reviews)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/DavidMovas/Movies-Reviews)
 [![Go Modules](https://img.shields.io/badge/go--modules-enabled-brightgreen)](https://blog.golang.org/using-go-modules)
