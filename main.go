@@ -12,10 +12,28 @@ import (
 
 	"github.com/DavidMovas/Movies-Reviews/internal/config"
 	"github.com/DavidMovas/Movies-Reviews/internal/server"
+
+	_ "github.com/DavidMovas/Movies-Reviews/docs"
 )
 
 var dbGracefulTime = time.Second * 10
 
+// @title Movies Reviews API
+// @version 1.0.0
+
+// @description This API is used for managing movies reviews.
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Creator Support
+// @contact.url https://github.com/DavidMovas/Movies-Reviews
+// @contact.email david417program@gmail.com
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:8080
+// @BasePath /api
+// @schemes http
 func main() {
 	cfg, err := config.NewConfig()
 	failOnError(err, "failed to load config")
