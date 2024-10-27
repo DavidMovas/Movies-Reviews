@@ -1,4 +1,6 @@
 info:
-  contact: {}
+  contact: { }
+  version: "1.0.0"
+  title: "Movies-Reviews API"
 paths: {}
 swagger: "2.0"

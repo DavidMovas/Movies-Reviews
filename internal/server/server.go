@@ -81,7 +81,7 @@ func New(ctx context.Context, cfg *config.Config) (*Server, error) {
 	api.Use(echox.Logger)
 
 	// Swagger routes
-	e.GET("/swagger/*", docs.EchoSwaggerHandler)
+	e.GET("/swagger*", docs.EchoSwaggerHandler)
 
 	// Auth API routes
 	api.POST("/auth/register", authModule.Handler.Register)

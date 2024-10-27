@@ -8,7 +8,7 @@ const docTemplate = `{
     "swagger": "2.0",
     "info": {
         "description": "{{escape .Description}}",
-        "title": "{{.Title}}",s
+        "title": "{{.Title}}",
         "contact": {},
         "version": "{{.Version}}"
     },
