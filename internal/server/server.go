@@ -8,6 +8,8 @@ import (
 	"net"
 	"time"
 
+	"github.com/DavidMovas/Movies-Reviews/docs"
+
 	"github.com/DavidMovas/Movies-Reviews/contracts"
 	"github.com/DavidMovas/Movies-Reviews/internal/config"
 	"github.com/DavidMovas/Movies-Reviews/internal/echox"
@@ -77,6 +79,9 @@ func New(ctx context.Context, cfg *config.Config) (*Server, error) {
 	api := e.Group("/api")
 	api.Use(jwt.NewAuthMiddleware(cfg.JWT.Secret))
 	api.Use(echox.Logger)
+
+	// Swagger routes
+	e.GET("/swagger/*", docs.EchoSwaggerHandler)
 
 	// Auth API routes
 	api.POST("/auth/register", authModule.Handler.Register)
