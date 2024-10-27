@@ -183,6 +183,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/apperrors.Error"
                         }
                     },
+                    "403": {
+                        "description": "Insufficient permissions",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
                     "409": {
                         "description": "Genre with that name already exists",
                         "schema": {
@@ -281,6 +287,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/apperrors.Error"
                         }
                     },
+                    "403": {
+                        "description": "Insufficient permissions",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
                     "404": {
                         "description": "Genre not found",
                         "schema": {
@@ -323,8 +335,517 @@ const docTemplate = `{
                             "$ref": "#/definitions/apperrors.Error"
                         }
                     },
+                    "403": {
+                        "description": "Insufficient permissions",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
                     "404": {
                         "description": "Genre not found",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/movies": {
+            "get": {
+                "description": "Get movies",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "movies"
+                ],
+                "summary": "Get movies",
+                "operationId": "get-movies",
+                "parameters": [
+                    {
+                        "description": "Request, if request body empty, default values will be used",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/contracts.PaginatedRequestOrdered"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "PaginatedResponse of Movies, total number of movies, or nil if none found",
+                        "schema": {
+                            "$ref": "#/definitions/pagination.PaginatedResponseOrdered-contracts_Movie"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request, invalid parameter or missing parameter",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create movie",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "movies"
+                ],
+                "summary": "Create movie",
+                "operationId": "create-movie",
+                "parameters": [
+                    {
+                        "description": "Movie details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/contracts.CreateMovieRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Movie created",
+                        "schema": {
+                            "$ref": "#/definitions/contracts.MovieDetails"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request, invalid parameter or missing parameter",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Insufficient permissions",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/movies/{movieId}": {
+            "get": {
+                "description": "Get movie by id",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "movies"
+                ],
+                "summary": "Get movie by id",
+                "operationId": "get-movie-by-id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Movie ID",
+                        "name": "movieId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Movie details",
+                        "schema": {
+                            "$ref": "#/definitions/contracts.MovieDetails"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid movie id, invalid parameter or missing parameter",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Movie not found",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update movie by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "movies"
+                ],
+                "summary": "Update movie by id",
+                "operationId": "update-movie-by-id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Movie ID",
+                        "name": "movieId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated movie details, fields that are not provided will not be updated",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/contracts.UpdateMovieRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Movie updated",
+                        "schema": {
+                            "$ref": "#/definitions/contracts.MovieDetails"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid movie id, invalid parameter or missing parameter",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Insufficient permissions",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Movie not found",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete movie by id",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "movies"
+                ],
+                "summary": "Delete movie by id",
+                "operationId": "delete-movie-by-id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Movie ID",
+                        "name": "movieId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Movie deleted (softly deleting)"
+                    },
+                    "400": {
+                        "description": "Invalid movie id, invalid parameter or missing parameter",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Insufficient permissions",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Movie not found",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/stars": {
+            "get": {
+                "description": "Get stars",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "stars"
+                ],
+                "summary": "Get stars",
+                "operationId": "get-stars",
+                "parameters": [
+                    {
+                        "description": "Request, if request body empty, default values will be used",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/contracts.PaginatedRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "PaginatedResponse of Stars, total number of stars, or nil if none found",
+                        "schema": {
+                            "$ref": "#/definitions/pagination.PaginatedResponse-contracts_Star"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request, invalid parameter or missing parameter",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create star",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "stars"
+                ],
+                "summary": "Create star",
+                "operationId": "create-star",
+                "parameters": [
+                    {
+                        "description": "Request, can have optional fields",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/stars.CreateStarRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Star",
+                        "schema": {
+                            "$ref": "#/definitions/stars.Star"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request, invalid parameter or missing parameter",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Insufficient permissions",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/stars/{starId}": {
+            "get": {
+                "description": "Get star by id",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "stars"
+                ],
+                "summary": "Get star by id",
+                "operationId": "get-star-by-id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Star ID",
+                        "name": "starId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Star",
+                        "schema": {
+                            "$ref": "#/definitions/stars.Star"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request, invalid parameter or missing parameter",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Star not found",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update star by id",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "stars"
+                ],
+                "summary": "Update star by id",
+                "operationId": "update-star-by-id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Star ID",
+                        "name": "starId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Request, can have optional fields",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/stars.UpdateStarRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Star",
+                        "schema": {
+                            "$ref": "#/definitions/stars.Star"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request, invalid parameter or missing parameter",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Insufficient permissions",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Star not found",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete star by id",
+                "tags": [
+                    "stars"
+                ],
+                "summary": "Delete star by id",
+                "operationId": "delete-star-by-id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Star ID",
+                        "name": "starId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Invalid request, invalid parameter or missing parameter",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Insufficient permissions",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Star not found",
                         "schema": {
                             "$ref": "#/definitions/apperrors.Error"
                         }
@@ -420,6 +941,12 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Invalid user id, invalid parameter or missing parameter",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Insufficient permissions",
                         "schema": {
                             "$ref": "#/definitions/apperrors.Error"
                         }
@@ -663,6 +1190,224 @@ const docTemplate = `{
                 }
             }
         },
+        "contracts.CreateMovieRequest": {
+            "type": "object",
+            "properties": {
+                "cast": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/contracts.MovieCreditInfo"
+                    }
+                },
+                "description": {
+                    "type": "string"
+                },
+                "genreIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "releaseDate": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 1
+                }
+            }
+        },
+        "contracts.Genre": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "contracts.Movie": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "releaseDate": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "contracts.MovieCredit": {
+            "type": "object",
+            "properties": {
+                "details": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "star": {
+                    "$ref": "#/definitions/contracts.Star"
+                }
+            }
+        },
+        "contracts.MovieCreditInfo": {
+            "type": "object",
+            "properties": {
+                "details": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "starId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "contracts.MovieDetails": {
+            "type": "object",
+            "properties": {
+                "cast": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/contracts.MovieCredit"
+                    }
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "genres": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/contracts.Genre"
+                    }
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "releaseDate": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "integer"
+                }
+            }
+        },
+        "contracts.PaginatedRequest": {
+            "type": "object",
+            "properties": {
+                "page": {
+                    "type": "integer"
+                },
+                "size": {
+                    "type": "integer"
+                }
+            }
+        },
+        "contracts.PaginatedRequestOrdered": {
+            "type": "object",
+            "properties": {
+                "order": {
+                    "type": "string"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "size": {
+                    "type": "integer"
+                },
+                "sort": {
+                    "type": "string"
+                }
+            }
+        },
+        "contracts.Star": {
+            "type": "object",
+            "properties": {
+                "bio": {
+                    "type": "string"
+                },
+                "birthDate": {
+                    "type": "string"
+                },
+                "birthPlace": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deathDate": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "middleName": {
+                    "type": "string"
+                }
+            }
+        },
+        "contracts.UpdateMovieRequest": {
+            "type": "object",
+            "properties": {
+                "cast": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/contracts.MovieCreditInfo"
+                    }
+                },
+                "description": {
+                    "type": "string"
+                },
+                "genreIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "releaseDate": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string",
+                    "maxLength": 100
+                },
+                "version": {
+                    "type": "integer"
+                }
+            }
+        },
         "contracts.UpdateUserRequest": {
             "type": "object",
             "properties": {
@@ -730,6 +1475,153 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 32,
                     "minLength": 3
+                }
+            }
+        },
+        "pagination.PaginatedResponse-contracts_Star": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/contracts.Star"
+                    }
+                },
+                "page": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "size": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "pagination.PaginatedResponseOrdered-contracts_Movie": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/contracts.Movie"
+                    }
+                },
+                "order": {
+                    "type": "string"
+                },
+                "page": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "size": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "sort": {
+                    "type": "string"
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "stars.CreateStarRequest": {
+            "type": "object",
+            "properties": {
+                "bio": {
+                    "type": "string"
+                },
+                "birthDate": {
+                    "type": "string"
+                },
+                "birthPlace": {
+                    "type": "string",
+                    "maxLength": 100
+                },
+                "deathDate": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 1
+                },
+                "lastName": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 1
+                },
+                "middleName": {
+                    "type": "string",
+                    "maxLength": 50
+                }
+            }
+        },
+        "stars.Star": {
+            "type": "object",
+            "properties": {
+                "bio": {
+                    "type": "string"
+                },
+                "birthDate": {
+                    "type": "string"
+                },
+                "birthPlace": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deathDate": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "middleName": {
+                    "type": "string"
+                }
+            }
+        },
+        "stars.UpdateStarRequest": {
+            "type": "object",
+            "properties": {
+                "bio": {
+                    "type": "string"
+                },
+                "birthDate": {
+                    "type": "string"
+                },
+                "birthPlace": {
+                    "type": "string",
+                    "maxLength": 100
+                },
+                "deathDate": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string",
+                    "maxLength": 50
+                },
+                "lastName": {
+                    "type": "string",
+                    "maxLength": 50
+                },
+                "middleName": {
+                    "type": "string",
+                    "maxLength": 50
                 }
             }
         }

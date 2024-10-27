@@ -87,6 +87,7 @@ func (h *Handler) GetExistingUserByUsername(c echo.Context) error {
 // @Produce json
 // @Success 200 "User updated"
 // @Failure 400 {object} apperrors.Error "Invalid user id, invalid parameter or missing parameter"
+// @Failure 403 {object} apperrors.Error "Insufficient permissions"
 // @Failure 404 {object} apperrors.Error "User not found"
 // @Failure 500 {object} apperrors.Error "Internal server error"
 // @Router /users/{userId} [put]

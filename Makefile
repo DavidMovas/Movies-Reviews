@@ -10,6 +10,9 @@ go-lint:
 go-fmt:
 	 gofumpt -l -w .
 
+gen:
+	swag init
+
 tidy:
 	go mod tidy
 

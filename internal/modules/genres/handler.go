@@ -75,6 +75,7 @@ func (h *Handler) GetGenreByID(c echo.Context) error {
 // @Produce json
 // @Success 201 {object} Genre "Genre"
 // @Failure 400 {object} apperrors.Error "Invalid parameter or missing parameter"
+// @Failure 403 {object} apperrors.Error "Insufficient permissions"
 // @Failure 409 {object} apperrors.Error "Genre with that name already exists"
 // @Failure 500 {object} apperrors.Error "Internal server error"
 // @Router /genres [post]
@@ -101,6 +102,7 @@ func (h *Handler) CreateGenre(c echo.Context) error {
 // @Produce json
 // @Success 200 "Genre updated"
 // @Failure 400 {object} apperrors.Error "Invalid genre id, invalid parameter or missing parameter"
+// @Failure 403 {object} apperrors.Error "Insufficient permissions"
 // @Failure 404 {object} apperrors.Error "Genre not found"
 // @Failure 500 {object} apperrors.Error "Internal server error"
 // @Router /genres/{genreId} [put]
@@ -130,6 +132,7 @@ func (h *Handler) UpdateGenreByID(c echo.Context) error {
 // @Produce json
 // @Success 200 "Genre deleted (softly deleting)"
 // @Failure 400 {object} apperrors.Error "Invalid genre id, invalid parameter or missing parameter"
+// @Failure 403 {object} apperrors.Error "Insufficient permissions"
 // @Failure 404 {object} apperrors.Error "Genre not found"
 // @Failure 500 {object} apperrors.Error "Internal server error"
 // @Router /genres/{genreId} [delete]

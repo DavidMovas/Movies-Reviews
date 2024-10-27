@@ -13,6 +13,8 @@ import (
 	"github.com/DavidMovas/Movies-Reviews/internal/pagination"
 
 	"github.com/labstack/echo"
+
+	_ "github.com/DavidMovas/Movies-Reviews/docs"
 )
 
 const (
@@ -32,6 +34,17 @@ func NewHandler(service *Service, paginationConfig *config.PaginationConfig) *Ha
 	}
 }
 
+// GetMovies godoc
+// @Summary      Get movies
+// @Description  Get movies
+// @ID           get-movies
+// @Tags         movies
+// @Produce      json
+// @Param        request body contracts.PaginatedRequestOrdered true "Request, if request body empty, default values will be used"
+// @Success      200 {object} pagination.PaginatedResponseOrdered[contracts.Movie] "PaginatedResponse of Movies, total number of movies, or nil if none found"
+// @Failure      400 {object} apperrors.Error "Invalid request, invalid parameter or missing parameter"
+// @Failure      500 {object} apperrors.Error "Internal server error"
+// @Router       /movies [get]
 func (h *Handler) GetMovies(c echo.Context) error {
 	req, err := echox.BindAndValidate[GetMoviesRequest](c)
 	if err != nil {
@@ -52,6 +65,18 @@ func (h *Handler) GetMovies(c echo.Context) error {
 	return c.JSON(http.StatusOK, pagination.ResponseOrdered[*Movie](&req.PaginatedRequestOrdered, total, movies))
 }
 
+// GetMovieByID godoc
+// @Summary      Get movie by id
+// @Description  Get movie by id
+// @ID           get-movie-by-id
+// @Tags         movies
+// @Produce      json
+// @Param        movieId path int true "Movie ID"
+// @Success      200 {object} contracts.MovieDetails "Movie details"
+// @Failure      400 {object} apperrors.Error "Invalid movie id, invalid parameter or missing parameter"
+// @Failure      404 {object} apperrors.Error "Movie not found"
+// @Failure      500 {object} apperrors.Error "Internal server error"
+// @Router       /movies/{movieId} [get]
 func (h *Handler) GetMovieByID(c echo.Context) error {
 	movieID, err := echox.ReadFromParam[int](c, paramMovieID, invalidMovieID)
 	if err != nil {
@@ -66,6 +91,19 @@ func (h *Handler) GetMovieByID(c echo.Context) error {
 	return c.JSON(http.StatusOK, movie)
 }
 
+// CreateMovie godoc
+// @Summary      Create movie
+// @Description  Create movie
+// @ID           create-movie
+// @Tags         movies
+// @Accept       json
+// @Produce      json
+// @Param        request body contracts.CreateMovieRequest true "Movie details"
+// @Success      201 {object} contracts.MovieDetails "Movie created"
+// @Failure      403 {object} apperrors.Error "Insufficient permissions"
+// @Failure      400 {object} apperrors.Error "Invalid request, invalid parameter or missing parameter"
+// @Failure      500 {object} apperrors.Error "Internal server error"
+// @Router       /movies [post]
 func (h *Handler) CreateMovie(c echo.Context) error {
 	req, err := echox.BindAndValidate[CreateMovieRequest](c)
 	if err != nil {
@@ -104,6 +142,21 @@ func (h *Handler) CreateMovie(c echo.Context) error {
 	return c.JSON(http.StatusCreated, movie)
 }
 
+// UpdateMovieByID godoc
+// @Summary      Update movie by id
+// @Description  Update movie by id
+// @ID           update-movie-by-id
+// @Tags         movies
+// @Accept       json
+// @Produce      json
+// @Param        movieId path int true "Movie ID"
+// @Param        request body contracts.UpdateMovieRequest true "Updated movie details, fields that are not provided will not be updated"
+// @Success      200 {object} contracts.MovieDetails "Movie updated"
+// @Failure      400 {object} apperrors.Error "Invalid movie id, invalid parameter or missing parameter"
+// @Failure      403 {object} apperrors.Error "Insufficient permissions"
+// @Failure      404 {object} apperrors.Error "Movie not found"
+// @Failure      500 {object} apperrors.Error "Internal server error"
+// @Router       /movies/{movieId} [put]
 func (h *Handler) UpdateMovieByID(c echo.Context) error {
 	movieID, err := echox.ReadFromParam[int](c, paramMovieID, invalidMovieID)
 	if err != nil {
@@ -123,6 +176,19 @@ func (h *Handler) UpdateMovieByID(c echo.Context) error {
 	return c.JSON(http.StatusOK, movie)
 }
 
+// DeleteMovieByID godoc
+// @Summary      Delete movie by id
+// @Description  Delete movie by id
+// @ID           delete-movie-by-id
+// @Tags         movies
+// @Produce      json
+// @Param        movieId path int true "Movie ID"
+// @Success      200 "Movie deleted (softly deleting)"
+// @Failure      400 {object} apperrors.Error "Invalid movie id, invalid parameter or missing parameter"
+// @Failure      403 {object} apperrors.Error "Insufficient permissions"
+// @Failure      404 {object} apperrors.Error "Movie not found"
+// @Failure      500 {object} apperrors.Error "Internal server error"
+// @Router       /movies/{movieId} [delete]
 func (h *Handler) DeleteMovieByID(c echo.Context) error {
 	movieID, err := echox.ReadFromParam[int](c, paramMovieID, invalidMovieID)
 	if err != nil {

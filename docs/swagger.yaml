@@ -50,6 +50,149 @@ definitions:
         minLength: 3
         type: string
     type: object
+  contracts.CreateMovieRequest:
+    properties:
+      cast:
+        items:
+          $ref: '#/definitions/contracts.MovieCreditInfo'
+        type: array
+      description:
+        type: string
+      genreIds:
+        items:
+          type: integer
+        type: array
+      releaseDate:
+        type: string
+      title:
+        maxLength: 100
+        minLength: 1
+        type: string
+    type: object
+  contracts.Genre:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  contracts.Movie:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      id:
+        type: integer
+      releaseDate:
+        type: string
+      title:
+        type: string
+    type: object
+  contracts.MovieCredit:
+    properties:
+      details:
+        type: string
+      role:
+        type: string
+      star:
+        $ref: '#/definitions/contracts.Star'
+    type: object
+  contracts.MovieCreditInfo:
+    properties:
+      details:
+        type: string
+      role:
+        type: string
+      starId:
+        type: integer
+    type: object
+  contracts.MovieDetails:
+    properties:
+      cast:
+        items:
+          $ref: '#/definitions/contracts.MovieCredit'
+        type: array
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      description:
+        type: string
+      genres:
+        items:
+          $ref: '#/definitions/contracts.Genre'
+        type: array
+      id:
+        type: integer
+      releaseDate:
+        type: string
+      title:
+        type: string
+      version:
+        type: integer
+    type: object
+  contracts.PaginatedRequest:
+    properties:
+      page:
+        type: integer
+      size:
+        type: integer
+    type: object
+  contracts.PaginatedRequestOrdered:
+    properties:
+      order:
+        type: string
+      page:
+        type: integer
+      size:
+        type: integer
+      sort:
+        type: string
+    type: object
+  contracts.Star:
+    properties:
+      bio:
+        type: string
+      birthDate:
+        type: string
+      birthPlace:
+        type: string
+      createdAt:
+        type: string
+      deathDate:
+        type: string
+      deletedAt:
+        type: string
+      firstName:
+        type: string
+      id:
+        type: integer
+      lastName:
+        type: string
+      middleName:
+        type: string
+    type: object
+  contracts.UpdateMovieRequest:
+    properties:
+      cast:
+        items:
+          $ref: '#/definitions/contracts.MovieCreditInfo'
+        type: array
+      description:
+        type: string
+      genreIds:
+        items:
+          type: integer
+        type: array
+      releaseDate:
+        type: string
+      title:
+        maxLength: 100
+        type: string
+      version:
+        type: integer
+    type: object
   contracts.UpdateUserRequest:
     properties:
       password:
@@ -95,6 +238,107 @@ definitions:
       name:
         maxLength: 32
         minLength: 3
+        type: string
+    type: object
+  pagination.PaginatedResponse-contracts_Star:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/contracts.Star'
+        type: array
+      page:
+        minimum: 0
+        type: integer
+      size:
+        minimum: 0
+        type: integer
+      total:
+        type: integer
+    type: object
+  pagination.PaginatedResponseOrdered-contracts_Movie:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/contracts.Movie'
+        type: array
+      order:
+        type: string
+      page:
+        minimum: 0
+        type: integer
+      size:
+        minimum: 0
+        type: integer
+      sort:
+        type: string
+      total:
+        type: integer
+    type: object
+  stars.CreateStarRequest:
+    properties:
+      bio:
+        type: string
+      birthDate:
+        type: string
+      birthPlace:
+        maxLength: 100
+        type: string
+      deathDate:
+        type: string
+      firstName:
+        maxLength: 50
+        minLength: 1
+        type: string
+      lastName:
+        maxLength: 50
+        minLength: 1
+        type: string
+      middleName:
+        maxLength: 50
+        type: string
+    type: object
+  stars.Star:
+    properties:
+      bio:
+        type: string
+      birthDate:
+        type: string
+      birthPlace:
+        type: string
+      createdAt:
+        type: string
+      deathDate:
+        type: string
+      deletedAt:
+        type: string
+      firstName:
+        type: string
+      id:
+        type: integer
+      lastName:
+        type: string
+      middleName:
+        type: string
+    type: object
+  stars.UpdateStarRequest:
+    properties:
+      bio:
+        type: string
+      birthDate:
+        type: string
+      birthPlace:
+        maxLength: 100
+        type: string
+      deathDate:
+        type: string
+      firstName:
+        maxLength: 50
+        type: string
+      lastName:
+        maxLength: 50
+        type: string
+      middleName:
+        maxLength: 50
         type: string
     type: object
 host: localhost:8080
@@ -215,6 +459,10 @@ paths:
           description: Invalid parameter or missing parameter
           schema:
             $ref: '#/definitions/apperrors.Error'
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: '#/definitions/apperrors.Error'
         "409":
           description: Genre with that name already exists
           schema:
@@ -242,6 +490,10 @@ paths:
           description: Genre deleted (softly deleting)
         "400":
           description: Invalid genre id, invalid parameter or missing parameter
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "403":
+          description: Insufficient permissions
           schema:
             $ref: '#/definitions/apperrors.Error'
         "404":
@@ -308,6 +560,10 @@ paths:
           description: Invalid genre id, invalid parameter or missing parameter
           schema:
             $ref: '#/definitions/apperrors.Error'
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: '#/definitions/apperrors.Error'
         "404":
           description: Genre not found
           schema:
@@ -318,6 +574,345 @@ paths:
             $ref: '#/definitions/apperrors.Error'
       tags:
       - genres
+  /movies:
+    get:
+      description: Get movies
+      operationId: get-movies
+      parameters:
+      - description: Request, if request body empty, default values will be used
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/contracts.PaginatedRequestOrdered'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: PaginatedResponse of Movies, total number of movies, or nil
+            if none found
+          schema:
+            $ref: '#/definitions/pagination.PaginatedResponseOrdered-contracts_Movie'
+        "400":
+          description: Invalid request, invalid parameter or missing parameter
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      summary: Get movies
+      tags:
+      - movies
+    post:
+      consumes:
+      - application/json
+      description: Create movie
+      operationId: create-movie
+      parameters:
+      - description: Movie details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/contracts.CreateMovieRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Movie created
+          schema:
+            $ref: '#/definitions/contracts.MovieDetails'
+        "400":
+          description: Invalid request, invalid parameter or missing parameter
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      summary: Create movie
+      tags:
+      - movies
+  /movies/{movieId}:
+    delete:
+      description: Delete movie by id
+      operationId: delete-movie-by-id
+      parameters:
+      - description: Movie ID
+        in: path
+        name: movieId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Movie deleted (softly deleting)
+        "400":
+          description: Invalid movie id, invalid parameter or missing parameter
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "404":
+          description: Movie not found
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      summary: Delete movie by id
+      tags:
+      - movies
+    get:
+      description: Get movie by id
+      operationId: get-movie-by-id
+      parameters:
+      - description: Movie ID
+        in: path
+        name: movieId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Movie details
+          schema:
+            $ref: '#/definitions/contracts.MovieDetails'
+        "400":
+          description: Invalid movie id, invalid parameter or missing parameter
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "404":
+          description: Movie not found
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      summary: Get movie by id
+      tags:
+      - movies
+    put:
+      consumes:
+      - application/json
+      description: Update movie by id
+      operationId: update-movie-by-id
+      parameters:
+      - description: Movie ID
+        in: path
+        name: movieId
+        required: true
+        type: integer
+      - description: Updated movie details, fields that are not provided will not
+          be updated
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/contracts.UpdateMovieRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Movie updated
+          schema:
+            $ref: '#/definitions/contracts.MovieDetails'
+        "400":
+          description: Invalid movie id, invalid parameter or missing parameter
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "404":
+          description: Movie not found
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      summary: Update movie by id
+      tags:
+      - movies
+  /stars:
+    get:
+      description: Get stars
+      operationId: get-stars
+      parameters:
+      - description: Request, if request body empty, default values will be used
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/contracts.PaginatedRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: PaginatedResponse of Stars, total number of stars, or nil if
+            none found
+          schema:
+            $ref: '#/definitions/pagination.PaginatedResponse-contracts_Star'
+        "400":
+          description: Invalid request, invalid parameter or missing parameter
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      summary: Get stars
+      tags:
+      - stars
+    post:
+      description: Create star
+      operationId: create-star
+      parameters:
+      - description: Request, can have optional fields
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/stars.CreateStarRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Star
+          schema:
+            $ref: '#/definitions/stars.Star'
+        "400":
+          description: Invalid request, invalid parameter or missing parameter
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      summary: Create star
+      tags:
+      - stars
+  /stars/{starId}:
+    delete:
+      description: Delete star by id
+      operationId: delete-star-by-id
+      parameters:
+      - description: Star ID
+        in: path
+        name: starId
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Invalid request, invalid parameter or missing parameter
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "404":
+          description: Star not found
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      summary: Delete star by id
+      tags:
+      - stars
+    get:
+      description: Get star by id
+      operationId: get-star-by-id
+      parameters:
+      - description: Star ID
+        in: path
+        name: starId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Star
+          schema:
+            $ref: '#/definitions/stars.Star'
+        "400":
+          description: Invalid request, invalid parameter or missing parameter
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "404":
+          description: Star not found
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      summary: Get star by id
+      tags:
+      - stars
+    put:
+      description: Update star by id
+      operationId: update-star-by-id
+      parameters:
+      - description: Star ID
+        in: path
+        name: starId
+        required: true
+        type: integer
+      - description: Request, can have optional fields
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/stars.UpdateStarRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Star
+          schema:
+            $ref: '#/definitions/stars.Star'
+        "400":
+          description: Invalid request, invalid parameter or missing parameter
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "404":
+          description: Star not found
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      summary: Update star by id
+      tags:
+      - stars
   /users/{userId}:
     delete:
       description: Delete existing user by id
@@ -405,6 +1000,10 @@ paths:
           description: User updated
         "400":
           description: Invalid user id, invalid parameter or missing parameter
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "403":
+          description: Insufficient permissions
           schema:
             $ref: '#/definitions/apperrors.Error'
         "404":
