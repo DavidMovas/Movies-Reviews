@@ -1,6 +1,327 @@
+basePath: /api
+definitions:
+  apperrors.Code:
+    enum:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    type: integer
+    x-enum-varnames:
+    - InternalCode
+    - BadRequestCode
+    - NotFoundCode
+    - AlreadyExistsCode
+    - UnauthorizedCode
+    - ForbiddenCode
+    - VersionMismatchCode
+  apperrors.Error:
+    properties:
+      code:
+        $ref: '#/definitions/apperrors.Code'
+      incidentID:
+        type: string
+      stackTrace:
+        type: string
+    type: object
+  auth.LoginUserRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  auth.LoginUserResponse:
+    properties:
+      access_token:
+        type: string
+    type: object
+  auth.RegisterUserRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        maxLength: 24
+        minLength: 3
+        type: string
+    type: object
+  contracts.UpdateUserRequest:
+    properties:
+      password:
+        type: string
+      userId:
+        type: integer
+      username:
+        maxLength: 24
+        minLength: 3
+        type: string
+    type: object
+  contracts.User:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      role:
+        type: string
+      username:
+        type: string
+    type: object
+host: localhost:8080
 info:
-  contact: { }
-  version: "1.0.0"
-  title: "Movies-Reviews API"
-paths: {}
+  contact:
+    email: david417program@gmail.com
+    name: API Creator Support
+    url: https://github.com/DavidMovas/Movies-Reviews
+  description: This API is used for managing movies reviews.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Movies Reviews API
+  version: 1.0.0
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Login a user and return an access token
+      operationId: login
+      parameters:
+      - description: User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/auth.LoginUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Access token
+          schema:
+            $ref: '#/definitions/auth.LoginUserResponse'
+        "400":
+          description: Invalid email or password
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user
+      operationId: register
+      parameters:
+      - description: User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/auth.RegisterUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User
+          schema:
+            $ref: '#/definitions/contracts.User'
+        "400":
+          description: Invalid email or password
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      tags:
+      - auth
+  /users/{userId}:
+    delete:
+      description: Delete existing user by id
+      operationId: delete-existing-user-by-id
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Invalid user id, invalid parameter or missing parameter
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      tags:
+      - users
+    get:
+      description: Get existing user by id
+      operationId: get-existing-user-by-id
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User
+          schema:
+            $ref: '#/definitions/contracts.User'
+        "400":
+          description: Invalid user id, invalid parameter or missing parameter
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Update existing user by id
+      operationId: update-existing-user-by-id
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: integer
+      - description: User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/contracts.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Invalid user id, invalid parameter or missing parameter
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      tags:
+      - users
+  /users/{userId}/role/{role}:
+    put:
+      description: Update user role by id
+      operationId: update-user-role-by-id
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: integer
+      - description: Role
+        in: path
+        name: role
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Invalid user id, invalid parameter or missing parameter
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "403":
+          description: Insufficient permissions
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      tags:
+      - users
+  /users/{username}:
+    get:
+      description: Get existing user by username
+      operationId: get-existing-user-by-username
+      parameters:
+      - description: Username
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User
+          schema:
+            $ref: '#/definitions/contracts.User'
+        "400":
+          description: Invalid username, invalid parameter or missing parameter
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      tags:
+      - users
+schemes:
+- http
 swagger: "2.0"

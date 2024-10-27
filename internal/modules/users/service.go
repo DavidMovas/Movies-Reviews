@@ -44,7 +44,7 @@ func (s *Service) UpdateExistingUserByID(ctx context.Context, userID int, user *
 		return err
 	}
 
-	if err := s.repo.UpdateExistingUserByID(ctx, userID, user.Username, string(passHash)); err != nil {
+	if err = s.repo.UpdateExistingUserByID(ctx, userID, user.Username, string(passHash)); err != nil {
 		return err
 	}
 
