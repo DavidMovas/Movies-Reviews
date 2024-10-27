@@ -64,7 +64,7 @@ If you want to use OpenAPI, you can download the OpenAPI spec file from
 |
 [YAML](docs/swagger.yaml)
 
-Also if you want to use Swagger UI please go next route: 
+Also, if you want to use Swagger UI please go next route: 
 `http://example-host/swagger/index.html`
 
 ------------------------------------------------------------------------------------------------
