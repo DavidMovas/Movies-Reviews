@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/DavidMovas/Movies-Reviews/internal/echox"
-	apperrors "github.com/DavidMovas/Movies-Reviews/internal/error"
 	"github.com/labstack/echo/v4"
 )
 
@@ -52,12 +51,12 @@ func (h *Handler) GetGenres(c echo.Context) error {
 // @Failure 500 {object} apperrors.Error "Internal server error"
 // @Router /genres/{genreId} [get]
 func (h *Handler) GetGenreByID(c echo.Context) error {
-	genreID, err := echox.ReadFromParam[int](c, paramGenreID, invalidGenreID)
+	req, err := echox.BindAndValidate[GetGenreRequest](c)
 	if err != nil {
-		return apperrors.BadRequest(err)
+		return err
 	}
 
-	genre, err := h.Service.GetGenreByID(c.Request().Context(), genreID)
+	genre, err := h.Service.GetGenreByID(c.Request().Context(), req.GenreID)
 	if err != nil {
 		return err
 	}
@@ -105,17 +104,12 @@ func (h *Handler) CreateGenre(c echo.Context) error {
 // @Failure 500 {object} apperrors.Error "Internal server error"
 // @Router /genres/{genreId} [put]
 func (h *Handler) UpdateGenreByID(c echo.Context) error {
-	genreID, err := echox.ReadFromParam[int](c, paramGenreID, invalidGenreID)
-	if err != nil {
-		return apperrors.BadRequest(err)
-	}
-
-	raq, err := echox.BindAndValidate[UpdateGenreRequest](c)
+	req, err := echox.BindAndValidate[UpdateGenreRequest](c)
 	if err != nil {
 		return err
 	}
 
-	if err := h.Service.UpdateGenreByID(c.Request().Context(), genreID, raq); err != nil {
+	if err = h.Service.UpdateGenreByID(c.Request().Context(), req.GenreID, req); err != nil {
 		return err
 	}
 
@@ -135,10 +129,10 @@ func (h *Handler) UpdateGenreByID(c echo.Context) error {
 // @Failure 500 {object} apperrors.Error "Internal server error"
 // @Router /genres/{genreId} [delete]
 func (h *Handler) DeleteGenreByID(c echo.Context) error {
-	genreID, err := echox.ReadFromParam[int](c, paramGenreID, invalidGenreID)
+	req, err := echox.BindAndValidate[DeleteGenreRequest](c)
 	if err != nil {
-		return apperrors.BadRequest(err)
+		return err
 	}
 
-	return h.Service.DeleteGenreByID(c.Request().Context(), genreID)
+	return h.Service.DeleteGenreByID(c.Request().Context(), req.GenreID)
 }

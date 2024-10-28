@@ -24,25 +24,26 @@ func genresAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 	})
 
 	t.Run("genres.GetGenreById: not found", func(t *testing.T) {
-		_, err := c.GetGenreByID(1)
+		req := &contracts.GetGenreRequest{GenreID: 1}
+		_, err := c.GetGenreByID(req)
 		requireNotFoundError(t, err, "genre", "id", 1)
 	})
 
 	t.Run("genres.CreateGenre: insufficient permissions", func(t *testing.T) {
-		raq := contracts.CreateGenreRequest{
+		req := contracts.CreateGenreRequest{
 			Name: "action",
 		}
 
-		_, err := c.CreateGenre("", &raq)
+		_, err := c.CreateGenre(contracts.NewAuthenticated(req, ""))
 		requireForbiddenError(t, err, "insufficient permissions")
 	})
 
 	t.Run("genres.CreateGenre: success", func(t *testing.T) {
 		var err error
-		raq := contracts.CreateGenreRequest{
+		req := contracts.CreateGenreRequest{
 			Name: "action",
 		}
-		actionGenre, err = c.CreateGenre(johnMooreToken, &raq)
+		actionGenre, err = c.CreateGenre(contracts.NewAuthenticated(req, johnMooreToken))
 		require.NoError(t, err)
 		require.NotNil(t, actionGenre)
 	})
@@ -73,7 +74,7 @@ func genresAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 		}
 
 		for _, cc := range cases {
-			genre, err := c.CreateGenre(johnMooreToken, &cc.req)
+			genre, err := c.CreateGenre(contracts.NewAuthenticated(cc.req, johnMooreToken))
 			require.NoError(t, err)
 			require.NotNil(t, cc.addr)
 			*cc.addr = genre
@@ -83,82 +84,89 @@ func genresAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 	})
 
 	t.Run("genres.CreateGenre: already exists", func(t *testing.T) {
-		raq := contracts.CreateGenreRequest{
+		req := contracts.CreateGenreRequest{
 			Name: "action",
 		}
-		_, err := c.CreateGenre(johnMooreToken, &raq)
+		_, err := c.CreateGenre(contracts.NewAuthenticated(req, johnMooreToken))
 		requireAlreadyExistsError(t, err, "genre", "name", "action")
 	})
 
 	t.Run("genres.CreateGenre: bad request", func(t *testing.T) {
-		raq := contracts.CreateGenreRequest{
+		req := contracts.CreateGenreRequest{
 			Name: "a",
 		}
-		_, err := c.CreateGenre(adminToken, &raq)
+		_, err := c.CreateGenre(contracts.NewAuthenticated(req, adminToken))
 		requireBadRequestError(t, err, "Name: less than min")
 	})
 
 	t.Run("genres.CreateGenre: insufficient permissions", func(t *testing.T) {
-		raq := contracts.CreateGenreRequest{
+		req := contracts.CreateGenreRequest{
 			Name: "action",
 		}
-		_, err := c.CreateGenre("", &raq)
+		_, err := c.CreateGenre(contracts.NewAuthenticated(req, ""))
 		requireForbiddenError(t, err, "insufficient permissions")
 	})
 
 	t.Run("genres.GetGenreById: success", func(t *testing.T) {
-		requestedGenre, err := c.GetGenreByID(actionGenre.ID)
+		req := &contracts.GetGenreRequest{GenreID: actionGenre.ID}
+		requestedGenre, err := c.GetGenreByID(req)
 		require.NoError(t, err)
 		require.Equal(t, actionGenre.ID, requestedGenre.ID)
 		require.NotNil(t, requestedGenre)
 	})
 
 	t.Run("genres.UpdateGenreById: insufficient permissions", func(t *testing.T) {
-		raq := contracts.UpdateGenreRequest{
-			Name: "horror",
+		req := contracts.UpdateGenreRequest{
+			GenreID: actionGenre.ID,
+			Name:    "horror",
 		}
-		err := c.UpdateGenreByID("", &raq, actionGenre.ID)
+		err := c.UpdateGenreByID(contracts.NewAuthenticated(req, ""))
 		requireForbiddenError(t, err, "insufficient permissions")
 	})
 
 	t.Run("genres.UpdateGenreById: not found", func(t *testing.T) {
-		raq := contracts.UpdateGenreRequest{
-			Name: "horror",
+		req := contracts.UpdateGenreRequest{
+			GenreID: 100,
+			Name:    "horror",
 		}
-		err := c.UpdateGenreByID(johnMooreToken, &raq, 100)
-		requireNotFoundError(t, err, "genre", "id", 100)
+		err := c.UpdateGenreByID(contracts.NewAuthenticated(req, johnMooreToken))
+		requireNotFoundError(t, err, "genre", "id", req.GenreID)
 	})
 
 	t.Run("genres.UpdateGenreById: already exists", func(t *testing.T) {
-		raq := contracts.UpdateGenreRequest{
-			Name: actionGenre.Name,
+		req := contracts.UpdateGenreRequest{
+			GenreID: actionGenre.ID + 1,
+			Name:    actionGenre.Name,
 		}
-		err := c.UpdateGenreByID(johnMooreToken, &raq, actionGenre.ID+1)
+		err := c.UpdateGenreByID(contracts.NewAuthenticated(req, johnMooreToken))
 		requireAlreadyExistsError(t, err, "genre", "name", actionGenre.Name)
 	})
 
 	t.Run("genres.UpdateGenreById: success", func(t *testing.T) {
-		var err error
-		raq := contracts.UpdateGenreRequest{
-			Name: "romance 2",
+		req := contracts.UpdateGenreRequest{
+			GenreID: romanceGenre.ID,
+			Name:    "romance 2",
 		}
-		err = c.UpdateGenreByID(johnMooreToken, &raq, romanceGenre.ID)
+		err := c.UpdateGenreByID(contracts.NewAuthenticated(req, johnMooreToken))
 		require.NoError(t, err)
-		romanceGenre.Name = raq.Name
+		romanceGenre.Name = req.Name
 	})
 
 	t.Run("genres.DeleteGenreById: insufficient permissions", func(t *testing.T) {
-		err := c.DeleteGenreByID("", romanceGenre.ID)
+		req := contracts.DeleteGenreRequest{GenreID: romanceGenre.ID}
+		err := c.DeleteGenreByID(contracts.NewAuthenticated(req, ""))
 		requireForbiddenError(t, err, "insufficient permissions")
 	})
 
 	t.Run("genres.DeleteGenreById: not found", func(t *testing.T) {
-		err := c.DeleteGenreByID(johnMooreToken, romanceGenre.ID+100)
-		requireNotFoundError(t, err, "genre", "id", romanceGenre.ID+100)
+		req := contracts.DeleteGenreRequest{GenreID: romanceGenre.ID + 100}
+		err := c.DeleteGenreByID(contracts.NewAuthenticated(req, johnMooreToken))
+		requireNotFoundError(t, err, "genre", "id", req.GenreID)
 	})
 
 	t.Run("genres.DeleteGenreById: success", func(t *testing.T) {
-		err := c.DeleteGenreByID(johnMooreToken, romanceGenre.ID)
+		req := contracts.DeleteGenreRequest{GenreID: romanceGenre.ID}
+		err := c.DeleteGenreByID(contracts.NewAuthenticated(req, johnMooreToken))
 		require.NoError(t, err)
 	})
 }
