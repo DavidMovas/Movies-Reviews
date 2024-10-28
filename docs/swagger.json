@@ -18,7 +18,7 @@
         },
         "version": "1.0.0"
     },
-    "host": "localhost:8000",
+    "host": "localhost:8080",
     "basePath": "/api",
     "paths": {
         "/auth/login": {
@@ -589,6 +589,57 @@
                     },
                     "403": {
                         "description": "Insufficient permissions",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Movie not found",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/movies/{movieId}/stars": {
+            "get": {
+                "description": "Get stars by movie id",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "movies"
+                ],
+                "summary": "Get stars by movie id",
+                "operationId": "get-stars-by-movie-id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Movie ID",
+                        "name": "movieId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Stars for movie",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/contracts.Star"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid movie id, invalid parameter or missing parameter",
                         "schema": {
                             "$ref": "#/definitions/apperrors.Error"
                         }

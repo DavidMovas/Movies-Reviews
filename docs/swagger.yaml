@@ -341,7 +341,7 @@ definitions:
         maxLength: 50
         type: string
     type: object
-host: localhost:8000
+host: localhost:8080
 info:
   contact:
     email: david417program@gmail.com
@@ -744,6 +744,40 @@ paths:
           schema:
             $ref: '#/definitions/apperrors.Error'
       summary: Update movie by id
+      tags:
+      - movies
+  /movies/{movieId}/stars:
+    get:
+      description: Get stars by movie id
+      operationId: get-stars-by-movie-id
+      parameters:
+      - description: Movie ID
+        in: path
+        name: movieId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Stars for movie
+          schema:
+            items:
+              $ref: '#/definitions/contracts.Star'
+            type: array
+        "400":
+          description: Invalid movie id, invalid parameter or missing parameter
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "404":
+          description: Movie not found
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      summary: Get stars by movie id
       tags:
       - movies
   /stars:

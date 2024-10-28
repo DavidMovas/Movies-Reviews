@@ -611,6 +611,57 @@ const docTemplate = `{
                 }
             }
         },
+        "/movies/{movieId}/stars": {
+            "get": {
+                "description": "Get stars by movie id",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "movies"
+                ],
+                "summary": "Get stars by movie id",
+                "operationId": "get-stars-by-movie-id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Movie ID",
+                        "name": "movieId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Stars for movie",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/contracts.Star"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid movie id, invalid parameter or missing parameter",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Movie not found",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/stars": {
             "get": {
                 "description": "Get stars",
@@ -1629,7 +1680,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0.0",
-	Host:             "localhost:8000",
+	Host:             "localhost:8080",
 	BasePath:         "/api",
 	Schemes:          []string{"http"},
 	Title:            "Movies Reviews API",
