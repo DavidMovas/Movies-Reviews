@@ -7,7 +7,7 @@ import (
 	"github.com/DavidMovas/Movies-Reviews/contracts"
 	"github.com/DavidMovas/Movies-Reviews/internal/echox"
 	apperrors "github.com/DavidMovas/Movies-Reviews/internal/error"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 const (

@@ -11,7 +11,7 @@ import (
 
 	"github.com/DavidMovas/Movies-Reviews/internal/echox"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 const (

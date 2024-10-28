@@ -12,7 +12,7 @@ import (
 	"github.com/DavidMovas/Movies-Reviews/internal/modules/genres"
 	"github.com/DavidMovas/Movies-Reviews/internal/pagination"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 const (

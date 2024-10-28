@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	apperrors "github.com/DavidMovas/Movies-Reviews/internal/error"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	"gopkg.in/validator.v2"
 )
 
