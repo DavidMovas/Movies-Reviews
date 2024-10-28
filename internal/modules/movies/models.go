@@ -39,11 +39,13 @@ type MovieCreditInfo struct {
 }
 
 type GetMovieRequest struct {
-	MovieID int `json:"movieId" validate:"nonzero"`
+	MovieID int `json:"-" param:"movieId" validate:"nonzero"`
 }
 
 type GetMoviesRequest struct {
 	pagination.PaginatedRequestOrdered
+	StarID     *int    `query:"starId"`
+	SearchTerm *string `query:"q"`
 }
 
 type CreateMovieRequest struct {

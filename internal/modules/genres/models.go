@@ -7,6 +7,24 @@ type Genre struct {
 	Name string `json:"name"`
 }
 
+type GetGenreRequest struct {
+	GenreID int `json:"-" param:"genreId" validate:"nonzero"`
+}
+
+type CreateGenreRequest struct {
+	Name string `json:"name" validate:"min=3,max=32"`
+}
+
+type UpdateGenreRequest struct {
+	GenreID int    `json:"-" param:"genreId" validate:"nonzero"`
+	Name    string `json:"name" validate:"min=3,max=32"`
+}
+
+type DeleteGenreRequest struct {
+	GenreID int `json:"-" param:"genreId" validate:"nonzero"`
+}
+
+// MovieGenreRelation is a relation between movie and genre
 var _ dbx.Keyer = MovieGenreRelation{}
 
 type MovieGenreRelation struct {
@@ -24,12 +42,4 @@ func (m MovieGenreRelation) Key() any {
 		MovieID: m.MovieID,
 		GenreID: m.GenreID,
 	}
-}
-
-type CreateGenreRequest struct {
-	Name string `json:"name" validate:"min=3,max=32"`
-}
-
-type UpdateGenreRequest struct {
-	Name string `json:"name" validate:"min=3,max=32"`
 }

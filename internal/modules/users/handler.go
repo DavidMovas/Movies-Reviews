@@ -1,20 +1,10 @@
 package users
 
 import (
-	"errors"
 	"net/http"
 
-	"github.com/DavidMovas/Movies-Reviews/contracts"
 	"github.com/DavidMovas/Movies-Reviews/internal/echox"
-	apperrors "github.com/DavidMovas/Movies-Reviews/internal/error"
 	"github.com/labstack/echo/v4"
-)
-
-const (
-	paramUserID     = "userId"
-	paramUsername   = "username"
-	invalidUserID   = "invalid userid"
-	invalidUsername = "invalid username"
 )
 
 type Handler struct {
@@ -39,12 +29,12 @@ func NewHandler(service *Service) *Handler {
 // @Failure 500 {object} apperrors.Error "Internal server error"
 // @Router /users/{userId} [get]
 func (h *Handler) GetExistingUserByID(c echo.Context) error {
-	userID, err := echox.ReadFromParam[int](c, paramUserID, invalidUserID)
+	req, err := echox.BindAndValidate[GetUserByIDRequest](c)
 	if err != nil {
-		return apperrors.BadRequest(err)
+		return err
 	}
 
-	user, err := h.service.GetExistingUserByID(c.Request().Context(), userID)
+	user, err := h.service.GetExistingUserByID(c.Request().Context(), req.UserID)
 	if err != nil {
 		return err
 	}
@@ -64,12 +54,12 @@ func (h *Handler) GetExistingUserByID(c echo.Context) error {
 // @Failure 500 {object} apperrors.Error "Internal server error"
 // @Router /users/{username} [get]
 func (h *Handler) GetExistingUserByUsername(c echo.Context) error {
-	username, err := echox.ReadFromParam[string](c, paramUsername, invalidUsername)
+	req, err := echox.BindAndValidate[GetUserByUsernameRequest](c)
 	if err != nil {
-		return apperrors.BadRequest(err)
+		return err
 	}
 
-	user, err := h.service.GetExistingUserByUsername(c.Request().Context(), username)
+	user, err := h.service.GetExistingUserByUsername(c.Request().Context(), req.Username)
 	if err != nil {
 		return err
 	}
@@ -92,17 +82,12 @@ func (h *Handler) GetExistingUserByUsername(c echo.Context) error {
 // @Failure 500 {object} apperrors.Error "Internal server error"
 // @Router /users/{userId} [put]
 func (h *Handler) UpdateExistingUserByID(c echo.Context) error {
-	userID, err := echox.ReadFromParam[int](c, paramUserID, invalidUserID)
-	if err != nil {
-		return apperrors.BadRequest(err)
-	}
-
-	raq, err := echox.BindAndValidate[UpdateUserRequest](c)
+	req, err := echox.BindAndValidate[UpdateUserRequest](c)
 	if err != nil {
 		return err
 	}
 
-	if err = h.service.UpdateExistingUserByID(c.Request().Context(), userID, raq); err != nil {
+	if err = h.service.UpdateExistingUserByID(c.Request().Context(), req.UserID, req); err != nil {
 		return err
 	}
 
@@ -123,18 +108,12 @@ func (h *Handler) UpdateExistingUserByID(c echo.Context) error {
 // @Failure 500 {object} apperrors.Error "Internal server error"
 // @Router /users/{userId}/role/{role} [put]
 func (h *Handler) UpdateUserRoleByID(c echo.Context) error {
-	userID, err := echox.ReadFromParam[int](c, paramUserID, invalidUserID)
+	req, err := echox.BindAndValidate[UpdateUserRoleRequest](c)
 	if err != nil {
-		return apperrors.BadRequest(err)
+		return err
 	}
 
-	newRole := c.Param("role")
-
-	if !contracts.ValidateRole(newRole) {
-		return apperrors.BadRequestHidden(errors.New("invalid role"), "role unknown")
-	}
-
-	if err := h.service.UpdateUserRoleByID(c.Request().Context(), userID, newRole); err != nil {
+	if err = h.service.UpdateUserRoleByID(c.Request().Context(), req.UserID, req.Role); err != nil {
 		return err
 	}
 
@@ -154,10 +133,10 @@ func (h *Handler) UpdateUserRoleByID(c echo.Context) error {
 // @Failure 500 {object} apperrors.Error "Internal server error"
 // @Router /users/{userId} [delete]
 func (h *Handler) DeleteExistingUserByID(c echo.Context) error {
-	userID, err := echox.ReadFromParam[int](c, paramUserID, invalidUserID)
+	req, err := echox.BindAndValidate[GetUserByIDRequest](c)
 	if err != nil {
 		return err
 	}
 
-	return h.service.DeleteExistingUserByID(c.Request().Context(), userID)
+	return h.service.DeleteExistingUserByID(c.Request().Context(), req.UserID)
 }

@@ -12,44 +12,44 @@ func (c *Client) GetGenres() ([]*contracts.Genre, error) {
 	return genres, err
 }
 
-func (c *Client) GetGenreByID(genreID int) (*contracts.Genre, error) {
+func (c *Client) GetGenreByID(req *contracts.GetGenreRequest) (*contracts.Genre, error) {
 	var genre *contracts.Genre
 
 	_, err := c.client.R().
 		SetResult(&genre).
-		Get(c.path("/api/genres/%d", genreID))
+		Get(c.path("/api/genres/%d", req.GenreID))
 
 	return genre, err
 }
 
-func (c *Client) CreateGenre(accessToken string, req *contracts.CreateGenreRequest) (*contracts.Genre, error) {
+func (c *Client) CreateGenre(req *contracts.AuthenticatedRequest[contracts.CreateGenreRequest]) (*contracts.Genre, error) {
 	var genre *contracts.Genre
 
 	_, err := c.client.R().
-		SetAuthToken(accessToken).
+		SetAuthToken(req.AccessToken).
 		SetHeader("Content-Type", "application/json").
-		SetBody(req).
+		SetBody(req.Request).
 		SetResult(&genre).
 		Post(c.path("/api/genres"))
 
 	return genre, err
 }
 
-func (c *Client) UpdateGenreByID(accessToken string, req *contracts.UpdateGenreRequest, genreID int) error {
+func (c *Client) UpdateGenreByID(req *contracts.AuthenticatedRequest[contracts.UpdateGenreRequest]) error {
 	_, err := c.client.R().
-		SetAuthToken(accessToken).
+		SetAuthToken(req.AccessToken).
 		SetHeader("Content-Type", "application/json").
-		SetBody(req).
-		Put(c.path("/api/genres/%d", genreID))
+		SetBody(req.Request).
+		Put(c.path("/api/genres/%d", req.Request.GenreID))
 
 	return err
 }
 
-func (c *Client) DeleteGenreByID(accessToken string, genreID int) error {
+func (c *Client) DeleteGenreByID(req *contracts.AuthenticatedRequest[contracts.DeleteGenreRequest]) error {
 	_, err := c.client.R().
-		SetAuthToken(accessToken).
+		SetAuthToken(req.AccessToken).
 		SetHeader("Content-Type", "application/json").
-		Delete(c.path("/api/genres/%d", genreID))
+		Delete(c.path("/api/genres/%d", req.Request.GenreID))
 
 	return err
 }
