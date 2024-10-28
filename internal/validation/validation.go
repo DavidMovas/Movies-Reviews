@@ -5,6 +5,8 @@ import (
 	"net/mail"
 	"strings"
 
+	"github.com/DavidMovas/Movies-Reviews/contracts"
+
 	"gopkg.in/validator.v2"
 )
 
@@ -31,6 +33,7 @@ func SetupValidators() {
 		{"email", email},
 		{"password", password},
 		{"nonzero", nonzero},
+		{"role", role},
 	}
 
 	for _, v := range validators {
@@ -75,6 +78,18 @@ func nonzero(v interface{}, _ string) error {
 	s, ok := v.(string)
 	if ok && s == "" {
 		return fmt.Errorf("must not be empty")
+	}
+	return nil
+}
+
+func role(v interface{}, _ string) error {
+	s, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("role must be a string")
+	}
+
+	if !contracts.ValidateRole(s) {
+		return fmt.Errorf("invalid role")
 	}
 	return nil
 }
