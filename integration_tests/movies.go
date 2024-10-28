@@ -34,7 +34,7 @@ func moviesAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 
 	t.Run("movies.CreateMovie: insufficient permissions", func(t *testing.T) {
 		req := &contracts.CreateMovieRequest{}
-		_, err := c.CreateMovie("", req)
+		_, err := c.CreateMovie(contracts.NewAuthenticated(req, ""))
 		requireForbiddenError(t, err, "insufficient permissions")
 	})
 
@@ -108,7 +108,7 @@ func moviesAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 		}
 
 		for _, cc := range cases {
-			movie, err := c.CreateMovie(johnMooreToken, cc.req)
+			movie, err := c.CreateMovie(contracts.NewAuthenticated(cc.req, johnMooreToken))
 			require.NoError(t, err)
 
 			*cc.addr = movie
@@ -125,7 +125,7 @@ func moviesAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 			ReleaseDate: time.Date(1972, 3, 24, 0, 0, 0, 0, time.UTC),
 			Description: "The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son.",
 		}
-		_, err := c.CreateMovie(johnMooreToken, req)
+		_, err := c.CreateMovie(contracts.NewAuthenticated(req, johnMooreToken))
 		requireBadRequestError(t, err, "Title: less than min")
 	})
 
@@ -175,7 +175,7 @@ func moviesAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 			MovieID: 1,
 			Title:   ptr("The Godfather 2"),
 		}
-		_, err := c.UpdateMovieByID("", req)
+		_, err := c.UpdateMovieByID(contracts.NewAuthenticated(req, ""))
 		requireForbiddenError(t, err, "insufficient permissions")
 	})
 
@@ -184,7 +184,7 @@ func moviesAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 			MovieID: 100,
 			Title:   ptr("The Godfather 2"),
 		}
-		_, err := c.UpdateMovieByID(johnMooreToken, req)
+		_, err := c.UpdateMovieByID(contracts.NewAuthenticated(req, johnMooreToken))
 		requireNotFoundError(t, err, "movie", "id", req.MovieID)
 	})
 
@@ -208,7 +208,7 @@ func moviesAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 				},
 			},
 		}
-		movie, err := c.UpdateMovieByID(johnMooreToken, req)
+		movie, err := c.UpdateMovieByID(contracts.NewAuthenticated(req, johnMooreToken))
 		require.NoError(t, err)
 		require.Equal(t, "The Godfather 2", movie.Title)
 		require.Equal(t, *releaseTime, movie.ReleaseDate)
@@ -226,7 +226,7 @@ func moviesAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 		req := &contracts.DeleteMovieRequest{
 			MovieID: 1,
 		}
-		err := c.DeleteMovieByID("", req)
+		err := c.DeleteMovieByID(contracts.NewAuthenticated(req, ""))
 		requireForbiddenError(t, err, "insufficient permissions")
 	})
 
@@ -234,7 +234,7 @@ func moviesAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 		req := &contracts.DeleteMovieRequest{
 			MovieID: 100,
 		}
-		err := c.DeleteMovieByID(johnMooreToken, req)
+		err := c.DeleteMovieByID(contracts.NewAuthenticated(req, johnMooreToken))
 		requireNotFoundError(t, err, "movie", "id", req.MovieID)
 	})
 
@@ -242,7 +242,7 @@ func moviesAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 		req := &contracts.DeleteMovieRequest{
 			MovieID: godFather.ID,
 		}
-		err := c.DeleteMovieByID(johnMooreToken, req)
+		err := c.DeleteMovieByID(contracts.NewAuthenticated(req, johnMooreToken))
 		require.NoError(t, err)
 	})
 }

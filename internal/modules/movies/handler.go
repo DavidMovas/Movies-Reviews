@@ -15,11 +15,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-const (
-	paramMovieID   = "movieId"
-	invalidMovieID = "invalid movie id"
-)
-
 type Handler struct {
 	service          *Service
 	paginationConfig *config.PaginationConfig

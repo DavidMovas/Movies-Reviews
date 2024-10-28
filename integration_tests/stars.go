@@ -201,7 +201,7 @@ func starsAPIChecks(t *testing.T, client *client.Client, _ *config.Config) {
 		req := &contracts.DeleteStarRequest{
 			StarID: denzelStar.ID,
 		}
-		err := client.DeleteStarByID("", req)
+		err := client.DeleteStarByID(*contracts.NewAuthenticated(req, ""))
 		requireForbiddenError(t, err, "insufficient permissions")
 	})
 
@@ -209,7 +209,7 @@ func starsAPIChecks(t *testing.T, client *client.Client, _ *config.Config) {
 		req := &contracts.DeleteStarRequest{
 			StarID: 1000,
 		}
-		err := client.DeleteStarByID(johnMooreToken, req)
+		err := client.DeleteStarByID(*contracts.NewAuthenticated(req, johnMooreToken))
 		requireNotFoundError(t, err, "star", "id", req.StarID)
 	})
 
@@ -217,7 +217,7 @@ func starsAPIChecks(t *testing.T, client *client.Client, _ *config.Config) {
 		req := &contracts.DeleteStarRequest{
 			StarID: denzelStar.ID,
 		}
-		err := client.DeleteStarByID(johnMooreToken, req)
+		err := client.DeleteStarByID(*contracts.NewAuthenticated(req, johnMooreToken))
 		require.NoError(t, err)
 	})
 }

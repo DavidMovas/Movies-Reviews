@@ -12,11 +12,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-const (
-	paramStarID   = "starId"
-	invalidStarID = "invalid starId"
-)
-
 type Handler struct {
 	*Service
 	paginationConfig *config.PaginationConfig

@@ -49,10 +49,10 @@ func (c *Client) UpdateStarByID(req *contracts.AuthenticatedRequest[*contracts.U
 	return star, err
 }
 
-func (c *Client) DeleteStarByID(accessToken string, req *contracts.DeleteStarRequest) error {
+func (c *Client) DeleteStarByID(req contracts.AuthenticatedRequest[*contracts.DeleteStarRequest]) error {
 	_, err := c.client.R().
-		SetAuthToken(accessToken).
-		Delete(c.path("/api/stars/%d", req.StarID))
+		SetAuthToken(req.AccessToken).
+		Delete(c.path("/api/stars/%d", req.Request.StarID))
 
 	return err
 }
