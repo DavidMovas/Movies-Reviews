@@ -71,9 +71,9 @@ These tests help identify potential issues and provide confidence in the correct
 | DELETE | /api/movies/{movieId}       | Delete movie by id (soft)                     | editor |
 
 ##### OpenAPI API:
-| Method | Endpoint | Description  | Auth  |
-|--------|----------|--------------|-------|
-| GET    | /swagger | OpenAPI spec | admin |
+| Method | Endpoint  | Description  | Auth  |
+|--------|-----------|--------------|-------|
+| GET    | /swagger* | OpenAPI spec | admin |
 
 ------------------------------------------------------------------------------------------------
 ### Environment Variables
