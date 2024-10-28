@@ -4,7 +4,7 @@ import (
 	apperrors "github.com/DavidMovas/Movies-Reviews/internal/error"
 	"github.com/DavidMovas/Movies-Reviews/internal/jwt"
 	"github.com/DavidMovas/Movies-Reviews/internal/modules/users"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 var errForbidden = apperrors.Forbidden("insufficient permissions")

@@ -5,7 +5,7 @@ import (
 
 	"github.com/DavidMovas/Movies-Reviews/internal/jwt"
 	"github.com/DavidMovas/Movies-Reviews/internal/log"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 func Logger(next echo.HandlerFunc) echo.HandlerFunc {
