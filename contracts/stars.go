@@ -16,7 +16,7 @@ type Star struct {
 }
 
 type GetStarRequest struct {
-	StarID int `json:"starId" validate:"nonzero"`
+	StarID int `json:"" param:"starId" validate:"nonzero"`
 }
 
 type GetStarsRequest struct {

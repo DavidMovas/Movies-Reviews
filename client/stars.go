@@ -15,12 +15,12 @@ func (c *Client) GetStars(req *contracts.GetStarsRequest) (*contracts.PaginatedR
 	return stars, err
 }
 
-func (c *Client) GetStarByID(starID int) (*contracts.Star, error) {
+func (c *Client) GetStarByID(req *contracts.GetStarRequest) (*contracts.Star, error) {
 	var star contracts.Star
 
 	_, err := c.client.R().
 		SetResult(&star).
-		Get(c.path("/api/stars/%d", starID))
+		Get(c.path("/api/stars/%d", req.StarID))
 
 	return &star, err
 }
@@ -49,10 +49,10 @@ func (c *Client) UpdateStarByID(req *contracts.AuthenticatedRequest[*contracts.U
 	return star, err
 }
 
-func (c *Client) DeleteStarByID(accessToken string, starID int) error {
+func (c *Client) DeleteStarByID(accessToken string, req *contracts.DeleteStarRequest) error {
 	_, err := c.client.R().
 		SetAuthToken(accessToken).
-		Delete(c.path("/api/stars/%d", starID))
+		Delete(c.path("/api/stars/%d", req.StarID))
 
 	return err
 }

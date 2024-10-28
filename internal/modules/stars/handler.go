@@ -7,8 +7,6 @@ import (
 
 	"github.com/DavidMovas/Movies-Reviews/internal/pagination"
 
-	apperrors "github.com/DavidMovas/Movies-Reviews/internal/error"
-
 	"github.com/DavidMovas/Movies-Reviews/internal/echox"
 
 	"github.com/labstack/echo/v4"
@@ -72,12 +70,12 @@ func (h *Handler) GetStars(c echo.Context) error {
 // @Failure      500 {object} apperrors.Error "Internal server error"
 // @Router       /stars/{starId} [get]
 func (h *Handler) GetStarByID(c echo.Context) error {
-	starID, err := echox.ReadFromParam[int](c, paramStarID, invalidStarID)
+	req, err := echox.BindAndValidate[GetStarRequest](c)
 	if err != nil {
-		return apperrors.BadRequest(err)
+		return err
 	}
 
-	star, err := h.Service.GetStarByID(c.Request().Context(), starID)
+	star, err := h.Service.GetStarByID(c.Request().Context(), req.StarID)
 	if err != nil {
 		return err
 	}
@@ -126,17 +124,12 @@ func (h *Handler) CreateStar(c echo.Context) error {
 // @Failure      500 {object} apperrors.Error "Internal server error"
 // @Router       /stars/{starId} [put]
 func (h *Handler) UpdateStarByID(c echo.Context) error {
-	starID, err := echox.ReadFromParam[int](c, paramStarID, invalidStarID)
-	if err != nil {
-		return apperrors.BadRequest(err)
-	}
-
 	raq, err := echox.BindAndValidate[UpdateStarRequest](c)
 	if err != nil {
 		return err
 	}
 
-	star, err := h.Service.UpdateStar(c.Request().Context(), starID, raq)
+	star, err := h.Service.UpdateStar(c.Request().Context(), raq.StarID, raq)
 	if err != nil {
 		return err
 	}
@@ -157,12 +150,12 @@ func (h *Handler) UpdateStarByID(c echo.Context) error {
 // @Failure      500 {object} apperrors.Error "Internal server error"
 // @Router       /stars/{starId} [delete]
 func (h *Handler) DeleteStarByID(c echo.Context) error {
-	starID, err := echox.ReadFromParam[int](c, paramStarID, invalidStarID)
+	req, err := echox.BindAndValidate[DeleteStarRequest](c)
 	if err != nil {
-		return apperrors.BadRequest(err)
+		return err
 	}
 
-	if err = h.Service.DeleteStarByID(c.Request().Context(), starID); err != nil {
+	if err = h.Service.DeleteStarByID(c.Request().Context(), req.StarID); err != nil {
 		return err
 	}
 

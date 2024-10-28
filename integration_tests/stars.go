@@ -32,8 +32,11 @@ func starsAPIChecks(t *testing.T, client *client.Client, _ *config.Config) {
 	})
 
 	t.Run("stars.GetStarById: not found", func(t *testing.T) {
-		_, err := client.GetStarByID(1)
-		requireNotFoundError(t, err, "star", "id", 1)
+		req := &contracts.GetStarRequest{
+			StarID: 1,
+		}
+		_, err := client.GetStarByID(req)
+		requireNotFoundError(t, err, "star", "id", req.StarID)
 	})
 
 	t.Run("stars.CreateStar: insufficient permissions", func(t *testing.T) {
@@ -123,9 +126,12 @@ func starsAPIChecks(t *testing.T, client *client.Client, _ *config.Config) {
 	})
 
 	t.Run("stars.GetStarById: success", func(t *testing.T) {
-		star, err := client.GetStarByID(denzelStar.ID)
+		req := &contracts.GetStarRequest{
+			StarID: denzelStar.ID,
+		}
+		star, err := client.GetStarByID(req)
 		require.NoError(t, err)
-		require.Equal(t, denzelStar.ID, star.ID)
+		require.Equal(t, req.StarID, star.ID)
 	})
 
 	t.Run("stars.UpdateStar: insufficient permissions", func(t *testing.T) {
@@ -192,18 +198,26 @@ func starsAPIChecks(t *testing.T, client *client.Client, _ *config.Config) {
 	})
 
 	t.Run("stars.DeleteStar: insufficient permissions", func(t *testing.T) {
-		err := client.DeleteStarByID("", denzelStar.ID)
+		req := &contracts.DeleteStarRequest{
+			StarID: denzelStar.ID,
+		}
+		err := client.DeleteStarByID("", req)
 		requireForbiddenError(t, err, "insufficient permissions")
 	})
 
 	t.Run("stars.DeleteStar: not found", func(t *testing.T) {
-		const starID = 1000
-		err := client.DeleteStarByID(johnMooreToken, starID)
-		requireNotFoundError(t, err, "star", "id", starID)
+		req := &contracts.DeleteStarRequest{
+			StarID: 1000,
+		}
+		err := client.DeleteStarByID(johnMooreToken, req)
+		requireNotFoundError(t, err, "star", "id", req.StarID)
 	})
 
 	t.Run("stars.DeleteStar: success", func(t *testing.T) {
-		err := client.DeleteStarByID(johnMooreToken, denzelStar.ID)
+		req := &contracts.DeleteStarRequest{
+			StarID: denzelStar.ID,
+		}
+		err := client.DeleteStarByID(johnMooreToken, req)
 		require.NoError(t, err)
 	})
 }
