@@ -5,7 +5,6 @@ import "time"
 const (
 	AdminRole  = "admin"
 	EditorRole = "editor"
-	UserRole   = "user"
 )
 
 type User struct {

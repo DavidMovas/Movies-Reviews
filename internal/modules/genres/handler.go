@@ -7,11 +7,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-const (
-	paramGenreID   = "genreId"
-	invalidGenreID = "invalid genreId"
-)
-
 type Handler struct {
 	*Service
 }
