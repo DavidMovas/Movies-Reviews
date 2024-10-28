@@ -147,7 +147,7 @@ func (r *Repository) GetStarByID(ctx context.Context, starID int) (*Star, error)
 }
 
 func (r *Repository) GetStarsForMovie(ctx context.Context, movieID int) ([]*Star, error) {
-	query, args, err := squirrel.Select("id, first_name, middle_name, last_name, birth_date, birth_place, death_date, bio, created_at").
+	query, args, err := squirrel.Select("id, first_name, middle_name, last_name, birth_date, birth_place, death_date, bio, created_at, deleted_at").
 		From("stars").
 		InnerJoin("movie_stars ON star_id = id").
 		Where(squirrel.Eq{"movie_id": movieID}).
