@@ -104,7 +104,6 @@ func New(ctx context.Context, cfg *config.Config) (*Server, error) {
 	// Stars API routers
 	api.GET("/stars", starsModule.Handler.GetStars)
 	api.GET("/stars/:starId", starsModule.Handler.GetStarByID)
-	api.GET("/stars/:starId/movies/:movieId", starsModule.Handler.GetStarsForMovie)
 	api.POST("/stars", starsModule.Handler.CreateStar, auth.Editor)
 	api.PUT("/stars/:starId", starsModule.Handler.UpdateStarByID, auth.Editor)
 	api.DELETE("/stars/:starId", starsModule.Handler.DeleteStarByID, auth.Editor)
@@ -112,6 +111,7 @@ func New(ctx context.Context, cfg *config.Config) (*Server, error) {
 	// Movies API routers
 	api.GET("/movies", moviesModule.Handler.GetMovies)
 	api.GET("/movies/:movieId", moviesModule.Handler.GetMovieByID)
+	api.GET("/movies/:movieId/stars", moviesModule.Handler.GetStarsByMovieID)
 	api.POST("/movies", moviesModule.Handler.CreateMovie, auth.Editor)
 	api.PUT("/movies/:movieId", moviesModule.Handler.UpdateMovieByID, auth.Editor)
 	api.DELETE("/movies/:movieId", moviesModule.Handler.DeleteMovieByID, auth.Editor)

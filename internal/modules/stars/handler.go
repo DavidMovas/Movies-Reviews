@@ -17,9 +17,6 @@ import (
 const (
 	paramStarID   = "starId"
 	invalidStarID = "invalid starId"
-
-	paramMovieID   = "movieId"
-	invalidMovieID = "invalid movieId"
 )
 
 type Handler struct {
@@ -60,25 +57,6 @@ func (h *Handler) GetStars(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, pagination.Response[*Star](&req.PaginatedRequest, total, stars))
-}
-
-func (h *Handler) GetStarsForMovie(c echo.Context) error {
-	starID, err := echox.ReadFromParam[int](c, paramStarID, invalidStarID)
-	if err != nil {
-		return apperrors.BadRequest(err)
-	}
-
-	movieID, err := echox.ReadFromParam[int](c, paramMovieID, invalidMovieID)
-	if err != nil {
-		return apperrors.BadRequest(err)
-	}
-
-	stars, err := h.Service.GetStarsForMovie(c.Request().Context(), starID, movieID)
-	if err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusOK, stars)
 }
 
 // GetStarByID godoc

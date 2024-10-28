@@ -89,6 +89,20 @@ func (h *Handler) GetMovieByID(c echo.Context) error {
 	return c.JSON(http.StatusOK, movie)
 }
 
+func (h *Handler) GetStarsByMovieID(c echo.Context) error {
+	movieID, err := echox.ReadFromParam[int](c, paramMovieID, invalidMovieID)
+	if err != nil {
+		return err
+	}
+
+	stars, err := h.service.GetStarsByMovieID(c.Request().Context(), movieID)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, stars)
+}
+
 // CreateMovie godoc
 // @Summary      Create movie
 // @Description  Create movie

@@ -41,6 +41,10 @@ func (s *Service) GetMovieByID(ctx context.Context, movieID int) (*MovieDetails,
 	return movie, err
 }
 
+func (s *Service) GetStarsByMovieID(ctx context.Context, movieID int) ([]*stars.Star, error) {
+	return s.starsRepo.GetStarsForMovie(ctx, movieID)
+}
+
 func (s *Service) CreateMovie(ctx context.Context, movie *MovieDetails) (*MovieDetails, error) {
 	err := s.repo.CreateMovie(ctx, movie)
 	if err != nil {
