@@ -155,6 +155,17 @@ func moviesAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 		require.Equal(t, len([]*contracts.MovieDetails{titanic}), len(res.Items))
 	})
 
+	t.Run("movies.GetStarsByMovieId: movie not found", func(t *testing.T) {
+		_, err := c.GetStarsByMovieID(100)
+		requireNotFoundError(t, err, "movie", "id", 100)
+	})
+
+	t.Run("movies.GetStarsByMovieId: success", func(t *testing.T) {
+		stars, err := c.GetStarsByMovieID(godFather.ID)
+		require.NoError(t, err)
+		require.Equal(t, 3, len(stars))
+	})
+
 	t.Run("movies.UpdateMovie: insufficient permissions", func(t *testing.T) {
 		req := &contracts.UpdateMovieRequest{
 			Title: ptr("The Godfather 2"),

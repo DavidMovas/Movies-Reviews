@@ -164,7 +164,14 @@ func (r *Repository) GetStarsForMovie(ctx context.Context, movieID int) ([]*Star
 	}
 	defer rows.Close()
 
-	return r.scanStars(rows)
+	stars, err := r.scanStars(rows)
+	if err != nil {
+		return nil, err
+	} else if len(stars) == 0 {
+		return nil, apperrors.NotFound("movie", "id", movieID)
+	}
+
+	return stars, nil
 }
 
 func (r *Repository) GetStarsByMovieID(ctx context.Context, movieID int) ([]*MovieCredit, error) {

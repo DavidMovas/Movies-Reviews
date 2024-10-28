@@ -95,12 +95,12 @@ func (h *Handler) GetStarsByMovieID(c echo.Context) error {
 		return err
 	}
 
-	stars, err := h.service.GetStarsByMovieID(c.Request().Context(), movieID)
+	associatedStars, err := h.service.GetStarsByMovieID(c.Request().Context(), movieID)
 	if err != nil {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, stars)
+	return c.JSON(http.StatusOK, associatedStars)
 }
 
 // CreateMovie godoc
