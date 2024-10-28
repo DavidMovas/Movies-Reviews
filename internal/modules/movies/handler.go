@@ -89,6 +89,18 @@ func (h *Handler) GetMovieByID(c echo.Context) error {
 	return c.JSON(http.StatusOK, movie)
 }
 
+// GetStarsByMovieID godoc
+// @Summary      Get stars by movie id
+// @Description  Get stars by movie id
+// @ID           get-stars-by-movie-id
+// @Tags         movies
+// @Produce      json
+// @Param        movieId path int true "Movie ID"
+// @Success      200 {object} []contracts.Star "Stars for movie"
+// @Failure      400 {object} apperrors.Error "Invalid movie id, invalid parameter or missing parameter"
+// @Failure      404 {object} apperrors.Error "Movie not found"
+// @Failure      500 {object} apperrors.Error "Internal server error"
+// @Router       /movies/{movieId}/stars [get]
 func (h *Handler) GetStarsByMovieID(c echo.Context) error {
 	movieID, err := echox.ReadFromParam[int](c, paramMovieID, invalidMovieID)
 	if err != nil {

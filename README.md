@@ -58,16 +58,17 @@ These tests help identify potential issues and provide confidence in the correct
 | GET    | /api/stars/{starId} | Get star by id                               | any    |
 | POST   | /api/stars          | Create new star                              | editor |
 | PUT    | /api/stars/{starId} | Update star by id                            | editor |
-| DELETE | /api/stars/{starId} | Delete star by id                            | editor |
+| DELETE | /api/stars/{starId} | Delete star by id (soft)                     | editor |
 
 ##### Movies API:
-| Method | Endpoint              | Description                                   | Auth   | 
-|--------|-----------------------|-----------------------------------------------|--------|
-| GET    | /api/movies           | Get all movies (paginated, filtered, ordered) | any    |
-| GET    | /api/movies/{movieId} | Get movie by id                               | any    |
-| POST   | /api/movies           | Create a new movie                            | editor |
-| PUT    | /api/movies/{movieId} | Update movie by id                            | editor |
-| DELETE | /api/movies/{movieId} | Delete movie by id                            | editor |
+| Method | Endpoint                    | Description                                   | Auth   | 
+|--------|-----------------------------|-----------------------------------------------|--------|
+| GET    | /api/movies                 | Get all movies (paginated, filtered, ordered) | any    |
+| GET    | /api/movies/{movieId}       | Get movie by id                               | any    |
+| GET    | /api/movies/{movieId}/stars | Get all stars by movie id                     | any    |
+| POST   | /api/movies                 | Create a new movie                            | editor |
+| PUT    | /api/movies/{movieId}       | Update movie by id                            | editor |
+| DELETE | /api/movies/{movieId}       | Delete movie by id (soft)                     | editor |
 
 ##### OpenAPI API:
 | Method | Endpoint | Description  | Auth  |
