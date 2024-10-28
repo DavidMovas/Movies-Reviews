@@ -5,7 +5,7 @@ import (
 
 	apperrors "github.com/DavidMovas/Movies-Reviews/internal/error"
 	"github.com/golang-jwt/jwt"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 type contextKey string
