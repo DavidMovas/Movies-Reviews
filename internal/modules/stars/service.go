@@ -20,6 +20,10 @@ func (s *Service) GetStars(ctx context.Context) ([]*Star, error) {
 	return s.repo.GetStars(ctx)
 }
 
+func (s *Service) GetStarsForMovie(ctx context.Context, starID int, movieID int) ([]*Star, error) {
+	return s.repo.GetStarsForMovie(ctx, starID, movieID)
+}
+
 func (s *Service) GetStarByID(ctx context.Context, starID int) (*Star, error) {
 	return s.repo.GetStarByID(ctx, starID)
 }

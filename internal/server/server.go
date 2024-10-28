@@ -104,10 +104,10 @@ func New(ctx context.Context, cfg *config.Config) (*Server, error) {
 	// Stars API routers
 	api.GET("/stars", starsModule.Handler.GetStars)
 	api.GET("/stars/:starId", starsModule.Handler.GetStarByID)
+	api.GET("/stars/:starId/movies/:movieId", starsModule.Handler.GetStarsForMovie)
 	api.POST("/stars", starsModule.Handler.CreateStar, auth.Editor)
 	api.PUT("/stars/:starId", starsModule.Handler.UpdateStarByID, auth.Editor)
 	api.DELETE("/stars/:starId", starsModule.Handler.DeleteStarByID, auth.Editor)
-	// Get all stars for a movie
 
 	// Movies API routers
 	api.GET("/movies", moviesModule.Handler.GetMovies)
