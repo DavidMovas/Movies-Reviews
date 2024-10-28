@@ -28,7 +28,7 @@ type MovieCredit struct {
 }
 
 type GetMovieRequest struct {
-	MovieID int `json:"movieId" validate:"nonzero"`
+	MovieID int `json:"-" param:"movieId" validate:"nonzero"`
 }
 
 type MovieCreditInfo struct {
@@ -36,8 +36,11 @@ type MovieCreditInfo struct {
 	Role    string `json:"role"`
 	Details string `json:"details,omitempty"`
 }
+
 type GetMoviesRequest struct {
 	PaginatedRequestOrdered
+	StarID     *int    `json:"-" query:"starId"`
+	SearchTerm *string `json:"-" query:"q"`
 }
 
 type CreateMovieRequest struct {
