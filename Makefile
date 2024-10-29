@@ -4,6 +4,9 @@ run:
 compose:
 	docker-compose up --build -d
 
+compose-down:
+	docker-compose down
+
 go-lint:
 	golangci-lint run ./...
 
