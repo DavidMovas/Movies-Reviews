@@ -51,7 +51,7 @@ func (h *Handler) GetMovies(c echo.Context) error {
 		req.Sort = "id"
 	}
 
-	movies, total, err := h.service.GetMovies(c.Request().Context(), offset, limit, req.Sort, req.Order)
+	movies, total, err := h.service.GetMovies(c.Request().Context(), offset, limit, req.Sort, req.Order, req.SearchTerm)
 	if err != nil {
 		return err
 	}

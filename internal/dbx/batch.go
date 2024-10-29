@@ -2,7 +2,7 @@ package dbx
 
 import (
 	"github.com/Masterminds/squirrel"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 )
 
 func QueryBatchSelect(b *pgx.Batch, sb squirrel.SelectBuilder) error {
