@@ -44,7 +44,6 @@ type GetMovieRequest struct {
 
 type GetMoviesRequest struct {
 	pagination.PaginatedRequestOrdered
-	StarID     *int    `query:"starId"`
 	SearchTerm *string `query:"q"`
 }
 

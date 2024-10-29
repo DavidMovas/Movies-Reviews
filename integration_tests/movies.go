@@ -157,6 +157,44 @@ func moviesAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 		require.Equal(t, len([]*contracts.MovieDetails{titanic}), len(res.Items))
 	})
 
+	t.Run("movies.GetMovies: text-search: not found", func(t *testing.T) {
+		req := &contracts.GetMoviesRequest{
+			SearchTerm: ptr("MATCHES_NOTHING"),
+		}
+		res, err := c.GetMovies(req)
+		require.NoError(t, err)
+		require.Equal(t, 0, res.Total)
+		require.Equal(t, 1, res.Page)
+		require.Equal(t, testPaginationDefaultSize, res.Size)
+		require.Equal(t, 0, len(res.Items))
+	})
+
+	t.Run("movies.GetMovies: title-text-search: success", func(t *testing.T) {
+		req := &contracts.GetMoviesRequest{
+			SearchTerm: ptr("Godfather"),
+		}
+		res, err := c.GetMovies(req)
+		require.NoError(t, err)
+		require.Equal(t, 1, res.Total)
+		require.Equal(t, 1, res.Page)
+		require.Equal(t, godFather.Title, res.Items[0].Title)
+		require.Equal(t, testPaginationDefaultSize, res.Size)
+		require.Equal(t, 1, len(res.Items))
+	})
+
+	t.Run("movies.GetMovies: description-text-search: success", func(t *testing.T) {
+		req := &contracts.GetMoviesRequest{
+			SearchTerm: ptr("aristocrat & love"),
+		}
+		res, err := c.GetMovies(req)
+		require.NoError(t, err)
+		require.Equal(t, 1, res.Total)
+		require.Equal(t, 1, res.Page)
+		require.Equal(t, titanic.Title, res.Items[0].Title)
+		require.Equal(t, testPaginationDefaultSize, res.Size)
+		require.Equal(t, 1, len(res.Items))
+	})
+
 	t.Run("movies.GetStarsByMovieId: movie not found", func(t *testing.T) {
 		req := &contracts.GetMovieRequest{MovieID: 100}
 		_, err := c.GetStarsByMovieID(req)

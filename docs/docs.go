@@ -369,11 +369,11 @@ const docTemplate = `{
                 "operationId": "get-movies",
                 "parameters": [
                     {
-                        "description": "Request, if request body empty, default values will be used",
+                        "description": "Request, if request body empty, default values will be used, if searchTerm in not empty: searching by title or description matches",
                         "name": "request",
                         "in": "body",
                         "schema": {
-                            "$ref": "#/definitions/contracts.PaginatedRequestOrdered"
+                            "$ref": "#/definitions/contracts.GetMoviesRequest"
                         }
                     }
                 ],
@@ -1278,6 +1278,23 @@ const docTemplate = `{
                 }
             }
         },
+        "contracts.GetMoviesRequest": {
+            "type": "object",
+            "properties": {
+                "order": {
+                    "type": "string"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "size": {
+                    "type": "integer"
+                },
+                "sort": {
+                    "type": "string"
+                }
+            }
+        },
         "contracts.Movie": {
             "type": "object",
             "properties": {
@@ -1375,23 +1392,6 @@ const docTemplate = `{
                 }
             }
         },
-        "contracts.PaginatedRequestOrdered": {
-            "type": "object",
-            "properties": {
-                "order": {
-                    "type": "string"
-                },
-                "page": {
-                    "type": "integer"
-                },
-                "size": {
-                    "type": "integer"
-                },
-                "sort": {
-                    "type": "string"
-                }
-            }
-        },
         "contracts.Star": {
             "type": "object",
             "properties": {
@@ -1462,9 +1462,6 @@ const docTemplate = `{
             "properties": {
                 "password": {
                     "type": "string"
-                },
-                "userId": {
-                    "type": "integer"
                 },
                 "username": {
                     "type": "string",

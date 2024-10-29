@@ -26,8 +26,8 @@ func NewService(repo *Repository, genresRepo *genres.Repository, starsRepo *star
 	}
 }
 
-func (s *Service) GetMovies(ctx context.Context, offset int, limit int, sort, order string) ([]*Movie, int, error) {
-	return s.repo.GetMovies(ctx, offset, limit, sort, order)
+func (s *Service) GetMovies(ctx context.Context, offset int, limit int, sort, order string, searchTerm *string) ([]*Movie, int, error) {
+	return s.repo.GetMovies(ctx, offset, limit, sort, order, searchTerm)
 }
 
 func (s *Service) GetMovieByID(ctx context.Context, movieID int) (*MovieDetails, error) {

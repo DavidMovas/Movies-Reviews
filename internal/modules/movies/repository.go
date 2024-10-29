@@ -33,29 +33,34 @@ func NewRepository(db *pgxpool.Pool, genresRepo *genres.Repository, starsRepo *s
 	}
 }
 
-func (r *Repository) GetMovies(ctx context.Context, offset int, limit int, sort, order string) ([]*Movie, int, error) {
-	selectQuery, args, err := squirrel.Select("id, title, release_date, created_at, deleted_at").
+func (r *Repository) GetMovies(ctx context.Context, offset int, limit int, sort, order string, searchTerm *string) ([]*Movie, int, error) {
+	selectQuery := dbx.StatementBuilder.Select("id, title, release_date, created_at, deleted_at").
 		From("movies").
 		Where(squirrel.Eq{"deleted_at": nil}).
 		OrderBy(sort + " " + order).
 		Limit(uint64(limit)).
-		Offset(uint64(offset)).
-		PlaceholderFormat(squirrel.Dollar).
-		ToSql()
+		Offset(uint64(offset))
 
-	countQuery, _, _ := squirrel.Select("COUNT(*)").
+	countQuery := dbx.StatementBuilder.Select("COUNT(*)").
 		From("movies").
-		Where(squirrel.Eq{"deleted_at": nil}).
-		PlaceholderFormat(squirrel.Dollar).
-		ToSql()
+		Where(squirrel.Eq{"deleted_at": nil})
 
-	if err != nil {
-		return nil, 0, apperrors.Internal(err)
+	if searchTerm != nil {
+		selectQuery = selectQuery.Where("search_vector @@ to_tsquery('english', ?)", *searchTerm).
+			OrderByClause("ts_rank_cd(search_vector, to_tsquery('english', ?)) DESC", *searchTerm)
+
+		countQuery = countQuery.Where("search_vector @@ to_tsquery('english', ?)", *searchTerm)
 	}
 
 	b := &pgx.Batch{}
-	b.Queue(selectQuery, args...)
-	b.Queue(countQuery)
+
+	if err := dbx.QueryBatchSelect(b, selectQuery); err != nil {
+		return nil, 0, apperrors.Internal(err)
+	}
+	if err := dbx.QueryBatchSelect(b, countQuery); err != nil {
+		return nil, 0, apperrors.Internal(err)
+	}
+
 	br := r.db.SendBatch(ctx, b)
 	defer func() {
 		_ = br.Close()

@@ -72,30 +72,26 @@ func (r *Repository) GetRelationsByMovieID(ctx context.Context, movieID int) ([]
 }
 
 func (r *Repository) GetStarsPaginated(ctx context.Context, offset int, limit int) ([]*Star, int, error) {
-	selectQuery, selectArgs, err := squirrel.Select("id, first_name, middle_name, last_name, birth_date, birth_place, death_date, bio, created_at, deleted_at").
+	selectQuery := dbx.StatementBuilder.Select("id, first_name, middle_name, last_name, birth_date, birth_place, death_date, bio, created_at, deleted_at").
 		From("stars").
 		Where(squirrel.Eq{"deleted_at": nil}).
 		OrderBy("id").
 		Limit(uint64(limit)).
-		Offset(uint64(offset)).
-		PlaceholderFormat(squirrel.Dollar).
-		ToSql()
-	if err != nil {
-		return nil, 0, apperrors.Internal(err)
-	}
+		Offset(uint64(offset))
 
-	countQuery, countArgs, err := squirrel.Select("COUNT(*)").
+	countQuery := dbx.StatementBuilder.Select("COUNT(*)").
 		From("stars").
-		Where(squirrel.Eq{"deleted_at": nil}).
-		PlaceholderFormat(squirrel.Dollar).
-		ToSql()
-	if err != nil {
-		return nil, 0, apperrors.Internal(err)
-	}
+		Where(squirrel.Eq{"deleted_at": nil})
 
 	b := &pgx.Batch{}
-	b.Queue(selectQuery, selectArgs...)
-	b.Queue(countQuery, countArgs...)
+
+	if err := dbx.QueryBatchSelect(b, selectQuery); err != nil {
+		return nil, 0, apperrors.Internal(err)
+	}
+	if err := dbx.QueryBatchSelect(b, countQuery); err != nil {
+		return nil, 0, apperrors.Internal(err)
+	}
+
 	br := r.db.SendBatch(ctx, b)
 	defer func() {
 		_ = br.Close()
