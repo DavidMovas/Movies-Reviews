@@ -39,7 +39,6 @@ type MovieCreditInfo struct {
 
 type GetMoviesRequest struct {
 	PaginatedRequestOrdered
-	StarID     *int    `json:"-" query:"starId"`
 	SearchTerm *string `json:"-" query:"q"`
 }
 
@@ -63,6 +62,14 @@ type UpdateMovieRequest struct {
 
 type DeleteMovieRequest struct {
 	MovieID int `json:"-" param:"movieId" validate:"nonzero"`
+}
+
+func (r *GetMoviesRequest) ToQueryParams() map[string]string {
+	params := r.PaginatedRequestOrdered.ToQueryParams()
+	if r.SearchTerm != nil {
+		params["q"] = *r.SearchTerm
+	}
+	return params
 }
 
 func ValidateSortRequest(sort string) error {
