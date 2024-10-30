@@ -145,26 +145,28 @@ func (r *Repository) GetReviewByID(ctx context.Context, reviewID int) (*Review, 
 	return pgx.RowToAddrOfStructByPos[Review](rows)
 }
 
-func (r *Repository) CreateReview(ctx context.Context, req *CreateReviewRequest) error {
+func (r *Repository) CreateReview(ctx context.Context, req *CreateReviewRequest) (*Review, error) {
 	builder := dbx.StatementBuilder.Insert("reviews").
 		Columns("movie_id", "user_id", "rating", "title", "content").
-		Values(req.MovieID, req.UserID, req.Rating, req.Title, req.Content)
+		Values(req.MovieID, req.UserID, req.Rating, req.Title, req.Content).
+		Suffix("RETURNING id, rating, title, content, created_at, updated_at, deleted_at")
 
 	query, args, err := builder.ToSql()
 	if err != nil {
-		return apperrors.Internal(err)
+		return nil, apperrors.Internal(err)
 	}
 
-	n, err := r.db.Exec(ctx, query, args...)
+	var review Review
+	err = r.db.QueryRow(ctx, query, args...).
+		Scan(&review.ID, &review.Rating, &review.Title, &review.Content, &review.CreatedAt, &review.UpdatedAt, &review.DeletedAt)
 	if err != nil {
-		return apperrors.Internal(err)
+		return nil, apperrors.Internal(err)
 	}
 
-	if n.RowsAffected() == 0 {
-		return apperrors.AlreadyExists("review", "user_id", req.UserID)
-	}
+	review.MovieID = req.MovieID
+	review.UserID = req.UserID
 
-	return nil
+	return &review, nil
 }
 
 func (r *Repository) UpdateReview(ctx context.Context, reviewID int, req *UpdateReviewRequest) (*Review, error) {
