@@ -85,7 +85,7 @@ func (h *Handler) CreateReview(c echo.Context) error {
 	return c.JSON(http.StatusCreated, review)
 }
 
-func (h *Handler) UpdateReview(c echo.Context) error {
+func (h *Handler) UpdateReviewByID(c echo.Context) error {
 	req, err := echox.BindAndValidate[UpdateReviewRequest](c)
 	if err != nil {
 		return err
@@ -99,7 +99,7 @@ func (h *Handler) UpdateReview(c echo.Context) error {
 	return c.JSON(http.StatusOK, review)
 }
 
-func (h *Handler) DeleteReview(c echo.Context) error {
+func (h *Handler) DeleteReviewByID(c echo.Context) error {
 	req, err := echox.BindAndValidate[DeleteReviewRequest](c)
 	if err != nil {
 		return err
