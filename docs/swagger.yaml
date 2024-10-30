@@ -69,6 +69,21 @@ definitions:
         minLength: 1
         type: string
     type: object
+  contracts.CreateReviewRequest:
+    properties:
+      description:
+        maxLength: 1000
+        type: string
+      rating:
+        maximum: 10
+        minimum: 1
+        type: integer
+      title:
+        maxLength: 100
+        type: string
+      userId:
+        type: integer
+    type: object
   contracts.Genre:
     properties:
       id:
@@ -77,6 +92,28 @@ definitions:
         type: string
     type: object
   contracts.GetMoviesRequest:
+    properties:
+      order:
+        type: string
+      page:
+        type: integer
+      size:
+        type: integer
+      sort:
+        type: string
+    type: object
+  contracts.GetReviewsByMovieIDRequest:
+    properties:
+      order:
+        type: string
+      page:
+        type: integer
+      size:
+        type: integer
+      sort:
+        type: string
+    type: object
+  contracts.GetReviewsByUserIDRequest:
     properties:
       order:
         type: string
@@ -150,6 +187,27 @@ definitions:
       size:
         type: integer
     type: object
+  contracts.Review:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      movieId:
+        type: integer
+      rating:
+        type: integer
+      title:
+        type: string
+      updatedAt:
+        type: string
+      userId:
+        type: integer
+    type: object
   contracts.Star:
     properties:
       bio:
@@ -192,6 +250,21 @@ definitions:
         type: string
       version:
         type: integer
+    type: object
+  contracts.UpdateReviewRequest:
+    properties:
+      description:
+        maxLength: 1000
+        type: string
+      movieId:
+        type: integer
+      rating:
+        maximum: 10
+        minimum: 1
+        type: integer
+      title:
+        maxLength: 100
+        type: string
     type: object
   contracts.UpdateUserRequest:
     properties:
@@ -237,6 +310,21 @@ definitions:
         maxLength: 32
         minLength: 3
         type: string
+    type: object
+  pagination.PaginatedResponse-contracts_Review:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/contracts.Review'
+        type: array
+      page:
+        minimum: 0
+        type: integer
+      size:
+        minimum: 0
+        type: integer
+      total:
+        type: integer
     type: object
   pagination.PaginatedResponse-contracts_Star:
     properties:
@@ -745,6 +833,85 @@ paths:
       summary: Update movie by id
       tags:
       - movies
+  /movies/{movieId}/reviews:
+    get:
+      consumes:
+      - application/json
+      description: Get reviews by movie ID
+      operationId: get-reviews-by-movie-id
+      parameters:
+      - description: Movie ID
+        in: path
+        name: movieId
+        required: true
+        type: integer
+      - description: Pagination request, if request body empty, default values will
+          be used
+        in: body
+        name: request
+        schema:
+          $ref: '#/definitions/contracts.GetReviewsByMovieIDRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: PaginatedResponse of Reviews, total number of reviews, or nil
+            if none found
+          schema:
+            $ref: '#/definitions/pagination.PaginatedResponse-contracts_Review'
+        "400":
+          description: Invalid request, invalid parameter or missing parameter
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      summary: Get reviews by movie ID
+      tags:
+      - reviews
+    post:
+      consumes:
+      - application/json
+      description: Create review
+      operationId: create-review
+      parameters:
+      - description: Create review request, movieId and userId are required be unique
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/contracts.CreateReviewRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Review
+          schema:
+            $ref: '#/definitions/contracts.Review'
+        "400":
+          description: Invalid request, invalid parameter or missing parameter
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "409":
+          description: Review already exists
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      summary: Create review
+      tags:
+      - reviews
   /movies/{movieId}/stars:
     get:
       description: Get stars by movie id
@@ -779,6 +946,125 @@ paths:
       summary: Get stars by movie id
       tags:
       - movies
+  /reviews/{reviewId}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete review by ID
+      operationId: delete-review-by-id
+      parameters:
+      - description: Review ID
+        in: path
+        name: reviewId
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: Review deleted (softly deleting)
+        "400":
+          description: Invalid request, invalid parameter or missing parameter
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      summary: Delete review by ID
+      tags:
+      - reviews
+    get:
+      consumes:
+      - application/json
+      description: Get review by ID
+      operationId: get-review-by-id
+      parameters:
+      - description: Review ID
+        in: path
+        name: reviewId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Review
+          schema:
+            $ref: '#/definitions/contracts.Review'
+        "400":
+          description: Invalid request, invalid parameter or missing parameter
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "404":
+          description: Review not found
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      summary: Get review by ID
+      tags:
+      - reviews
+    put:
+      consumes:
+      - application/json
+      description: Update review by ID
+      operationId: update-review-by-id
+      parameters:
+      - description: Review ID
+        in: path
+        name: reviewId
+        required: true
+        type: integer
+      - description: Update review request, at least one field is required, if optional
+          fields are empty, it will set default values
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/contracts.UpdateReviewRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Review
+          schema:
+            $ref: '#/definitions/contracts.Review'
+        "400":
+          description: Invalid request, invalid parameter or missing parameter
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      summary: Update review by ID
+      tags:
+      - reviews
   /stars:
     get:
       description: Get stars
@@ -1047,6 +1333,43 @@ paths:
             $ref: '#/definitions/apperrors.Error'
       tags:
       - users
+  /users/{userId}/reviews:
+    get:
+      consumes:
+      - application/json
+      description: Get reviews by user ID
+      operationId: get-reviews-by-user-id
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: integer
+      - description: Pagination request, if request body empty, default values will
+          be used
+        in: body
+        name: request
+        schema:
+          $ref: '#/definitions/contracts.GetReviewsByUserIDRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: PaginatedResponse of Reviews, total number of reviews, or nil
+            if none found
+          schema:
+            $ref: '#/definitions/pagination.PaginatedResponse-contracts_Review'
+        "400":
+          description: Invalid request, invalid parameter or missing parameter
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      summary: Get reviews by user ID
+      tags:
+      - reviews
   /users/{userId}/role/{role}:
     put:
       description: Update user role by id

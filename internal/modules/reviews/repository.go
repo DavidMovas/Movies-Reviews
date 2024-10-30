@@ -137,7 +137,10 @@ func (r *Repository) GetReviewByID(ctx context.Context, reviewID int) (*Review, 
 	}
 
 	rows, err := r.db.Query(ctx, query, args...)
-	if err != nil {
+	switch {
+	case dbx.IsNoRows(err):
+		return nil, apperrors.NotFound("review", "id", reviewID)
+	case err != nil:
 		return nil, apperrors.Internal(err)
 	}
 	defer rows.Close()
@@ -159,7 +162,11 @@ func (r *Repository) CreateReview(ctx context.Context, req *CreateReviewRequest)
 	var review Review
 	err = r.db.QueryRow(ctx, query, args...).
 		Scan(&review.ID, &review.Rating, &review.Title, &review.Content, &review.CreatedAt, &review.UpdatedAt, &review.DeletedAt)
-	if err != nil {
+
+	switch {
+	case dbx.IsUniqueViolation(err, "reviews_movie_id_user_id_key"):
+		return nil, apperrors.AlreadyExists("review", "movie_id user_id", fmt.Sprintf("%d - %d", req.MovieID, req.UserID))
+	case err != nil:
 		return nil, apperrors.Internal(err)
 	}
 
