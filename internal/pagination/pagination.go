@@ -30,6 +30,12 @@ func SetDefaultsOrdered(r *PaginatedRequestOrdered, cfg *config.PaginationConfig
 	}
 }
 
+func SetDefaultsOrderedWith(r *PaginatedRequestOrdered, cfg *config.PaginationConfig, sort string, order string) {
+	r.Sort = sort
+	r.Order = order
+	SetDefaultsOrdered(r, cfg)
+}
+
 func OffsetLimit(r *PaginatedRequest) (int, int) {
 	offset := (r.Page - 1) * r.Size
 	limit := r.Size

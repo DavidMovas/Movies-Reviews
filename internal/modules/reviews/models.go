@@ -9,7 +9,7 @@ import (
 type Review struct {
 	ID        int        `json:"id"`
 	MovieID   int        `json:"movieId"`
-	UserID    string     `json:"userId"`
+	UserID    int        `json:"userId"`
 	Rating    int        `json:"rating"`
 	Title     string     `json:"title"`
 	Content   string     `json:"description"`
