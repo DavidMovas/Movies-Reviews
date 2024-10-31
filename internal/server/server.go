@@ -123,9 +123,9 @@ func New(ctx context.Context, cfg *config.Config) (*Server, error) {
 	api.GET("/movies/:movieId/reviews", reviewsModule.Handler.GetReviewsByMovieID)
 	api.GET("/users/:userId/reviews", reviewsModule.Handler.GetReviewsByUserID)
 	api.GET("/reviews/:reviewId", reviewsModule.Handler.GetReviewByID)
-	api.POST("/movies/:movieId/reviews", reviewsModule.Handler.CreateReview, auth.Self)
-	api.PUT("/reviews/:reviewId", reviewsModule.Handler.UpdateReviewByID, auth.Self)
-	api.DELETE("/reviews/:reviewId", reviewsModule.Handler.DeleteReviewByID, auth.Self)
+	api.POST("/users/:userId/reviews", reviewsModule.Handler.CreateReview, auth.Self)
+	api.PUT("/users/:userId/reviews/:reviewId", reviewsModule.Handler.UpdateReviewByID, auth.Self)
+	api.DELETE("/users/:userId/reviews/:reviewId", reviewsModule.Handler.DeleteReviewByID, auth.Self)
 
 	return &Server{
 		e:       e,

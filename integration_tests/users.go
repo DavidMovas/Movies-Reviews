@@ -88,6 +88,7 @@ func usersAPIChecks(t *testing.T, c *client.Client, cfg *config.Config) {
 	})
 
 	johnMooreToken = login(t, c, johnMoore.Email, johnMoorePass)
+	markTwainToken = login(t, c, markTwain.Email, markTwainPass)
 
 	t.Run("users.UpdateUserRoleById: invalid role", func(t *testing.T) {
 		req := &contracts.UpdateUserRoleRequest{

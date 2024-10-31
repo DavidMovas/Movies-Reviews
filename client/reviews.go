@@ -2,8 +2,8 @@ package client
 
 import "github.com/DavidMovas/Movies-Reviews/contracts"
 
-func (c *Client) GetReviewsByMovieID(req *contracts.GetReviewsByMovieIDRequest) ([]*contracts.Review, error) {
-	var resp []*contracts.Review
+func (c *Client) GetReviewsByMovieID(req *contracts.GetReviewsByMovieIDRequest) (*contracts.PaginatedResponseOrdered[*contracts.Review], error) {
+	var resp *contracts.PaginatedResponseOrdered[*contracts.Review]
 
 	_, err := c.client.R().
 		SetResult(&resp).
@@ -13,8 +13,8 @@ func (c *Client) GetReviewsByMovieID(req *contracts.GetReviewsByMovieIDRequest) 
 	return resp, err
 }
 
-func (c *Client) GetReviewsByUserID(req *contracts.GetReviewsByUserIDRequest) ([]*contracts.Review, error) {
-	var resp []*contracts.Review
+func (c *Client) GetReviewsByUserID(req *contracts.GetReviewsByUserIDRequest) (*contracts.PaginatedResponseOrdered[*contracts.Review], error) {
+	var resp *contracts.PaginatedResponseOrdered[*contracts.Review]
 
 	_, err := c.client.R().
 		SetResult(&resp).
@@ -34,34 +34,34 @@ func (c *Client) GetReviewByID(req *contracts.GetReviewRequest) (*contracts.Revi
 	return resp, err
 }
 
-func (c *Client) CreateReview(req *contracts.AuthenticatedRequest[*contracts.CreateReviewRequest]) (*contracts.Review, error) {
+func (c *Client) CreateReview(req contracts.AuthenticatedRequest[*contracts.CreateReviewRequest]) (*contracts.Review, error) {
 	var resp *contracts.Review
 
 	_, err := c.client.R().
 		SetAuthToken(req.AccessToken).
-		SetBody(req).
+		SetBody(req.Request).
 		SetResult(&resp).
-		Post(c.path("/api/movies/%d/reviews", req.Request.MovieID))
+		Post(c.path("/api/users/%d/reviews", req.Request.UserID))
 
 	return resp, err
 }
 
-func (c *Client) UpdateReview(req *contracts.AuthenticatedRequest[*contracts.UpdateReviewRequest]) (*contracts.Review, error) {
+func (c *Client) UpdateReview(req contracts.AuthenticatedRequest[*contracts.UpdateReviewRequest]) (*contracts.Review, error) {
 	var resp *contracts.Review
 
 	_, err := c.client.R().
 		SetAuthToken(req.AccessToken).
-		SetBody(req).
+		SetBody(req.Request).
 		SetResult(&resp).
-		Put(c.path("/api/reviews/%d", req.Request.ReviewID))
+		Put(c.path("/api/users/%d/reviews/%d", req.Request.UserID, req.Request.ReviewID))
 
 	return resp, err
 }
 
-func (c *Client) DeleteReview(req *contracts.AuthenticatedRequest[*contracts.DeleteReviewRequest]) error {
+func (c *Client) DeleteReview(req contracts.AuthenticatedRequest[*contracts.DeleteReviewRequest]) error {
 	_, err := c.client.R().
 		SetAuthToken(req.AccessToken).
-		Delete(c.path("/api/reviews/%d", req.Request.ReviewID))
+		Delete(c.path("/api/users/%d/reviews/%d", req.Request.UserID, req.Request.ReviewID))
 
 	return err
 }

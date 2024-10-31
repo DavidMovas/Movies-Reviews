@@ -16,6 +16,10 @@ var (
 	johnMoorePass  = standardPassword
 	johnMooreToken string
 
+	markTwain      *contracts.User
+	markTwainPass  = standardPassword
+	markTwainToken string
+
 	adminToken string
 )
 
@@ -44,19 +48,38 @@ func authAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 		requireBadRequestError(t, err, "Password: password must contain at least one of the following required entries: uppercase")
 	})
 
-	t.Run("auth.RegisterUser: success", func(t *testing.T) {
-		req := &contracts.RegisterUserRequest{
-			Username: "johnmoore",
-			Email:    "johnmoore@mail.com",
-			Password: johnMoorePass,
+	t.Run("auth.RegisterUser: several users: success", func(t *testing.T) {
+		cases := []struct {
+			req  *contracts.RegisterUserRequest
+			addr **contracts.User
+		}{
+			{
+				req: &contracts.RegisterUserRequest{
+					Username: "johnmoore",
+					Email:    "johnmoore@mail.com",
+					Password: johnMoorePass,
+				},
+				addr: &johnMoore,
+			},
+			{
+				req: &contracts.RegisterUserRequest{
+					Username: "marktwain",
+					Email:    "marktwain@mail.com",
+					Password: markTwainPass,
+				},
+				addr: &markTwain,
+			},
 		}
-		user, err := c.RegisterUser(req)
-		require.NoError(t, err)
-		johnMoore = user
 
-		require.Equal(t, req.Username, user.Username)
-		require.Equal(t, req.Email, user.Email)
-		require.Equal(t, contracts.UserRole, user.Role)
+		for _, cc := range cases {
+			user, err := c.RegisterUser(cc.req)
+			require.NoError(t, err)
+			*cc.addr = user
+
+			require.Equal(t, cc.req.Username, user.Username)
+			require.Equal(t, cc.req.Email, user.Email)
+			require.Equal(t, contracts.UserRole, user.Role)
+		}
 	})
 
 	t.Run("auth.RegisterUsers: register 5 users: success", func(t *testing.T) {

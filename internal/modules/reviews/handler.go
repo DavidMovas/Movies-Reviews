@@ -75,7 +75,7 @@ func (h *Handler) GetReviewsByUserID(c echo.Context) error {
 	pagination.SetDefaultsOrderedWith(&req.PaginatedRequestOrdered, h.paginationConfig, "created_at", "desc")
 	offset, limit := pagination.OffsetLimit(&req.PaginatedRequest)
 
-	reviews, total, err := h.service.GetReviewsByMovieID(c.Request().Context(), req.UserID, offset, limit, req.Sort, req.Order)
+	reviews, total, err := h.service.GetReviewsByUserID(c.Request().Context(), req.UserID, offset, limit, req.Sort, req.Order)
 	if err != nil {
 		return err
 	}

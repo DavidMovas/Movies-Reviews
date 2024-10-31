@@ -128,31 +128,8 @@ func (r *Repository) GetReviewsByUserID(ctx context.Context, userID int, offset 
 func (r *Repository) GetReviewByID(ctx context.Context, reviewID int) (*Review, error) {
 	builder := dbx.StatementBuilder.Select("id, movie_id, user_id, rating, title, content, created_at, updated_at, deleted_at").
 		From("reviews").
-		Where("id = ?", reviewID).
+		Where(squirrel.Eq{"id": reviewID}).
 		Where(squirrel.Eq{"deleted_at": nil})
-
-	query, args, err := builder.ToSql()
-	if err != nil {
-		return nil, apperrors.Internal(err)
-	}
-
-	rows, err := r.db.Query(ctx, query, args...)
-	switch {
-	case dbx.IsNoRows(err):
-		return nil, apperrors.NotFound("review", "id", reviewID)
-	case err != nil:
-		return nil, apperrors.Internal(err)
-	}
-	defer rows.Close()
-
-	return pgx.RowToAddrOfStructByPos[Review](rows)
-}
-
-func (r *Repository) CreateReview(ctx context.Context, req *CreateReviewRequest) (*Review, error) {
-	builder := dbx.StatementBuilder.Insert("reviews").
-		Columns("movie_id", "user_id", "rating", "title", "content").
-		Values(req.MovieID, req.UserID, req.Rating, req.Title, req.Content).
-		Suffix("RETURNING id, rating, title, content, created_at, updated_at, deleted_at")
 
 	query, args, err := builder.ToSql()
 	if err != nil {
@@ -161,7 +138,32 @@ func (r *Repository) CreateReview(ctx context.Context, req *CreateReviewRequest)
 
 	var review Review
 	err = r.db.QueryRow(ctx, query, args...).
-		Scan(&review.ID, &review.Rating, &review.Title, &review.Content, &review.CreatedAt, &review.UpdatedAt, &review.DeletedAt)
+		Scan(&review.ID, &review.MovieID, &review.UserID, &review.Rating, &review.Title, &review.Content, &review.CreatedAt, &review.UpdatedAt, &review.DeletedAt)
+
+	switch {
+	case dbx.IsNoRows(err):
+		return nil, apperrors.NotFound("review", "id", reviewID)
+	case err != nil:
+		return nil, apperrors.Internal(err)
+	}
+
+	return &review, nil
+}
+
+func (r *Repository) CreateReview(ctx context.Context, req *CreateReviewRequest) (*Review, error) {
+	builder := dbx.StatementBuilder.Insert("reviews").
+		Columns("movie_id", "user_id", "rating", "title", "content").
+		Values(req.MovieID, req.UserID, req.Rating, req.Title, req.Content).
+		Suffix("RETURNING id, movie_id, user_id, rating, title, content, created_at, updated_at, deleted_at")
+
+	query, args, err := builder.ToSql()
+	if err != nil {
+		return nil, apperrors.Internal(err)
+	}
+
+	var review Review
+	err = r.db.QueryRow(ctx, query, args...).
+		Scan(&review.ID, &review.MovieID, &review.UserID, &review.Rating, &review.Title, &review.Content, &review.CreatedAt, &review.UpdatedAt, &review.DeletedAt)
 
 	switch {
 	case dbx.IsUniqueViolation(err, "reviews_movie_id_user_id_key"):
@@ -169,9 +171,6 @@ func (r *Repository) CreateReview(ctx context.Context, req *CreateReviewRequest)
 	case err != nil:
 		return nil, apperrors.Internal(err)
 	}
-
-	review.MovieID = req.MovieID
-	review.UserID = req.UserID
 
 	return &review, nil
 }

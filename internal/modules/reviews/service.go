@@ -3,6 +3,8 @@ package reviews
 import (
 	"context"
 
+	apperrors "github.com/DavidMovas/Movies-Reviews/internal/error"
+
 	"github.com/DavidMovas/Movies-Reviews/internal/log"
 )
 
@@ -43,6 +45,10 @@ func (s *Service) UpdateReview(ctx context.Context, reviewID int, req *UpdateRev
 	review, err := s.repo.UpdateReview(ctx, reviewID, req)
 	if err != nil {
 		return nil, err
+	}
+
+	if review.UserID != req.UserID {
+		return nil, apperrors.Forbidden("insufficient permissions")
 	}
 
 	log.FromContext(ctx).Info("review updated", "review_id", review.ID)
