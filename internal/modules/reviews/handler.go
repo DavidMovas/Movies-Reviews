@@ -124,7 +124,7 @@ func (h *Handler) GetReviewByID(c echo.Context) error {
 // @Failure      403 {object} apperrors.Error "Forbidden"
 // @Failure      409 {object} apperrors.Error "Review already exists"
 // @Failure      500 {object} apperrors.Error "Internal server error"
-// @Router       /movies/{movieId}/reviews [post]
+// @Router       /users/{userId}/reviews [post]
 func (h *Handler) CreateReview(c echo.Context) error {
 	req, err := echox.BindAndValidate[CreateReviewRequest](c)
 	if err != nil {
@@ -154,7 +154,7 @@ func (h *Handler) CreateReview(c echo.Context) error {
 // @Failure      403 {object} apperrors.Error "Forbidden"
 // @Failure      404 {object} apperrors.Error "Not found"
 // @Failure      500 {object} apperrors.Error "Internal server error"
-// @Router       /reviews/{reviewId} [put]
+// @Router       /users/{userId}/reviews/{reviewId} [put]
 func (h *Handler) UpdateReviewByID(c echo.Context) error {
 	req, err := echox.BindAndValidate[UpdateReviewRequest](c)
 	if err != nil {
@@ -182,7 +182,7 @@ func (h *Handler) UpdateReviewByID(c echo.Context) error {
 // @Failure      403 {object} apperrors.Error "Forbidden"
 // @Failure      404 {object} apperrors.Error "Not found"
 // @Failure      500 {object} apperrors.Error "Internal server error"
-// @Router       /reviews/{reviewId} [delete]
+// @Router       /users/{userId}/reviews/{reviewId} [delete]
 func (h *Handler) DeleteReviewByID(c echo.Context) error {
 	req, err := echox.BindAndValidate[DeleteReviewRequest](c)
 	if err != nil {

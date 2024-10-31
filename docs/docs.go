@@ -662,69 +662,6 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
-            "post": {
-                "description": "Create review",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "reviews"
-                ],
-                "summary": "Create review",
-                "operationId": "create-review",
-                "parameters": [
-                    {
-                        "description": "Create review request, movieId and userId are required be unique",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/contracts.CreateReviewRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Review",
-                        "schema": {
-                            "$ref": "#/definitions/contracts.Review"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request, invalid parameter or missing parameter",
-                        "schema": {
-                            "$ref": "#/definitions/apperrors.Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/apperrors.Error"
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "$ref": "#/definitions/apperrors.Error"
-                        }
-                    },
-                    "409": {
-                        "description": "Review already exists",
-                        "schema": {
-                            "$ref": "#/definitions/apperrors.Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/apperrors.Error"
-                        }
-                    }
-                }
             }
         },
         "/movies/{movieId}/stars": {
@@ -816,131 +753,6 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Review not found",
-                        "schema": {
-                            "$ref": "#/definitions/apperrors.Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/apperrors.Error"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Update review by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "reviews"
-                ],
-                "summary": "Update review by ID",
-                "operationId": "update-review-by-id",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Review ID",
-                        "name": "reviewId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Update review request, at least one field is required, if optional fields are empty, it will set default values",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/contracts.UpdateReviewRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Review",
-                        "schema": {
-                            "$ref": "#/definitions/contracts.Review"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request, invalid parameter or missing parameter",
-                        "schema": {
-                            "$ref": "#/definitions/apperrors.Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/apperrors.Error"
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "$ref": "#/definitions/apperrors.Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Not found",
-                        "schema": {
-                            "$ref": "#/definitions/apperrors.Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/apperrors.Error"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Delete review by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "reviews"
-                ],
-                "summary": "Delete review by ID",
-                "operationId": "delete-review-by-id",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Review ID",
-                        "name": "reviewId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Review deleted (softly deleting)"
-                    },
-                    "400": {
-                        "description": "Invalid request, invalid parameter or missing parameter",
-                        "schema": {
-                            "$ref": "#/definitions/apperrors.Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/apperrors.Error"
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "$ref": "#/definitions/apperrors.Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Not found",
                         "schema": {
                             "$ref": "#/definitions/apperrors.Error"
                         }
@@ -1406,6 +1218,196 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "post": {
+                "description": "Create review",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reviews"
+                ],
+                "summary": "Create review",
+                "operationId": "create-review",
+                "parameters": [
+                    {
+                        "description": "Create review request, movieId and userId are required be unique",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/contracts.CreateReviewRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Review",
+                        "schema": {
+                            "$ref": "#/definitions/contracts.Review"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request, invalid parameter or missing parameter",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "409": {
+                        "description": "Review already exists",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{userId}/reviews/{reviewId}": {
+            "put": {
+                "description": "Update review by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reviews"
+                ],
+                "summary": "Update review by ID",
+                "operationId": "update-review-by-id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Review ID",
+                        "name": "reviewId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update review request, at least one field is required, if optional fields are empty, it will set default values",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/contracts.UpdateReviewRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Review",
+                        "schema": {
+                            "$ref": "#/definitions/contracts.Review"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request, invalid parameter or missing parameter",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete review by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reviews"
+                ],
+                "summary": "Delete review by ID",
+                "operationId": "delete-review-by-id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Review ID",
+                        "name": "reviewId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Review deleted (softly deleting)"
+                    },
+                    "400": {
+                        "description": "Invalid request, invalid parameter or missing parameter",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    }
+                }
             }
         },
         "/users/{userId}/role/{role}": {
@@ -1619,6 +1621,9 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 1000
                 },
+                "movieId": {
+                    "type": "integer"
+                },
                 "rating": {
                     "type": "integer",
                     "maximum": 10,
@@ -1627,9 +1632,6 @@ const docTemplate = `{
                 "title": {
                     "type": "string",
                     "maxLength": 100
-                },
-                "userId": {
-                    "type": "integer"
                 }
             }
         },

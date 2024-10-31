@@ -74,6 +74,8 @@ definitions:
       description:
         maxLength: 1000
         type: string
+      movieId:
+        type: integer
       rating:
         maximum: 10
         minimum: 1
@@ -81,8 +83,6 @@ definitions:
       title:
         maxLength: 100
         type: string
-      userId:
-        type: integer
     type: object
   contracts.Genre:
     properties:
@@ -870,48 +870,6 @@ paths:
       summary: Get reviews by movie ID
       tags:
       - reviews
-    post:
-      consumes:
-      - application/json
-      description: Create review
-      operationId: create-review
-      parameters:
-      - description: Create review request, movieId and userId are required be unique
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/contracts.CreateReviewRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Review
-          schema:
-            $ref: '#/definitions/contracts.Review'
-        "400":
-          description: Invalid request, invalid parameter or missing parameter
-          schema:
-            $ref: '#/definitions/apperrors.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/apperrors.Error'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/apperrors.Error'
-        "409":
-          description: Review already exists
-          schema:
-            $ref: '#/definitions/apperrors.Error'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/apperrors.Error'
-      summary: Create review
-      tags:
-      - reviews
   /movies/{movieId}/stars:
     get:
       description: Get stars by movie id
@@ -947,43 +905,6 @@ paths:
       tags:
       - movies
   /reviews/{reviewId}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete review by ID
-      operationId: delete-review-by-id
-      parameters:
-      - description: Review ID
-        in: path
-        name: reviewId
-        required: true
-        type: integer
-      responses:
-        "200":
-          description: Review deleted (softly deleting)
-        "400":
-          description: Invalid request, invalid parameter or missing parameter
-          schema:
-            $ref: '#/definitions/apperrors.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/apperrors.Error'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/apperrors.Error'
-        "404":
-          description: Not found
-          schema:
-            $ref: '#/definitions/apperrors.Error'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/apperrors.Error'
-      summary: Delete review by ID
-      tags:
-      - reviews
     get:
       consumes:
       - application/json
@@ -1015,54 +936,6 @@ paths:
           schema:
             $ref: '#/definitions/apperrors.Error'
       summary: Get review by ID
-      tags:
-      - reviews
-    put:
-      consumes:
-      - application/json
-      description: Update review by ID
-      operationId: update-review-by-id
-      parameters:
-      - description: Review ID
-        in: path
-        name: reviewId
-        required: true
-        type: integer
-      - description: Update review request, at least one field is required, if optional
-          fields are empty, it will set default values
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/contracts.UpdateReviewRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Review
-          schema:
-            $ref: '#/definitions/contracts.Review'
-        "400":
-          description: Invalid request, invalid parameter or missing parameter
-          schema:
-            $ref: '#/definitions/apperrors.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/apperrors.Error'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/apperrors.Error'
-        "404":
-          description: Not found
-          schema:
-            $ref: '#/definitions/apperrors.Error'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/apperrors.Error'
-      summary: Update review by ID
       tags:
       - reviews
   /stars:
@@ -1368,6 +1241,134 @@ paths:
           schema:
             $ref: '#/definitions/apperrors.Error'
       summary: Get reviews by user ID
+      tags:
+      - reviews
+    post:
+      consumes:
+      - application/json
+      description: Create review
+      operationId: create-review
+      parameters:
+      - description: Create review request, movieId and userId are required be unique
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/contracts.CreateReviewRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Review
+          schema:
+            $ref: '#/definitions/contracts.Review'
+        "400":
+          description: Invalid request, invalid parameter or missing parameter
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "409":
+          description: Review already exists
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      summary: Create review
+      tags:
+      - reviews
+  /users/{userId}/reviews/{reviewId}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete review by ID
+      operationId: delete-review-by-id
+      parameters:
+      - description: Review ID
+        in: path
+        name: reviewId
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: Review deleted (softly deleting)
+        "400":
+          description: Invalid request, invalid parameter or missing parameter
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      summary: Delete review by ID
+      tags:
+      - reviews
+    put:
+      consumes:
+      - application/json
+      description: Update review by ID
+      operationId: update-review-by-id
+      parameters:
+      - description: Review ID
+        in: path
+        name: reviewId
+        required: true
+        type: integer
+      - description: Update review request, at least one field is required, if optional
+          fields are empty, it will set default values
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/contracts.UpdateReviewRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Review
+          schema:
+            $ref: '#/definitions/contracts.Review'
+        "400":
+          description: Invalid request, invalid parameter or missing parameter
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      summary: Update review by ID
       tags:
       - reviews
   /users/{userId}/role/{role}:
