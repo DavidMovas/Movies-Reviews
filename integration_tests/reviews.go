@@ -53,7 +53,6 @@ func reviewsAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 			req   *contracts.CreateReviewRequest
 			addr  **contracts.Review
 		}{
-
 			{
 				token: johnMooreToken,
 				req: &contracts.CreateReviewRequest{
