@@ -70,6 +70,16 @@ These tests help identify potential issues and provide confidence in the correct
 | PUT    | /api/movies/{movieId}       | Update movie by id                            | editor |
 | DELETE | /api/movies/{movieId}       | Delete movie by id (soft)                     | editor |
 
+##### Reviews API:
+| Method | Endpoint                               | Description                                                | Auth |
+|--------|----------------------------------------|------------------------------------------------------------|------|
+| GET    | /api/movies/{movieId}/reviews          | Get all reviews for a movie (paginated, filtered, ordered) | any  |
+| GET    | /api/users/{userId}/reviews            | Get all reviews for a user (paginated, filtered, ordered)  | any  |
+| GET    | /api/reviews/{reviewId}                | Get review by id                                           | any  |
+| POST   | /api/users/{userId}/reviews            | Create a new review                                        | user |
+| PUT    | /api/users/{userId}/reviews/{reviewId} | Update review by id                                        | user |
+| DELETE | /api/users/{userId}/reviews/{reviewId} | Delete review by id (soft)                                 | user |
+
 ##### OpenAPI API:
 | Method | Endpoint  | Description  | Auth  |
 |--------|-----------|--------------|-------|
