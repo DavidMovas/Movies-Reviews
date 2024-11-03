@@ -3,6 +3,8 @@ package movies
 import (
 	"context"
 
+	"golang.org/x/sync/errgroup"
+
 	"github.com/DavidMovas/Movies-Reviews/internal/slices"
 
 	"github.com/DavidMovas/Movies-Reviews/internal/modules/stars"
@@ -79,22 +81,28 @@ func (s *Service) DeleteMovieByID(ctx context.Context, movieID int) error {
 }
 
 func (s *Service) assemble(ctx context.Context, movie *MovieDetails) error {
-	var err error
-	if movie.Genres, err = s.genresRepo.GetGenresByMovieID(ctx, movie.ID); err != nil {
-		return err
-	}
-	credits, err := s.starsRepo.GetStarsByMovieID(ctx, movie.ID)
-	if err != nil {
-		return err
-	}
+	group, groupCtx := errgroup.WithContext(ctx)
 
-	movie.Cast = slices.CastSlice(credits, func(credit *stars.MovieCredit) *MovieCredit {
-		return &MovieCredit{
-			Star:    credit.Star,
-			Role:    credit.Role,
-			Details: credit.Details,
-		}
+	group.Go(func() error {
+		var err error
+		movie.Genres, err = s.genresRepo.GetGenresByMovieID(groupCtx, movie.ID)
+		return err
 	})
 
-	return err
+	group.Go(func() error {
+		var err error
+		credits, err := s.starsRepo.GetStarsByMovieID(groupCtx, movie.ID)
+		if err != nil {
+			movie.Cast = slices.CastSlice(credits, func(credit *stars.MovieCredit) *MovieCredit {
+				return &MovieCredit{
+					Star:    credit.Star,
+					Role:    credit.Role,
+					Details: credit.Details,
+				}
+			})
+		}
+		return err
+	})
+
+	return group.Wait()
 }
