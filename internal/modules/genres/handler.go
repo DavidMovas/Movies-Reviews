@@ -3,17 +3,21 @@ package genres
 import (
 	"net/http"
 
+	"github.com/golang/groupcache/singleflight"
+
 	"github.com/DavidMovas/Movies-Reviews/internal/echox"
 	"github.com/labstack/echo/v4"
 )
 
 type Handler struct {
 	*Service
+
+	reqGroup singleflight.Group
 }
 
 func NewHandler(service *Service) *Handler {
 	return &Handler{
-		service,
+		Service: service,
 	}
 }
 
@@ -26,12 +30,14 @@ func NewHandler(service *Service) *Handler {
 // @Failure 500 {object} apperrors.Error "Internal server error"
 // @Router /genres [get]
 func (h *Handler) GetGenres(c echo.Context) error {
-	genres, err := h.Service.GetGenres(c.Request().Context())
+	res, err := h.reqGroup.Do(c.Request().RequestURI, func() (any, error) {
+		return h.Service.GetGenres(c.Request().Context())
+	})
 	if err != nil {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, genres)
+	return c.JSON(http.StatusOK, res)
 }
 
 // GetGenreByID @Summary Get genre by id

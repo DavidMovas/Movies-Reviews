@@ -3,12 +3,16 @@ package users
 import (
 	"net/http"
 
+	"github.com/golang/groupcache/singleflight"
+
 	"github.com/DavidMovas/Movies-Reviews/internal/echox"
 	"github.com/labstack/echo/v4"
 )
 
 type Handler struct {
 	service *Service
+
+	reqGroup singleflight.Group
 }
 
 func NewHandler(service *Service) *Handler {
@@ -29,17 +33,24 @@ func NewHandler(service *Service) *Handler {
 // @Failure 500 {object} apperrors.Error "Internal server error"
 // @Router /users/{userId} [get]
 func (h *Handler) GetExistingUserByID(c echo.Context) error {
-	req, err := echox.BindAndValidate[GetUserByIDRequest](c)
+	res, err := h.reqGroup.Do(c.Request().RequestURI, func() (any, error) {
+		req, err := echox.BindAndValidate[GetUserByIDRequest](c)
+		if err != nil {
+			return nil, err
+		}
+
+		user, err := h.service.GetExistingUserByID(c.Request().Context(), req.UserID)
+		if err != nil {
+			return nil, err
+		}
+
+		return user, nil
+	})
 	if err != nil {
 		return err
 	}
 
-	user, err := h.service.GetExistingUserByID(c.Request().Context(), req.UserID)
-	if err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusOK, user)
+	return c.JSON(http.StatusOK, res)
 }
 
 // GetExistingUserByUsername @Summary Get existing user by username
@@ -54,17 +65,24 @@ func (h *Handler) GetExistingUserByID(c echo.Context) error {
 // @Failure 500 {object} apperrors.Error "Internal server error"
 // @Router /users/{username} [get]
 func (h *Handler) GetExistingUserByUsername(c echo.Context) error {
-	req, err := echox.BindAndValidate[GetUserByUsernameRequest](c)
+	res, err := h.reqGroup.Do(c.Request().RequestURI, func() (any, error) {
+		req, err := echox.BindAndValidate[GetUserByUsernameRequest](c)
+		if err != nil {
+			return nil, err
+		}
+
+		user, err := h.service.GetExistingUserByUsername(c.Request().Context(), req.Username)
+		if err != nil {
+			return nil, err
+		}
+
+		return user, nil
+	})
 	if err != nil {
 		return err
 	}
 
-	user, err := h.service.GetExistingUserByUsername(c.Request().Context(), req.Username)
-	if err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusOK, user)
+	return c.JSON(http.StatusOK, res)
 }
 
 // UpdateExistingUserByID @Summary Update existing user by id
