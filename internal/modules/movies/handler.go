@@ -3,6 +3,8 @@ package movies
 import (
 	"net/http"
 
+	"github.com/golang/groupcache/singleflight"
+
 	"github.com/DavidMovas/Movies-Reviews/internal/modules/stars"
 
 	"github.com/DavidMovas/Movies-Reviews/contracts"
@@ -18,6 +20,8 @@ import (
 type Handler struct {
 	service          *Service
 	paginationConfig *config.PaginationConfig
+
+	reqGroup singleflight.Group
 }
 
 func NewHandler(service *Service, paginationConfig *config.PaginationConfig) *Handler {
@@ -39,24 +43,33 @@ func NewHandler(service *Service, paginationConfig *config.PaginationConfig) *Ha
 // @Failure      500 {object} apperrors.Error "Internal server error"
 // @Router       /movies [get]
 func (h *Handler) GetMovies(c echo.Context) error {
-	req, err := echox.BindAndValidate[GetMoviesRequest](c)
+	res, err := h.reqGroup.Do(c.Request().RequestURI, func() (any, error) {
+
+		req, err := echox.BindAndValidate[GetMoviesRequest](c)
+		if err != nil {
+			return nil, err
+		}
+
+		pagination.SetDefaultsOrdered(&req.PaginatedRequestOrdered, h.paginationConfig)
+		offset, limit := pagination.OffsetLimit(&req.PaginatedRequest)
+
+		if err = contracts.ValidateSortRequest(req.Sort); err != nil {
+			req.Sort = "id"
+		}
+
+		movies, total, err := h.service.GetMovies(c.Request().Context(), offset, limit, req.Sort, req.Order, req.SearchTerm)
+		if err != nil {
+			return nil, err
+		}
+
+		return pagination.ResponseOrdered[*Movie](&req.PaginatedRequestOrdered, total, movies), nil
+	})
+
 	if err != nil {
 		return err
 	}
 
-	pagination.SetDefaultsOrdered(&req.PaginatedRequestOrdered, h.paginationConfig)
-	offset, limit := pagination.OffsetLimit(&req.PaginatedRequest)
-
-	if err = contracts.ValidateSortRequest(req.Sort); err != nil {
-		req.Sort = "id"
-	}
-
-	movies, total, err := h.service.GetMovies(c.Request().Context(), offset, limit, req.Sort, req.Order, req.SearchTerm)
-	if err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusOK, pagination.ResponseOrdered[*Movie](&req.PaginatedRequestOrdered, total, movies))
+	return c.JSON(http.StatusOK, res)
 }
 
 // GetMovieByID godoc
@@ -72,17 +85,25 @@ func (h *Handler) GetMovies(c echo.Context) error {
 // @Failure      500 {object} apperrors.Error "Internal server error"
 // @Router       /movies/{movieId} [get]
 func (h *Handler) GetMovieByID(c echo.Context) error {
-	req, err := echox.BindAndValidate[GetMovieRequest](c)
+	res, err := h.reqGroup.Do(c.Request().RequestURI, func() (any, error) {
+		req, err := echox.BindAndValidate[GetMovieRequest](c)
+		if err != nil {
+			return nil, err
+		}
+
+		movie, err := h.service.GetMovieByID(c.Request().Context(), req.MovieID)
+		if err != nil {
+			return nil, err
+		}
+
+		return movie, nil
+	})
+
 	if err != nil {
-		return err
+		return nil
 	}
 
-	movie, err := h.service.GetMovieByID(c.Request().Context(), req.MovieID)
-	if err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusOK, movie)
+	return c.JSON(http.StatusOK, res)
 }
 
 // GetStarsByMovieID godoc
@@ -98,17 +119,25 @@ func (h *Handler) GetMovieByID(c echo.Context) error {
 // @Failure      500 {object} apperrors.Error "Internal server error"
 // @Router       /movies/{movieId}/stars [get]
 func (h *Handler) GetStarsByMovieID(c echo.Context) error {
-	req, err := echox.BindAndValidate[GetMovieRequest](c)
+	res, err := h.reqGroup.Do(c.Request().RequestURI, func() (any, error) {
+		req, err := echox.BindAndValidate[GetMovieRequest](c)
+		if err != nil {
+			return nil, err
+		}
+
+		associatedStars, err := h.service.GetStarsByMovieID(c.Request().Context(), req.MovieID)
+		if err != nil {
+			return nil, err
+		}
+
+		return associatedStars, nil
+	})
+
 	if err != nil {
-		return err
+		return nil
 	}
 
-	associatedStars, err := h.service.GetStarsByMovieID(c.Request().Context(), req.MovieID)
-	if err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusOK, associatedStars)
+	return c.JSON(http.StatusOK, res)
 }
 
 // CreateMovie godoc
