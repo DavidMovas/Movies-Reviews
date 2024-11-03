@@ -8,6 +8,7 @@ require (
 	github.com/go-resty/resty/v2 v2.15.3
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang-jwt/jwt/v4 v4.5.0
+	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/consul/sdk v0.16.1
 	github.com/jackc/pgerrcode v0.0.0-20240316143900-6e2875d9b438
@@ -23,6 +24,7 @@ require (
 	github.com/swaggo/swag v1.16.4
 	github.com/testcontainers/testcontainers-go v0.33.0
 	golang.org/x/crypto v0.28.0
+	golang.org/x/sync v0.8.0
 	gopkg.in/validator.v2 v2.0.1
 	sigs.k8s.io/yaml v1.3.0
 )
@@ -108,7 +110,6 @@ require (
 	go.opentelemetry.io/otel/sdk v1.24.0 // indirect
 	go.opentelemetry.io/otel/trace v1.24.0 // indirect
 	golang.org/x/net v0.30.0 // indirect
-	golang.org/x/sync v0.8.0 // indirect
 	golang.org/x/sys v0.26.0 // indirect
 	golang.org/x/text v0.19.0 // indirect
 	golang.org/x/time v0.7.0 // indirect

@@ -91,8 +91,9 @@ func (s *Service) assemble(ctx context.Context, movie *MovieDetails) error {
 
 	group.Go(func() error {
 		var err error
-		credits, err := s.starsRepo.GetStarsByMovieID(groupCtx, movie.ID)
-		if err != nil {
+		var credits []*stars.MovieCredit
+		credits, err = s.starsRepo.GetStarsByMovieID(groupCtx, movie.ID)
+		if err == nil {
 			movie.Cast = slices.CastSlice(credits, func(credit *stars.MovieCredit) *MovieCredit {
 				return &MovieCredit{
 					Star:    credit.Star,
@@ -101,6 +102,7 @@ func (s *Service) assemble(ctx context.Context, movie *MovieDetails) error {
 				}
 			})
 		}
+
 		return err
 	})
 

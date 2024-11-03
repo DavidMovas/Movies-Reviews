@@ -44,7 +44,6 @@ func NewHandler(service *Service, paginationConfig *config.PaginationConfig) *Ha
 // @Router       /movies [get]
 func (h *Handler) GetMovies(c echo.Context) error {
 	res, err := h.reqGroup.Do(c.Request().RequestURI, func() (any, error) {
-
 		req, err := echox.BindAndValidate[GetMoviesRequest](c)
 		if err != nil {
 			return nil, err
@@ -64,7 +63,6 @@ func (h *Handler) GetMovies(c echo.Context) error {
 
 		return pagination.ResponseOrdered[*Movie](&req.PaginatedRequestOrdered, total, movies), nil
 	})
-
 	if err != nil {
 		return err
 	}
@@ -85,25 +83,17 @@ func (h *Handler) GetMovies(c echo.Context) error {
 // @Failure      500 {object} apperrors.Error "Internal server error"
 // @Router       /movies/{movieId} [get]
 func (h *Handler) GetMovieByID(c echo.Context) error {
-	res, err := h.reqGroup.Do(c.Request().RequestURI, func() (any, error) {
-		req, err := echox.BindAndValidate[GetMovieRequest](c)
-		if err != nil {
-			return nil, err
-		}
-
-		movie, err := h.service.GetMovieByID(c.Request().Context(), req.MovieID)
-		if err != nil {
-			return nil, err
-		}
-
-		return movie, nil
-	})
-
+	req, err := echox.BindAndValidate[GetMovieRequest](c)
 	if err != nil {
-		return nil
+		return err
 	}
 
-	return c.JSON(http.StatusOK, res)
+	movie, err := h.service.GetMovieByID(c.Request().Context(), req.MovieID)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, movie)
 }
 
 // GetStarsByMovieID godoc
@@ -119,25 +109,17 @@ func (h *Handler) GetMovieByID(c echo.Context) error {
 // @Failure      500 {object} apperrors.Error "Internal server error"
 // @Router       /movies/{movieId}/stars [get]
 func (h *Handler) GetStarsByMovieID(c echo.Context) error {
-	res, err := h.reqGroup.Do(c.Request().RequestURI, func() (any, error) {
-		req, err := echox.BindAndValidate[GetMovieRequest](c)
-		if err != nil {
-			return nil, err
-		}
-
-		associatedStars, err := h.service.GetStarsByMovieID(c.Request().Context(), req.MovieID)
-		if err != nil {
-			return nil, err
-		}
-
-		return associatedStars, nil
-	})
-
+	req, err := echox.BindAndValidate[GetMovieRequest](c)
 	if err != nil {
-		return nil
+		return err
 	}
 
-	return c.JSON(http.StatusOK, res)
+	associatedStars, err := h.service.GetStarsByMovieID(c.Request().Context(), req.MovieID)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, associatedStars)
 }
 
 // CreateMovie godoc

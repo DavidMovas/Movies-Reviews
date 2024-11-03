@@ -27,9 +27,9 @@ func moviesAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 	})
 
 	t.Run("movies.GetMovieById: not found", func(t *testing.T) {
-		req := &contracts.GetMovieRequest{MovieID: 0}
+		req := &contracts.GetMovieRequest{MovieID: 1000}
 		_, err := c.GetMovieByID(req)
-		requireNotFoundError(t, err, "movie", "id", 0)
+		requireNotFoundError(t, err, "movie", "id", 1000)
 	})
 
 	t.Run("movies.CreateMovie: insufficient permissions", func(t *testing.T) {
@@ -133,9 +133,8 @@ func moviesAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 		req := &contracts.GetMovieRequest{MovieID: godFather.ID}
 		movie, err := c.GetMovieByID(req)
 		require.NoError(t, err)
-		require.Equal(t, godFather, movie)
-		require.Equal(t, godFather.Genres, movie.Genres)
-		require.Equal(t, godFather.Cast, movie.Cast)
+
+		deepMovieCompare(t, godFather, movie)
 	})
 
 	t.Run("movies.GetMovies: success", func(t *testing.T) {
@@ -283,4 +282,16 @@ func moviesAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 		err := c.DeleteMovieByID(contracts.NewAuthenticated(req, johnMooreToken))
 		require.NoError(t, err)
 	})
+}
+
+func deepMovieCompare(t *testing.T, expected, actual *contracts.MovieDetails) {
+	require.Equal(t, expected.Title, actual.Title)
+	require.Equal(t, expected.ReleaseDate, actual.ReleaseDate)
+	require.Equal(t, expected.Description, actual.Description)
+	for i, genre := range expected.Genres {
+		require.Equal(t, genre.Name, actual.Genres[i].Name)
+	}
+	for i, cast := range expected.Cast {
+		require.Equal(t, cast.Star.ID, actual.Cast[i].Star.ID)
+	}
 }

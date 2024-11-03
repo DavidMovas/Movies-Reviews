@@ -46,7 +46,6 @@ func (h *Handler) GetExistingUserByID(c echo.Context) error {
 
 		return user, nil
 	})
-
 	if err != nil {
 		return err
 	}
@@ -79,7 +78,6 @@ func (h *Handler) GetExistingUserByUsername(c echo.Context) error {
 
 		return user, nil
 	})
-
 	if err != nil {
 		return err
 	}

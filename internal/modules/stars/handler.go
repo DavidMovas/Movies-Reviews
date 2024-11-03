@@ -56,7 +56,6 @@ func (h *Handler) GetStars(c echo.Context) error {
 
 		return pagination.Response[*Star](&req.PaginatedRequest, total, stars), nil
 	})
-
 	if err != nil {
 		return err
 	}
@@ -90,7 +89,6 @@ func (h *Handler) GetStarByID(c echo.Context) error {
 
 		return star, nil
 	})
-
 	if err != nil {
 		return err
 	}
