@@ -3,6 +3,8 @@ package stars
 import (
 	"net/http"
 
+	"github.com/golang/groupcache/singleflight"
+
 	"github.com/DavidMovas/Movies-Reviews/internal/config"
 
 	"github.com/DavidMovas/Movies-Reviews/internal/pagination"
@@ -15,12 +17,14 @@ import (
 type Handler struct {
 	*Service
 	paginationConfig *config.PaginationConfig
+
+	reqGroup singleflight.Group
 }
 
 func NewHandler(service *Service, paginationConfig *config.PaginationConfig) *Handler {
 	return &Handler{
-		service,
-		paginationConfig,
+		Service:          service,
+		paginationConfig: paginationConfig,
 	}
 }
 
@@ -36,20 +40,28 @@ func NewHandler(service *Service, paginationConfig *config.PaginationConfig) *Ha
 // @Failure      500 {object} apperrors.Error "Internal server error"
 // @Router       /stars [get]
 func (h *Handler) GetStars(c echo.Context) error {
-	req, err := echox.BindAndValidate[GetStarsRequest](c)
+	res, err := h.reqGroup.Do(c.Request().RequestURI, func() (any, error) {
+		req, err := echox.BindAndValidate[GetStarsRequest](c)
+		if err != nil {
+			return nil, err
+		}
+
+		pagination.SetDefaults(&req.PaginatedRequest, h.paginationConfig)
+		offset, limit := pagination.OffsetLimit(&req.PaginatedRequest)
+
+		stars, total, err := h.Service.GetStarsPaginated(c.Request().Context(), offset, limit)
+		if err != nil {
+			return nil, err
+		}
+
+		return pagination.Response[*Star](&req.PaginatedRequest, total, stars), nil
+	})
+
 	if err != nil {
 		return err
 	}
 
-	pagination.SetDefaults(&req.PaginatedRequest, h.paginationConfig)
-	offset, limit := pagination.OffsetLimit(&req.PaginatedRequest)
-
-	stars, total, err := h.Service.GetStarsPaginated(c.Request().Context(), offset, limit)
-	if err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusOK, pagination.Response[*Star](&req.PaginatedRequest, total, stars))
+	return c.JSON(http.StatusOK, res)
 }
 
 // GetStarByID godoc
@@ -65,17 +77,25 @@ func (h *Handler) GetStars(c echo.Context) error {
 // @Failure      500 {object} apperrors.Error "Internal server error"
 // @Router       /stars/{starId} [get]
 func (h *Handler) GetStarByID(c echo.Context) error {
-	req, err := echox.BindAndValidate[GetStarRequest](c)
+	res, err := h.reqGroup.Do(c.Request().RequestURI, func() (any, error) {
+		req, err := echox.BindAndValidate[GetStarRequest](c)
+		if err != nil {
+			return nil, err
+		}
+
+		star, err := h.Service.GetStarByID(c.Request().Context(), req.StarID)
+		if err != nil {
+			return nil, err
+		}
+
+		return star, nil
+	})
+
 	if err != nil {
 		return err
 	}
 
-	star, err := h.Service.GetStarByID(c.Request().Context(), req.StarID)
-	if err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusOK, star)
+	return c.JSON(http.StatusOK, res)
 }
 
 // CreateStar godoc
