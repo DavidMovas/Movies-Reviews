@@ -340,3 +340,16 @@ func (r *Repository) starsUpdateRequest(ctx context.Context, cast []*MovieCredit
 	}
 	return nil
 }
+
+func (r *Repository) Lock(ctx context.Context, tx pgx.Tx, movieID int) error {
+	n, err := tx.Exec(ctx, `SELECT 1 FROM movies WHERE deleted_at IS NULL AND id = $1 FOR UPDATE`, movieID)
+	if err != nil {
+		return apperrors.Internal(err)
+	}
+
+	if n.RowsAffected() == 0 {
+		return apperrors.NotFound("movie", "id", movieID)
+	}
+
+	return nil
+}
