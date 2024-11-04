@@ -171,7 +171,7 @@ func (r *Repository) CreateReview(ctx context.Context, req *CreateReviewRequest)
 			return apperrors.Internal(err)
 		}
 
-		err = r.db.QueryRow(ctx, query, args...).
+		err = tx.QueryRow(ctx, query, args...).
 			Scan(&review.ID, &review.MovieID, &review.UserID, &review.Rating, &review.Title, &review.Content, &review.CreatedAt, &review.UpdatedAt, &review.DeletedAt)
 
 		switch {
@@ -197,7 +197,11 @@ func (r *Repository) UpdateReview(ctx context.Context, reviewID int, req *Update
 	}
 
 	var review Review
-	err := dbx.InTransaction(ctx, r.db, func(ctx context.Context, _ pgx.Tx) error {
+	err := dbx.InTransaction(ctx, r.db, func(ctx context.Context, tx pgx.Tx) error {
+		if err := r.movieRepo.Lock(ctx, tx, req.MovieID); err != nil {
+			return err
+		}
+
 		builder := dbx.StatementBuilder.Update("reviews").
 			Set("updated_at", time.Now()).
 			Where("id = ?", reviewID).
@@ -219,7 +223,7 @@ func (r *Repository) UpdateReview(ctx context.Context, reviewID int, req *Update
 			return apperrors.Internal(err)
 		}
 
-		err = r.db.QueryRow(ctx, query, args...).
+		err = tx.QueryRow(ctx, query, args...).
 			Scan(&review.ID, &review.MovieID, &review.UserID, &review.Rating, &review.Title, &review.Content, &review.CreatedAt, &review.UpdatedAt, &review.DeletedAt)
 
 		switch {
@@ -249,7 +253,11 @@ func (r *Repository) DeleteReview(ctx context.Context, reviewID int) error {
 		return getErr
 	}
 
-	err := dbx.InTransaction(ctx, r.db, func(ctx context.Context, _ pgx.Tx) error {
+	err := dbx.InTransaction(ctx, r.db, func(ctx context.Context, tx pgx.Tx) error {
+		if err := r.movieRepo.Lock(ctx, tx, review.MovieID); err != nil {
+			return err
+		}
+
 		builder := dbx.StatementBuilder.Update("reviews").
 			Set("deleted_at", time.Now()).
 			Where("id = ?", reviewID).
@@ -260,7 +268,7 @@ func (r *Repository) DeleteReview(ctx context.Context, reviewID int) error {
 			return apperrors.Internal(err)
 		}
 
-		n, err := r.db.Exec(ctx, query, args...)
+		n, err := tx.Exec(ctx, query, args...)
 		if err != nil {
 			return apperrors.Internal(err)
 		}
