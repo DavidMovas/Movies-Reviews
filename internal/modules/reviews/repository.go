@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/DavidMovas/Movies-Reviews/internal/modules/movies"
+
 	apperrors "github.com/DavidMovas/Movies-Reviews/internal/error"
 	"github.com/jackc/pgx/v5"
 
@@ -16,12 +18,14 @@ import (
 )
 
 type Repository struct {
-	db *pgxpool.Pool
+	db        *pgxpool.Pool
+	movieRepo *movies.Repository
 }
 
-func NewRepository(db *pgxpool.Pool) *Repository {
+func NewRepository(db *pgxpool.Pool, movieRepo *movies.Repository) *Repository {
 	return &Repository{
-		db: db,
+		db:        db,
+		movieRepo: movieRepo,
 	}
 }
 
@@ -151,25 +155,36 @@ func (r *Repository) GetReviewByID(ctx context.Context, reviewID int) (*Review, 
 }
 
 func (r *Repository) CreateReview(ctx context.Context, req *CreateReviewRequest) (*Review, error) {
-	builder := dbx.StatementBuilder.Insert("reviews").
-		Columns("movie_id", "user_id", "rating", "title", "content").
-		Values(req.MovieID, req.UserID, req.Rating, req.Title, req.Content).
-		Suffix("RETURNING id, movie_id, user_id, rating, title, content, created_at, updated_at, deleted_at")
-
-	query, args, err := builder.ToSql()
-	if err != nil {
-		return nil, apperrors.Internal(err)
-	}
-
 	var review Review
-	err = r.db.QueryRow(ctx, query, args...).
-		Scan(&review.ID, &review.MovieID, &review.UserID, &review.Rating, &review.Title, &review.Content, &review.CreatedAt, &review.UpdatedAt, &review.DeletedAt)
+	err := dbx.InTransaction(ctx, r.db, func(ctx context.Context, tx pgx.Tx) error {
+		if err := r.movieRepo.Lock(ctx, tx, req.MovieID); err != nil {
+			return err
+		}
 
-	switch {
-	case dbx.IsUniqueViolation(err, "reviews_movie_id_user_id_key"):
-		return nil, apperrors.AlreadyExists("review", "movie_id user_id", fmt.Sprintf("%d - %d", req.MovieID, req.UserID))
-	case err != nil:
-		return nil, apperrors.Internal(err)
+		builder := dbx.StatementBuilder.Insert("reviews").
+			Columns("movie_id", "user_id", "rating", "title", "content").
+			Values(req.MovieID, req.UserID, req.Rating, req.Title, req.Content).
+			Suffix("RETURNING id, movie_id, user_id, rating, title, content, created_at, updated_at, deleted_at")
+
+		query, args, err := builder.ToSql()
+		if err != nil {
+			return apperrors.Internal(err)
+		}
+
+		err = tx.QueryRow(ctx, query, args...).
+			Scan(&review.ID, &review.MovieID, &review.UserID, &review.Rating, &review.Title, &review.Content, &review.CreatedAt, &review.UpdatedAt, &review.DeletedAt)
+
+		switch {
+		case dbx.IsUniqueViolation(err, "reviews_movie_id_user_id_key"):
+			return apperrors.AlreadyExists("review", "movie_id user_id", fmt.Sprintf("%d - %d", req.MovieID, req.UserID))
+		case err != nil:
+			return apperrors.Internal(err)
+		}
+
+		return r.recalculateMovieAverageRating(ctx, req.MovieID)
+	})
+	if err != nil {
+		return nil, err
 	}
 
 	return &review, nil
@@ -180,59 +195,104 @@ func (r *Repository) UpdateReview(ctx context.Context, reviewID int, req *Update
 		return nil, apperrors.BadRequest(fmt.Errorf("no fields to update"))
 	}
 
-	builder := dbx.StatementBuilder.Update("reviews").
-		Set("updated_at", time.Now()).
-		Where("id = ?", reviewID).
-		Where(squirrel.Eq{"deleted_at": nil}).
-		Suffix("RETURNING id, movie_id, user_id, rating, title, content, created_at, updated_at, deleted_at")
-
-	if req.Rating != nil {
-		builder = builder.Set("rating", *req.Rating)
-	}
-	if req.Title != nil {
-		builder = builder.Set("title", *req.Title)
-	}
-	if req.Content != nil {
-		builder = builder.Set("content", *req.Content)
-	}
-
-	query, args, err := builder.ToSql()
-	if err != nil {
-		return nil, apperrors.Internal(err)
-	}
-
 	var review Review
-	err = r.db.QueryRow(ctx, query, args...).
-		Scan(&review.ID, &review.MovieID, &review.UserID, &review.Rating, &review.Title, &review.Content, &review.CreatedAt, &review.UpdatedAt, &review.DeletedAt)
+	err := dbx.InTransaction(ctx, r.db, func(ctx context.Context, tx pgx.Tx) error {
+		if err := r.movieRepo.Lock(ctx, tx, req.MovieID); err != nil {
+			return err
+		}
 
-	switch {
-	case dbx.IsNoRows(err):
-		return nil, apperrors.NotFound("review", "id", reviewID)
-	case err != nil:
-		return nil, apperrors.Internal(err)
+		builder := dbx.StatementBuilder.Update("reviews").
+			Set("updated_at", time.Now()).
+			Where("id = ?", reviewID).
+			Where(squirrel.Eq{"deleted_at": nil}).
+			Suffix("RETURNING id, movie_id, user_id, rating, title, content, created_at, updated_at, deleted_at")
+
+		if req.Rating != nil {
+			builder = builder.Set("rating", *req.Rating)
+		}
+		if req.Title != nil {
+			builder = builder.Set("title", *req.Title)
+		}
+		if req.Content != nil {
+			builder = builder.Set("content", *req.Content)
+		}
+
+		query, args, err := builder.ToSql()
+		if err != nil {
+			return apperrors.Internal(err)
+		}
+
+		err = tx.QueryRow(ctx, query, args...).
+			Scan(&review.ID, &review.MovieID, &review.UserID, &review.Rating, &review.Title, &review.Content, &review.CreatedAt, &review.UpdatedAt, &review.DeletedAt)
+
+		switch {
+		case dbx.IsNoRows(err):
+			return apperrors.NotFound("review", "id", reviewID)
+		case err != nil:
+			return apperrors.Internal(err)
+		}
+
+		if req.Rating != nil {
+			return r.recalculateMovieAverageRating(ctx, req.MovieID)
+		}
+
+		return nil
+	})
+	if err != nil {
+		return nil, err
 	}
 
 	return &review, nil
 }
 
 func (r *Repository) DeleteReview(ctx context.Context, reviewID int) error {
-	builder := dbx.StatementBuilder.Update("reviews").
-		Set("deleted_at", time.Now()).
-		Where("id = ?", reviewID).
-		Where(squirrel.Eq{"deleted_at": nil})
-
-	query, args, err := builder.ToSql()
-	if err != nil {
-		return apperrors.Internal(err)
+	review, getErr := r.GetReviewByID(ctx, reviewID)
+	if getErr != nil {
+		return getErr
 	}
 
-	n, err := r.db.Exec(ctx, query, args...)
+	err := dbx.InTransaction(ctx, r.db, func(ctx context.Context, tx pgx.Tx) error {
+		if err := r.movieRepo.Lock(ctx, tx, review.MovieID); err != nil {
+			return err
+		}
+
+		builder := dbx.StatementBuilder.Update("reviews").
+			Set("deleted_at", time.Now()).
+			Where("id = ?", reviewID).
+			Where(squirrel.Eq{"deleted_at": nil})
+
+		query, args, err := builder.ToSql()
+		if err != nil {
+			return apperrors.Internal(err)
+		}
+
+		n, err := tx.Exec(ctx, query, args...)
+		if err != nil {
+			return apperrors.Internal(err)
+		}
+
+		if n.RowsAffected() == 0 {
+			return apperrors.NotFound("review", "id", reviewID)
+		}
+
+		return r.recalculateMovieAverageRating(ctx, review.MovieID)
+	})
+	if err != nil {
+		return nil
+	}
+
+	return nil
+}
+
+func (r *Repository) recalculateMovieAverageRating(ctx context.Context, movieID int) error {
+	q := dbx.FromContext(ctx, r.db)
+	n, err := q.Exec(ctx, `UPDATE movies SET avg_rating = (SELECT AVG(rating) FROM reviews WHERE deleted_at IS NULL AND movie_id = $1) WHERE id = $1`, movieID)
 	if err != nil {
 		return apperrors.Internal(err)
 	}
 
 	if n.RowsAffected() == 0 {
-		return apperrors.NotFound("review", "id", reviewID)
+		return apperrors.NotFound("movie", "id", movieID)
 	}
 
 	return nil

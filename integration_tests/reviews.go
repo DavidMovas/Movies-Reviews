@@ -191,6 +191,18 @@ func reviewsAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 		require.Equal(t, titanicReview1.Rating, res.Items[1].Rating)
 	})
 
+	t.Run("reviews.GetMovieById: (check average rating) success", func(t *testing.T) {
+		req := &contracts.GetMovieRequest{
+			MovieID: titanic.ID,
+		}
+
+		res, err := c.GetMovieByID(req)
+		require.NoError(t, err)
+		require.NotNil(t, res)
+		require.Equal(t, titanic.Title, res.Title)
+		requireMovieRatingEqual(t, float64((titanicReview1.Rating+titanicReview2.Rating)/2), *res.AvgRating)
+	})
+
 	t.Run("reviews.UpdateReview: insufficient permissions", func(t *testing.T) {
 		req := &contracts.UpdateReviewRequest{
 			ReviewID: titanicReview1.ID,
@@ -260,4 +272,9 @@ func reviewsAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 		err := c.DeleteReview(*contracts.NewAuthenticated(req, johnMooreToken))
 		require.NoError(t, err)
 	})
+}
+
+func requireMovieRatingEqual(t *testing.T, expected, actual float64) {
+	const delta = 0.01
+	require.InDelta(t, expected, actual, delta)
 }

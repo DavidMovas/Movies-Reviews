@@ -34,7 +34,7 @@ func NewRepository(db *pgxpool.Pool, genresRepo *genres.Repository, starsRepo *s
 }
 
 func (r *Repository) GetMovies(ctx context.Context, offset int, limit int, sort, order string, searchTerm *string) ([]*Movie, int, error) {
-	selectQuery := dbx.StatementBuilder.Select("id, title, release_date, created_at, deleted_at").
+	selectQuery := dbx.StatementBuilder.Select("id, title, release_date, avg_rating, created_at, deleted_at").
 		From("movies").
 		Where(squirrel.Eq{"deleted_at": nil}).
 		OrderBy(sort + " " + order).
@@ -75,7 +75,7 @@ func (r *Repository) GetMovies(ctx context.Context, offset int, limit int, sort,
 	var movies []*Movie
 	for rows.Next() {
 		var movie Movie
-		if err = rows.Scan(&movie.ID, &movie.Title, &movie.ReleaseDate, &movie.CreatedAt, &movie.DeletedAt); err != nil {
+		if err = rows.Scan(&movie.ID, &movie.Title, &movie.ReleaseDate, &movie.AvgRating, &movie.CreatedAt, &movie.DeletedAt); err != nil {
 			return nil, 0, apperrors.Internal(err)
 		}
 		movies = append(movies, &movie)
@@ -94,7 +94,7 @@ func (r *Repository) GetMovies(ctx context.Context, offset int, limit int, sort,
 }
 
 func (r *Repository) GetMovieByID(ctx context.Context, movieID int) (*MovieDetails, error) {
-	query, args, err := squirrel.Select("id, title, description, release_date, created_at, version").
+	query, args, err := squirrel.Select("id, title, description, release_date, avg_rating, created_at, version").
 		From("movies").
 		Where(squirrel.Eq{"id": movieID}).
 		Where(squirrel.Eq{"deleted_at": nil}).
@@ -106,7 +106,7 @@ func (r *Repository) GetMovieByID(ctx context.Context, movieID int) (*MovieDetai
 
 	var movie MovieDetails
 	err = r.db.QueryRow(ctx, query, args...).
-		Scan(&movie.ID, &movie.Title, &movie.Description, &movie.ReleaseDate, &movie.CreatedAt, &movie.Version)
+		Scan(&movie.ID, &movie.Title, &movie.Description, &movie.ReleaseDate, &movie.AvgRating, &movie.CreatedAt, &movie.Version)
 
 	switch {
 	case dbx.IsNoRows(err):
@@ -240,6 +240,19 @@ func (r *Repository) DeleteMovieByID(ctx context.Context, movieID int) error {
 	}
 
 	n, err := r.db.Exec(ctx, query, args...)
+	if err != nil {
+		return apperrors.Internal(err)
+	}
+
+	if n.RowsAffected() == 0 {
+		return apperrors.NotFound("movie", "id", movieID)
+	}
+
+	return nil
+}
+
+func (r *Repository) Lock(ctx context.Context, tx pgx.Tx, movieID int) error {
+	n, err := tx.Exec(ctx, `SELECT 1 FROM movies WHERE deleted_at IS NULL AND id = $1 FOR UPDATE`, movieID)
 	if err != nil {
 		return apperrors.Internal(err)
 	}
