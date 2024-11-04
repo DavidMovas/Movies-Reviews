@@ -183,7 +183,6 @@ func (r *Repository) CreateReview(ctx context.Context, req *CreateReviewRequest)
 
 		return r.recalculateMovieAverageRating(ctx, req.MovieID)
 	})
-
 	if err != nil {
 		return nil, err
 	}
@@ -239,7 +238,6 @@ func (r *Repository) UpdateReview(ctx context.Context, reviewID int, req *Update
 
 		return nil
 	})
-
 	if err != nil {
 		return nil, err
 	}
@@ -279,7 +277,6 @@ func (r *Repository) DeleteReview(ctx context.Context, reviewID int) error {
 
 		return r.recalculateMovieAverageRating(ctx, review.MovieID)
 	})
-
 	if err != nil {
 		return nil
 	}
@@ -290,7 +287,6 @@ func (r *Repository) DeleteReview(ctx context.Context, reviewID int) error {
 func (r *Repository) recalculateMovieAverageRating(ctx context.Context, movieID int) error {
 	q := dbx.FromContext(ctx, r.db)
 	n, err := q.Exec(ctx, `UPDATE movies SET avg_rating = (SELECT AVG(rating) FROM reviews WHERE deleted_at IS NULL AND movie_id = $1) WHERE id = $1`, movieID)
-
 	if err != nil {
 		return apperrors.Internal(err)
 	}
