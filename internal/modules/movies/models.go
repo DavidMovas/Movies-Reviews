@@ -14,6 +14,7 @@ type Movie struct {
 	ID          int        `json:"id"`
 	Title       string     `json:"title"`
 	ReleaseDate time.Time  `json:"releaseDate"`
+	AvgRating   *float64   `json:"avgRating,omitempty"`
 	CreatedAt   time.Time  `json:"createdAt"`
 	DeletedAt   *time.Time `json:"deletedAt,omitempty"`
 }
