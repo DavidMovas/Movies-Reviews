@@ -3,7 +3,12 @@ package collectors
 import (
 	"encoding/json"
 	"log/slog"
+	"net/url"
+	"strings"
 	"sync"
+	"time"
+
+	"github.com/DavidMovas/Movies-Reviews/internal/maps"
 
 	"github.com/DavidMovas/Movies-Reviews/scraper/models"
 
@@ -61,8 +66,67 @@ func NewMovieCollector(c *colly.Collector, castCollector *CastCollector, logger 
 
 		collector.l.
 			With("movie_id", movieID).
-			With("title", movie.Title)
+			With("title", movie.Title).
+			Debug("movie collected")
+
+		creditsLink, _ := url.JoinPath("https://www.imdb.com", info.URL, "/fullcredits")
+		castCollector.Visit(creditsLink)
 	})
 
 	return collector
+}
+
+func (c *MovieCollector) Visit(link string) {
+	visit(c.c, link, c.l)
+}
+
+func (c *MovieCollector) Wait() {
+	c.c.Wait()
+}
+
+func (c *MovieCollector) Movies() map[string]*models.Movie {
+	return c.movieMap
+}
+
+func (c *MovieCollector) Genres() []string {
+	genres := make([]string, 0, len(c.allGenres))
+	for genre := range c.allGenres {
+		genres = append(genres, genre)
+	}
+
+	return genres
+}
+
+func (c *MovieCollector) getOrCreateMovie(movieID, link string) *models.Movie {
+	movie, _, _ := maps.GetOrCreateLocked(c.movieMap, movieID, &c.mx, func(key string) (*models.Movie, error) {
+		return &models.Movie{
+			ID:   movieID,
+			Link: removeQueryPart(link),
+		}, nil
+	})
+
+	return movie
+}
+
+func (c *MovieCollector) toAllGenres(genres []string) {
+	c.mx.Lock()
+	defer c.mx.Unlock()
+
+	for _, genre := range genres {
+		c.allGenres[genre] = true
+	}
+}
+
+func getMovieID(url *url.URL) string {
+	id := strings.Split(url.Path, "/")[2]
+	return id
+}
+
+func mustParseDate(date string) time.Time {
+	t, err := time.Parse("2006-01-02", date)
+	if err != nil {
+		return time.Time{}
+	}
+
+	return t
 }
