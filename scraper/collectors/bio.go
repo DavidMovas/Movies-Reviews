@@ -25,7 +25,7 @@ type BioCollector struct {
 }
 
 func NewBioCollector(c *colly.Collector, logger *slog.Logger) *BioCollector {
-	_ = c.Limit(&colly.LimitRule{DomainGlob: "*", Parallelism: 5})
+	_ = c.Limit(&colly.LimitRule{DomainGlob: "*", Parallelism: 3})
 
 	collector := &BioCollector{
 		c:      c,

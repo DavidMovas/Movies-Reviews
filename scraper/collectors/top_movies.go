@@ -13,6 +13,9 @@ type TopMoviesCollector struct {
 }
 
 func NewTopMoviesCollector(c *colly.Collector, movieCollector *MovieCollector, logger *slog.Logger) *TopMoviesCollector {
+	_ = c.Limit(&colly.LimitRule{DomainGlob: "*", Parallelism: 5})
+	c.MaxDepth = 0
+
 	collector := &TopMoviesCollector{
 		c: c,
 		l: logger.With("collector", "top_movies"),

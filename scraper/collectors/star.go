@@ -22,7 +22,7 @@ type StarCollector struct {
 }
 
 func NewStarCollector(c *colly.Collector, bioCollector *BioCollector, logger *slog.Logger) *StarCollector {
-	_ = c.Limit(&colly.LimitRule{DomainGlob: "*", Parallelism: 5})
+	_ = c.Limit(&colly.LimitRule{DomainGlob: "*", Parallelism: 3})
 
 	collector := &StarCollector{
 		c:       c,

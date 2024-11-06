@@ -157,6 +157,6 @@ func (c *CastCollector) addCastFromCastTable(cast *models.Cast, table *goquery.S
 		cast.Cast = append(cast.Cast, credit)
 		added++
 
-		return added >= max
+		return added <= max
 	})
 }
