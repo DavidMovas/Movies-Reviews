@@ -41,7 +41,7 @@ func visit(c *colly.Collector, link string, logger *slog.Logger) {
 func removeQueryPart(link string) string {
 	u, err := url.Parse(link)
 	if err != nil {
-		fmt.Errorf("failed to parse url: %w", err)
+		return fmt.Errorf("failed to parse url: %w", err).Error()
 	}
 
 	u.Path = strings.Split(u.Path, "/?")[0]

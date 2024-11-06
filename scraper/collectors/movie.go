@@ -98,7 +98,7 @@ func (c *MovieCollector) Genres() []string {
 }
 
 func (c *MovieCollector) getOrCreateMovie(movieID, link string) *models.Movie {
-	movie, _, _ := maps.GetOrCreateLocked(c.movieMap, movieID, &c.mx, func(key string) (*models.Movie, error) {
+	movie, _, _ := maps.GetOrCreateLocked(c.movieMap, movieID, &c.mx, func(_ string) (*models.Movie, error) {
 		return &models.Movie{
 			ID:   movieID,
 			Link: removeQueryPart(link),

@@ -21,7 +21,7 @@ type StarCollector struct {
 	mx      sync.RWMutex
 }
 
-func NewStarCollector(c *colly.Collector, bioCollector *BioCollecor, logger *slog.Logger) *StarCollector {
+func NewStarCollector(c *colly.Collector, bioCollector *BioCollector, logger *slog.Logger) *StarCollector {
 	_ = c.Limit(&colly.LimitRule{DomainGlob: "*", Parallelism: 5})
 
 	collector := &StarCollector{
@@ -88,6 +88,11 @@ func (c *StarCollector) Wait() {
 
 func (c *StarCollector) Stars() map[string]*models.Star {
 	return c.starMap
+}
+
+func getStarID(link string) string {
+	id := strings.Split(link, "/")[2]
+	return id
 }
 
 func (c *StarCollector) getOrCreateStar(starID, link string) *models.Star {

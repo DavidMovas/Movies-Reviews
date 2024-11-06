@@ -55,6 +55,7 @@ func runIngest(opts *IngestOptions, logger *slog.Logger) error {
 		return fmt.Errorf("failed to login ingest user: %w", err)
 	}
 	token := res.AccessToken
+	_ = token
 	logger.Info("Logged in successfully")
 
 	var (
@@ -96,18 +97,21 @@ func runIngest(opts *IngestOptions, logger *slog.Logger) error {
 	logger.Info("Read data successfully")
 
 	// Ingest data
-	genreIngester := ingesters.NewGenreIngester(cl, token, logger)
-	if err = genreIngester.Ingest(genres); err != nil {
-		return fmt.Errorf("failed to ingest genres: %w", err)
-	}
-	starIngester := ingesters.NewStarIngester(cl, token, logger)
-	if err = starIngester.Ingest(stars, bios); err != nil {
-		return fmt.Errorf("failed to ingest stars: %w", err)
-	}
-	movieIngester := ingesters.NewMovieIngester(cl, token, genreIngester.Converter, starIngester.Converter, logger)
-	if err = movieIngester.Ingest(movies, cast); err != nil {
-		return fmt.Errorf("failed to ingest movies: %w", err)
-	}
+	/*
+		genreIngester := ingesters.NewGenreIngester(cl, token, logger)
+		if err = genreIngester.Ingest(genres); err != nil {
+			return fmt.Errorf("failed to ingest genres: %w", err)
+		}
+		starIngester := ingesters.NewStarIngester(cl, token, logger)
+		if err = starIngester.Ingest(stars, bios); err != nil {
+			return fmt.Errorf("failed to ingest stars: %w", err)
+		}
+		movieIngester := ingesters.NewMovieIngester(cl, token, genreIngester.Converter, starIngester.Converter, logger)
+		if err = movieIngester.Ingest(movies, cast); err != nil {
+			return fmt.Errorf("failed to ingest movies: %w", err)
+		}
+
+	*/
 
 	return nil
 }

@@ -111,7 +111,7 @@ func (c *CastCollector) isNewStarLink(link string) bool {
 }
 
 func (c *CastCollector) addCastFromSimpleTable(cast *models.Cast, role string, table *goquery.Selection) {
-	table.Find("tr").Each(func(i int, row *goquery.Selection) {
+	table.Find("tr").Each(func(_ int, row *goquery.Selection) {
 		starLink := row.Find("td.name a")
 		if starLink.Nodes == nil {
 			return
@@ -131,5 +131,32 @@ func (c *CastCollector) addCastFromSimpleTable(cast *models.Cast, role string, t
 		}
 
 		cast.Cast = append(cast.Cast, credit)
+	})
+}
+
+func (c *CastCollector) addCastFromCastTable(cast *models.Cast, table *goquery.Selection, max int) {
+	var added int
+	table.Find("tr").EachWithBreak(func(_ int, row *goquery.Selection) bool {
+		starLink := row.Find("td:not(.primary_photo .character) a")
+		if starLink.Nodes == nil {
+			return true
+		}
+
+		href := starLink.AttrOr("href", "")
+		link, _ := url.JoinPath("https://www.imdb.com", href)
+		link = removeQueryPart(link)
+
+		credit := &models.Credit{
+			Role:     "actor",
+			Details:  "",
+			StarName: strings.TrimSpace(starLink.Text()),
+			StarLink: link,
+			StarID:   getStarID(link),
+		}
+
+		cast.Cast = append(cast.Cast, credit)
+		added++
+
+		return added >= max
 	})
 }

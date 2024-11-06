@@ -40,7 +40,7 @@ func NewBioCollector(c *colly.Collector, logger *slog.Logger) *BioCollector {
 
 		overviewSection := getSectionByTitle(e, "overview")
 		if overviewSection.Nodes != nil {
-			overviewSection.Find("a").Each(func(i int, selection *goquery.Selection) {
+			overviewSection.Find("a").Each(func(_ int, selection *goquery.Selection) {
 				if bio.BirthPlace != "" {
 					return
 				}
@@ -54,7 +54,7 @@ func NewBioCollector(c *colly.Collector, logger *slog.Logger) *BioCollector {
 
 		bioSelection := getSectionByTitle(e, "mini_bio")
 		if bioSelection.Nodes != nil {
-			bioContentContainer := bioSelection.Find("ul > li > div ul > duv:not(.ipc-metadata-list-item-html-item--subtext) div")
+			bioContentContainer := bioSelection.Find("ul li > div ul > div:not(.ipc-metadata-list-item-html-item--subtext) div")
 			if bioContentContainer.Nodes != nil {
 				bio.Bio = bioContentContainer.Text()
 				bio.Bio = collectText(bioContentContainer)
@@ -82,7 +82,7 @@ func (c *BioCollector) Bios() map[string]*models.Bio {
 }
 
 func (c *BioCollector) getOrCreateBio(starID, link string) *models.Bio {
-	bio, _, _ := maps.GetOrCreateLocked(c.bioMap, starID, &c.mx, func(key string) (*models.Bio, error) {
+	bio, _, _ := maps.GetOrCreateLocked(c.bioMap, starID, &c.mx, func(_ string) (*models.Bio, error) {
 		return &models.Bio{
 			ID:   starID,
 			Link: link,
@@ -93,7 +93,7 @@ func (c *BioCollector) getOrCreateBio(starID, link string) *models.Bio {
 }
 
 func getSectionByTitle(e *colly.HTMLElement, title string) *goquery.Selection {
-	selector := fmt.Sprintf("div[data-testid=sub-section-#{%s}]", title)
+	selector := fmt.Sprintf("div[data-testid=sub-section-%s]", title)
 	return e.DOM.Find(selector)
 }
 
