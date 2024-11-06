@@ -83,3 +83,27 @@ func (res *PaginatedResponse[T]) GetTotal() int {
 func (res *PaginatedResponse[T]) GetItems() []T {
 	return res.Items
 }
+
+func (req *PaginatedRequestOrdered) SetPage(page int) {
+	req.PaginatedRequest.SetPage(page)
+}
+
+func (req *PaginatedRequestOrdered) SetSize(size int) {
+	req.PaginatedRequest.SetSize(size)
+}
+
+func (res *PaginatedResponseOrdered[T]) GetPage() int {
+	return res.PaginatedResponse.GetPage()
+}
+
+func (res *PaginatedResponseOrdered[T]) GetSize() int {
+	return res.PaginatedResponse.GetSize()
+}
+
+func (res *PaginatedResponseOrdered[T]) GetTotal() int {
+	return res.PaginatedResponse.GetTotal()
+}
+
+func (res *PaginatedResponseOrdered[T]) GetItems() []T {
+	return res.PaginatedResponse.GetItems()
+}

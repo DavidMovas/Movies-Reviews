@@ -4,7 +4,7 @@ import "github.com/DavidMovas/Movies-Reviews/contracts"
 
 func Paginate[I any, Req contracts.PaginationSetter](
 	req Req,
-	queryFn func(Req) (*contracts.PaginatedResponse[I], error),
+	queryFn func(Req) (*contracts.PaginatedResponseOrdered[I], error),
 ) ([]I, error) {
 	var items []I
 

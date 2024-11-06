@@ -74,7 +74,7 @@ func (i *StarIngester) Ingest(stars map[string]*models.Star, bios map[string]*mo
 
 		group.Go(func() error {
 			var created bool
-			_, created, err = maps.GetOrCreateLocked(idToStarMap, commonID, &mx, func(name starCommonIdentifier) (*contracts.Star, error) {
+			_, created, err = maps.GetOrCreateLocked(idToStarMap, commonID, &mx, func(_ starCommonIdentifier) (*contracts.Star, error) {
 				bio, ok := bios[star.ID]
 				if !ok {
 					i.logger.With("star_id", star.ID).
@@ -127,4 +127,9 @@ func (i *StarIngester) Ingest(stars map[string]*models.Star, bios map[string]*mo
 	}
 
 	return nil
+}
+
+func (i *StarIngester) Converter(imdbID string) (int, bool) {
+	id, ok := i.conversionMap[imdbID]
+	return id, ok
 }
