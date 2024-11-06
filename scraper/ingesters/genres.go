@@ -25,7 +25,7 @@ type GenreIngester struct {
 	conversionMap map[string]int
 }
 
-func NewGenresIngest(c *client.Client, token string, logger *slog.Logger) *GenreIngester {
+func NewGenreIngest(c *client.Client, token string, logger *slog.Logger) *GenreIngester {
 	return &GenreIngester{
 		c:      c,
 		token:  token,
