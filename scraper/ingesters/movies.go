@@ -26,13 +26,13 @@ type MoviesIngester struct {
 	logger           *slog.Logger
 }
 
-func NewMovieIngester(c *client.Client, token string, logger *slog.Logger) *MoviesIngester {
+func NewMovieIngester(c *client.Client, token string, genreIngesterConverter func(string) (int, bool), starIngesterConverter func(string) (int, bool), logger *slog.Logger) *MoviesIngester {
 	return &MoviesIngester{
 		c:                c,
 		token:            token,
 		logger:           logger.With("ingester", "movies"),
-		genreIDConverter: NewGenreIngest(c, token, logger).Converter,
-		starIDConverter:  NewStarIngester(c, token, logger).Converter,
+		genreIDConverter: genreIngesterConverter,
+		starIDConverter:  starIngesterConverter,
 	}
 }
 

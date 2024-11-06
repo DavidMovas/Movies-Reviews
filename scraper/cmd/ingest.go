@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/DavidMovas/Movies-Reviews/scraper/ingesters"
+
 	"github.com/DavidMovas/Movies-Reviews/scraper/models"
 
 	"github.com/DavidMovas/Movies-Reviews/client"
@@ -28,7 +30,7 @@ func NewIngestCmd(logger *slog.Logger) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "ingest",
 		Short: "Ingest movie info",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			return runIngest(&opts, logger)
 		},
 	}
@@ -96,22 +98,18 @@ func runIngest(opts *IngestOptions, logger *slog.Logger) error {
 
 	logger.Info("Read data successfully")
 
-	// Ingest data
-	/*
-		genreIngester := ingesters.NewGenreIngester(cl, token, logger)
-		if err = genreIngester.Ingest(genres); err != nil {
-			return fmt.Errorf("failed to ingest genres: %w", err)
-		}
-		starIngester := ingesters.NewStarIngester(cl, token, logger)
-		if err = starIngester.Ingest(stars, bios); err != nil {
-			return fmt.Errorf("failed to ingest stars: %w", err)
-		}
-		movieIngester := ingesters.NewMovieIngester(cl, token, genreIngester.Converter, starIngester.Converter, logger)
-		if err = movieIngester.Ingest(movies, cast); err != nil {
-			return fmt.Errorf("failed to ingest movies: %w", err)
-		}
-
-	*/
+	genreIngester := ingesters.NewGenreIngest(cl, token, logger)
+	if err = genreIngester.Ingest(genres); err != nil {
+		return fmt.Errorf("failed to ingest genres: %w", err)
+	}
+	starIngester := ingesters.NewStarIngester(cl, token, logger)
+	if err = starIngester.Ingest(stars, bios); err != nil {
+		return fmt.Errorf("failed to ingest stars: %w", err)
+	}
+	movieIngester := ingesters.NewMovieIngester(cl, token, genreIngester.Converter, starIngester.Converter, logger)
+	if err = movieIngester.Ingest(movies, cast); err != nil {
+		return fmt.Errorf("failed to ingest movies: %w", err)
+	}
 
 	return nil
 }

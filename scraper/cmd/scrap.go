@@ -22,7 +22,7 @@ func NewScrapCmd(logger *slog.Logger) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "scrap",
 		Short: "Scrap movie info",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			return runScrap(&opts, logger)
 		},
 	}
