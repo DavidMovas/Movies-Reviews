@@ -71,9 +71,9 @@ func moviesAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 			},
 			{
 				req: &contracts.CreateMovieRequest{
-					Title:       "Star Wars: Episode IV - A New Hope",
+					Title:       "Start Wars: Episode IV - A New Hope",
 					ReleaseDate: time.Date(1977, 5, 25, 0, 0, 0, 0, time.UTC),
-					Description: "A young Luke Skywalker has been chosen as a pilot. However, his past leads him to become a legendary pilot of the Star Wars warship, the Imperial Starfleet.",
+					Description: "A young Luke Skywalker has been chosen as a pilot. However, his past leads him to become a legendary pilot of the Start Wars warship, the Imperial Starfleet.",
 					GenreIDs:    []int{actionGenre.ID, dramaGenre.ID},
 					Cast: []contracts.MovieCreditInfo{
 						{

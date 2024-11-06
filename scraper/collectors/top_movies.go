@@ -19,7 +19,7 @@ func NewTopMoviesCollector(c *colly.Collector, movieCollector *MovieCollector, l
 	}
 
 	c.OnHTML("body", func(e *colly.HTMLElement) {
-		e.ForEach("a[href]", func(i int, e *colly.HTMLElement) {
+		e.ForEach("a[href]", func(_ int, e *colly.HTMLElement) {
 			link := e.Attr("href")
 			text := strings.TrimSpace(e.Text)
 
@@ -32,7 +32,7 @@ func NewTopMoviesCollector(c *colly.Collector, movieCollector *MovieCollector, l
 	return collector
 }
 
-func (c *TopMoviesCollector) Star() {
+func (c *TopMoviesCollector) Start() {
 	starLink := "https://www.imdb.com/chart/top"
 	visit(c.c, starLink, c.l)
 }

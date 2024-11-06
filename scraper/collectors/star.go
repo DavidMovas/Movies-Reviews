@@ -91,7 +91,7 @@ func (c *StarCollector) Stars() map[string]*models.Star {
 }
 
 func getStarID(link string) string {
-	id := strings.Split(link, "/")[2]
+	id := strings.Split(link, "/")[4]
 	return id
 }
 

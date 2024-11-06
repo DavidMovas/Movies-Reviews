@@ -35,7 +35,7 @@ func NewHandler(service *Service, paginationConfig *config.PaginationConfig) *Ha
 // @Tags         stars
 // @Produce      json
 // @Param        request body contracts.PaginatedRequest false "Request, if request body empty, default values will be used"
-// @Success      200 {object} pagination.PaginatedResponse[contracts.Star] "PaginatedResponse of Stars, total number of stars, or nil if none found"
+// @Success      200 {object} pagination.PaginatedResponse[contracts.Start] "PaginatedResponse of Stars, total number of stars, or nil if none found"
 // @Failure      400 {object} apperrors.Error "Invalid request, invalid parameter or missing parameter"
 // @Failure      500 {object} apperrors.Error "Internal server error"
 // @Router       /stars [get]
@@ -68,11 +68,11 @@ func (h *Handler) GetStars(c echo.Context) error {
 // @Description  Get star by id
 // @ID           get-star-by-id
 // @Tags         stars
-// @Param        starId path int true "Star ID"
+// @Param        starId path int true "Start ID"
 // @Produce      json
-// @Success      200 {object} Star "Star"
+// @Success      200 {object} Star "Start"
 // @Failure      400 {object} apperrors.Error "Invalid request, invalid parameter or missing parameter"
-// @Failure      404 {object} apperrors.Error "Star not found"
+// @Failure      404 {object} apperrors.Error "Start not found"
 // @Failure      500 {object} apperrors.Error "Internal server error"
 // @Router       /stars/{starId} [get]
 func (h *Handler) GetStarByID(c echo.Context) error {
@@ -103,7 +103,7 @@ func (h *Handler) GetStarByID(c echo.Context) error {
 // @Tags         stars
 // @Param        request body CreateStarRequest true "Request, can have optional fields"
 // @Produce      json
-// @Success      201 {object} Star "Star"
+// @Success      201 {object} Star "Start"
 // @Failure      400 {object} apperrors.Error "Invalid request, invalid parameter or missing parameter"
 // @Failure      403 {object} apperrors.Error "Insufficient permissions"
 // @Failure      500 {object} apperrors.Error "Internal server error"
@@ -127,13 +127,13 @@ func (h *Handler) CreateStar(c echo.Context) error {
 // @Description  Update star by id
 // @ID           update-star-by-id
 // @Tags         stars
-// @Param        starId path int true "Star ID"
+// @Param        starId path int true "Start ID"
 // @Param        request body UpdateStarRequest true "Request, can have optional fields"
 // @Produce      json
-// @Success      200 {object} Star "Star"
+// @Success      200 {object} Star "Start"
 // @Failure      400 {object} apperrors.Error "Invalid request, invalid parameter or missing parameter"
 // @Failure 	 403 {object} apperrors.Error "Insufficient permissions"
-// @Failure      404 {object} apperrors.Error "Star not found"
+// @Failure      404 {object} apperrors.Error "Start not found"
 // @Failure      500 {object} apperrors.Error "Internal server error"
 // @Router       /stars/{starId} [put]
 func (h *Handler) UpdateStarByID(c echo.Context) error {
@@ -155,11 +155,11 @@ func (h *Handler) UpdateStarByID(c echo.Context) error {
 // @Description  Delete star by id
 // @ID           delete-star-by-id
 // @Tags         stars
-// @Param        starId path int true "Star ID"
+// @Param        starId path int true "Start ID"
 // @Success      200
 // @Failure      400 {object} apperrors.Error "Invalid request, invalid parameter or missing parameter"
 // @Failure      403 {object} apperrors.Error "Insufficient permissions"
-// @Failure      404 {object} apperrors.Error "Star not found"
+// @Failure      404 {object} apperrors.Error "Start not found"
 // @Failure      500 {object} apperrors.Error "Internal server error"
 // @Router       /stars/{starId} [delete]
 func (h *Handler) DeleteStarByID(c echo.Context) error {

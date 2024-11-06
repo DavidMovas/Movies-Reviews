@@ -27,7 +27,7 @@ func NewScrapCmd(logger *slog.Logger) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&opts.Output, "output", "o", "", "Output directory")
+	cmd.Flags().StringVarP(&opts.Output, "output", "o", "./.", "Output directory")
 
 	_ = cmd.MarkFlagRequired("output")
 
@@ -43,7 +43,7 @@ func runScrap(opts *ScrapOptions, logger *slog.Logger) error {
 	movieCollector := collectors.NewMovieCollector(collectors.Derive(baseCollector), castCollector, logger)
 	topMoviesCollector := collectors.NewTopMoviesCollector(collectors.Derive(baseCollector), movieCollector, logger)
 
-	topMoviesCollector.Star()
+	topMoviesCollector.Start()
 	topMoviesCollector.Wait()
 	movieCollector.Wait()
 	castCollector.Wait()

@@ -4,21 +4,22 @@ import (
 	"log/slog"
 	"os"
 
+	"github.com/spf13/cobra"
+
 	"github.com/DavidMovas/Movies-Reviews/scraper/cmd"
 )
 
 func main() {
-	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
 
-	scraper := cmd.NewScrapCmd(logger)
-	ingester := cmd.NewIngestCmd(logger)
-
-	if err := scraper.Execute(); err != nil {
-		logger.Error(err.Error())
-		os.Exit(1)
+	rootCmd := &cobra.Command{
+		Use: "scraper",
 	}
 
-	if err := ingester.Execute(); err != nil {
+	rootCmd.AddCommand(cmd.NewScrapCmd(logger))
+	rootCmd.AddCommand(cmd.NewIngestCmd(logger))
+
+	if err := rootCmd.Execute(); err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)
 	}
