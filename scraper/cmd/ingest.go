@@ -35,10 +35,10 @@ func NewIngestCmd(logger *slog.Logger) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&opts.Input, "input", "i", "./.", "Input directory")
+	cmd.Flags().StringVarP(&opts.Input, "input", "i", "", "Input directory")
 	cmd.Flags().StringVarP(&opts.URL, "url", "u", "http://localhost:8000", "API URL")
-	cmd.Flags().StringVarP(&opts.Email, "email", "e", "admin@gmail.com", "User email")
-	cmd.Flags().StringVarP(&opts.Password, "password", "p", "admin@!123D", "User password")
+	cmd.Flags().StringVarP(&opts.Email, "email", "e", "", "User email")
+	cmd.Flags().StringVarP(&opts.Password, "password", "p", "", "User password")
 
 	_ = cmd.MarkFlagRequired("input")
 	_ = cmd.MarkFlagRequired("email")

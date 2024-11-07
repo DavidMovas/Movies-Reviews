@@ -98,7 +98,6 @@ func (i *StarIngester) Ingest(stars map[string]*models.Star, bios map[string]*mo
 				}
 
 				var s *contracts.Star
-
 				s, err = i.c.CreateStar(contracts.NewAuthenticated(req, i.token))
 				if err != nil {
 					return nil, fmt.Errorf("create star: %w", err)
@@ -126,6 +125,24 @@ func (i *StarIngester) Ingest(stars map[string]*models.Star, bios map[string]*mo
 		return fmt.Errorf("ingest stars: %w", err)
 	}
 
+	i.conversionMap = make(map[string]int, len(idToStarMap))
+	for _, star := range stars {
+		commonID := starCommonIdentifier{
+			FirstName: star.FirstName,
+			Lastname:  star.LastName,
+			BirthDate: star.BirthDate,
+		}
+		s, ok := idToStarMap[commonID]
+		if !ok {
+			i.logger.With("star_id", star.ID).
+				Error("no star found for id")
+			continue
+		}
+
+		i.conversionMap[star.ID] = s.ID
+	}
+
+	i.logger.Info("Stars ingested successfully")
 	return nil
 }
 

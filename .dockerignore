@@ -10,3 +10,4 @@ Makefile
 tern
 client
 integration_tests
+scraper
