@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log/slog"
 	"strings"
+	"time"
 
 	"github.com/gocolly/colly/v2"
 )
@@ -22,20 +23,11 @@ func NewTopMoviesCollector(c *colly.Collector, movieCollector *MovieCollector, l
 		l: logger.With("collector", "top_movies"),
 	}
 
-	c.OnHTML("body", func(e *colly.HTMLElement) {
-		e.ForEach("a[href]", func(_ int, e *colly.HTMLElement) {
-			link := e.Attr("href")
-			text := strings.TrimSpace(e.Text)
-
-			if text != "" && strings.HasPrefix(link, "/title/") {
-				movieCollector.Visit(e.Request.AbsoluteURL(link))
-			}
-		})
-	})
-
 	c.OnResponse(func(r *colly.Response) {
+		time.Sleep(time.Second * 2)
 		contentType := r.Headers.Get("Content-Type")
-		if !strings.Contains(contentType, "application/json") {
+		collector.l.With("content_type", contentType).Debug("content type")
+		if strings.Contains(contentType, "application/json") {
 			var data map[string]any
 
 			if err := json.Unmarshal(r.Body, &data); err != nil {
@@ -51,8 +43,15 @@ func NewTopMoviesCollector(c *colly.Collector, movieCollector *MovieCollector, l
 		}
 	})
 
-	c.OnScraped(func(_ *colly.Response) {
-		collector.l.Info("Scraped top movies:", len(movieCollector.movieMap))
+	c.OnHTML("body", func(e *colly.HTMLElement) {
+		e.ForEach("a[href]", func(_ int, e *colly.HTMLElement) {
+			link := e.Attr("href")
+			text := strings.TrimSpace(e.Text)
+
+			if text != "" && strings.HasPrefix(link, "/title/") {
+				movieCollector.Visit(e.Request.AbsoluteURL(link))
+			}
+		})
 	})
 
 	return collector
