@@ -7,6 +7,8 @@ import (
 	"sync"
 	"time"
 
+	"gopkg.in/validator.v2"
+
 	"github.com/DavidMovas/Movies-Reviews/internal/maps"
 
 	"github.com/DavidMovas/Movies-Reviews/internal/slices"
@@ -41,8 +43,8 @@ func (i *StarIngester) Ingest(stars map[string]*models.Star, bios map[string]*mo
 	}
 
 	type starCommonIdentifier struct {
-		FirstName string
-		Lastname  string
+		FirstName string `validate:"min=3,max=50"`
+		Lastname  string `validate:"min=3,max=50"`
 		BirthDate time.Time
 	}
 
@@ -66,6 +68,10 @@ func (i *StarIngester) Ingest(stars map[string]*models.Star, bios map[string]*mo
 			FirstName: star.FirstName,
 			Lastname:  star.LastName,
 			BirthDate: star.BirthDate,
+		}
+
+		if validator.Validate(commonID) != nil {
+			continue
 		}
 
 		if maps.ExistsLocked(idToStarMap, commonID, &mx) {
