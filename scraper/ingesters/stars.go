@@ -3,10 +3,11 @@ package ingesters
 import (
 	"context"
 	"fmt"
-	"gopkg.in/validator.v2"
 	"log/slog"
 	"sync"
 	"time"
+
+	"gopkg.in/validator.v2"
 
 	"github.com/DavidMovas/Movies-Reviews/internal/maps"
 

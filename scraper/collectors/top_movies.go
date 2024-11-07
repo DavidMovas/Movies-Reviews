@@ -2,8 +2,9 @@ package collectors
 
 import (
 	"encoding/json"
-	"github.com/gocolly/colly/v2"
 	"log/slog"
+
+	"github.com/gocolly/colly/v2"
 )
 
 type TopMoviesCollector struct {
