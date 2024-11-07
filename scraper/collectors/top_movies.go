@@ -1,6 +1,7 @@
 package collectors
 
 import (
+	"encoding/json"
 	"log/slog"
 	"strings"
 
@@ -32,6 +33,28 @@ func NewTopMoviesCollector(c *colly.Collector, movieCollector *MovieCollector, l
 		})
 	})
 
+	c.OnResponse(func(r *colly.Response) {
+		contentType := r.Headers.Get("Content-Type")
+		if !strings.Contains(contentType, "application/json") {
+			var data map[string]any
+
+			if err := json.Unmarshal(r.Body, &data); err != nil {
+				collector.l.
+					With("err", err).
+					Error("failed to unmarshal top movies response")
+				return
+			}
+
+			if id := findIDsWithPrefix(data, "tt"); id != "" {
+				movieCollector.Visit("https://www.imdb.com/title/" + id)
+			}
+		}
+	})
+
+	c.OnScraped(func(_ *colly.Response) {
+		collector.l.Info("Scraped top movies:", len(movieCollector.movieMap))
+	})
+
 	return collector
 }
 
@@ -42,4 +65,25 @@ func (c *TopMoviesCollector) Start() {
 
 func (c *TopMoviesCollector) Wait() {
 	c.c.Wait()
+}
+
+func findIDsWithPrefix(data map[string]interface{}, prefix string) string {
+	for _, value := range data {
+		switch v := value.(type) {
+		case string:
+			if strings.HasPrefix(v, prefix) {
+				return v
+			}
+		case map[string]interface{}:
+			findIDsWithPrefix(v, prefix)
+		case []interface{}:
+			for _, item := range v {
+				if itemMap, ok := item.(map[string]interface{}); ok {
+					findIDsWithPrefix(itemMap, prefix)
+				}
+			}
+		}
+	}
+
+	return ""
 }
