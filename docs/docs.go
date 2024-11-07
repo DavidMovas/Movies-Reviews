@@ -690,7 +690,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/contracts.Star"
+                                "$ref": "#/definitions/contracts.Start"
                             }
                         }
                     },
@@ -831,9 +831,9 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "Star",
+                        "description": "Start",
                         "schema": {
-                            "$ref": "#/definitions/stars.Star"
+                            "$ref": "#/definitions/stars.Start"
                         }
                     },
                     "400": {
@@ -871,7 +871,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Star ID",
+                        "description": "Start ID",
                         "name": "starId",
                         "in": "path",
                         "required": true
@@ -879,9 +879,9 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Star",
+                        "description": "Start",
                         "schema": {
-                            "$ref": "#/definitions/stars.Star"
+                            "$ref": "#/definitions/stars.Start"
                         }
                     },
                     "400": {
@@ -891,7 +891,7 @@ const docTemplate = `{
                         }
                     },
                     "404": {
-                        "description": "Star not found",
+                        "description": "Start not found",
                         "schema": {
                             "$ref": "#/definitions/apperrors.Error"
                         }
@@ -917,7 +917,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Star ID",
+                        "description": "Start ID",
                         "name": "starId",
                         "in": "path",
                         "required": true
@@ -934,9 +934,9 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Star",
+                        "description": "Start",
                         "schema": {
-                            "$ref": "#/definitions/stars.Star"
+                            "$ref": "#/definitions/stars.Start"
                         }
                     },
                     "400": {
@@ -952,7 +952,7 @@ const docTemplate = `{
                         }
                     },
                     "404": {
-                        "description": "Star not found",
+                        "description": "Start not found",
                         "schema": {
                             "$ref": "#/definitions/apperrors.Error"
                         }
@@ -975,7 +975,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Star ID",
+                        "description": "Start ID",
                         "name": "starId",
                         "in": "path",
                         "required": true
@@ -998,7 +998,7 @@ const docTemplate = `{
                         }
                     },
                     "404": {
-                        "description": "Star not found",
+                        "description": "Start not found",
                         "schema": {
                             "$ref": "#/definitions/apperrors.Error"
                         }
@@ -1727,7 +1727,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "star": {
-                    "$ref": "#/definitions/contracts.Star"
+                    "$ref": "#/definitions/contracts.Start"
                 }
             }
         },
@@ -1826,7 +1826,7 @@ const docTemplate = `{
                 }
             }
         },
-        "contracts.Star": {
+        "contracts.Start": {
             "type": "object",
             "properties": {
                 "bio": {
@@ -2007,7 +2007,7 @@ const docTemplate = `{
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/contracts.Star"
+                        "$ref": "#/definitions/contracts.Start"
                     }
                 },
                 "page": {
@@ -2083,7 +2083,7 @@ const docTemplate = `{
                 }
             }
         },
-        "stars.Star": {
+        "stars.Start": {
             "type": "object",
             "properties": {
                 "bio": {

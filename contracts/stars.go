@@ -20,7 +20,7 @@ type GetStarRequest struct {
 }
 
 type GetStarsRequest struct {
-	PaginatedRequest
+	PaginatedRequestOrdered
 }
 
 type CreateStarRequest struct {

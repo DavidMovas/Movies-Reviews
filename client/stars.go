@@ -4,8 +4,8 @@ import (
 	"github.com/DavidMovas/Movies-Reviews/contracts"
 )
 
-func (c *Client) GetStars(req *contracts.GetStarsRequest) (*contracts.PaginatedResponse[*contracts.Star], error) {
-	var stars *contracts.PaginatedResponse[*contracts.Star]
+func (c *Client) GetStars(req *contracts.GetStarsRequest) (*contracts.PaginatedResponseOrdered[*contracts.Star], error) {
+	var stars *contracts.PaginatedResponseOrdered[*contracts.Star]
 
 	_, err := c.client.R().
 		SetResult(&stars).

@@ -13,6 +13,18 @@ type PaginatedRequestOrdered struct {
 	Order string `json:"order" query:"order"`
 }
 
+type PaginationSetter interface {
+	SetPage(page int)
+	SetSize(size int)
+}
+
+type PaginationGetter[T any] interface {
+	GetPage() int
+	GetSize() int
+	GetTotal() int
+	GetItems() []T
+}
+
 type PaginatedResponse[T any] struct {
 	Page  int `json:"page" validate:"min=0"`
 	Size  int `json:"size" validate:"min=0"`
@@ -46,4 +58,52 @@ func (req *PaginatedRequestOrdered) ToQueryParams() map[string]string {
 		params["order"] = req.Order
 	}
 	return params
+}
+
+func (req *PaginatedRequest) SetPage(page int) {
+	req.Page = page
+}
+
+func (req *PaginatedRequest) SetSize(size int) {
+	req.Size = size
+}
+
+func (res *PaginatedResponse[T]) GetPage() int {
+	return res.Page
+}
+
+func (res *PaginatedResponse[T]) GetSize() int {
+	return res.Size
+}
+
+func (res *PaginatedResponse[T]) GetTotal() int {
+	return res.Total
+}
+
+func (res *PaginatedResponse[T]) GetItems() []T {
+	return res.Items
+}
+
+func (req *PaginatedRequestOrdered) SetPage(page int) {
+	req.PaginatedRequest.SetPage(page)
+}
+
+func (req *PaginatedRequestOrdered) SetSize(size int) {
+	req.PaginatedRequest.SetSize(size)
+}
+
+func (res *PaginatedResponseOrdered[T]) GetPage() int {
+	return res.PaginatedResponse.GetPage()
+}
+
+func (res *PaginatedResponseOrdered[T]) GetSize() int {
+	return res.PaginatedResponse.GetSize()
+}
+
+func (res *PaginatedResponseOrdered[T]) GetTotal() int {
+	return res.PaginatedResponse.GetTotal()
+}
+
+func (res *PaginatedResponseOrdered[T]) GetItems() []T {
+	return res.PaginatedResponse.GetItems()
 }
