@@ -2,11 +2,8 @@ package collectors
 
 import (
 	"encoding/json"
-	"log/slog"
-	"strings"
-	"time"
-
 	"github.com/gocolly/colly/v2"
+	"log/slog"
 )
 
 type TopMoviesCollector struct {
@@ -23,35 +20,20 @@ func NewTopMoviesCollector(c *colly.Collector, movieCollector *MovieCollector, l
 		l: logger.With("collector", "top_movies"),
 	}
 
-	c.OnResponse(func(r *colly.Response) {
-		time.Sleep(time.Second * 2)
-		contentType := r.Headers.Get("Content-Type")
-		collector.l.With("content_type", contentType).Debug("content type")
-		if strings.Contains(contentType, "application/json") {
-			var data map[string]any
+	c.OnHTML("script[type='application/ld+json']", func(e *colly.HTMLElement) {
+		var data map[string]any
 
-			if err := json.Unmarshal(r.Body, &data); err != nil {
-				collector.l.
-					With("err", err).
-					Error("failed to unmarshal top movies response")
-				return
-			}
+		jsonText := e.Text
 
-			if id := findIDsWithPrefix(data, "tt"); id != "" {
-				movieCollector.Visit("https://www.imdb.com/title/" + id)
-			}
+		if err := json.Unmarshal([]byte(jsonText), &data); err != nil {
+			collector.l.With("err", err).Error("error unmarshalling data")
+			return
 		}
-	})
 
-	c.OnHTML("body", func(e *colly.HTMLElement) {
-		e.ForEach("a[href]", func(_ int, e *colly.HTMLElement) {
-			link := e.Attr("href")
-			text := strings.TrimSpace(e.Text)
-
-			if text != "" && strings.HasPrefix(link, "/title/") {
-				movieCollector.Visit(e.Request.AbsoluteURL(link))
-			}
-		})
+		urls := findMovieURLs(data)
+		for _, url := range urls {
+			movieCollector.Visit(url)
+		}
 	})
 
 	return collector
@@ -66,23 +48,29 @@ func (c *TopMoviesCollector) Wait() {
 	c.c.Wait()
 }
 
-func findIDsWithPrefix(data map[string]interface{}, prefix string) string {
-	for _, value := range data {
+func findMovieURLs(data map[string]interface{}) []string {
+	var urls []string
+
+	for key, value := range data {
 		switch v := value.(type) {
 		case string:
-			if strings.HasPrefix(v, prefix) {
-				return v
+			if key == "url" && isMovieURL(v) {
+				urls = append(urls, v)
 			}
 		case map[string]interface{}:
-			findIDsWithPrefix(v, prefix)
+			urls = append(urls, findMovieURLs(v)...)
 		case []interface{}:
 			for _, item := range v {
 				if itemMap, ok := item.(map[string]interface{}); ok {
-					findIDsWithPrefix(itemMap, prefix)
+					urls = append(urls, findMovieURLs(itemMap)...)
 				}
 			}
 		}
 	}
 
-	return ""
+	return urls
+}
+
+func isMovieURL(url string) bool {
+	return len(url) > 0 && url[:29] == "https://www.imdb.com/title/tt"
 }
