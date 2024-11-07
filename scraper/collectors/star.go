@@ -49,7 +49,6 @@ func NewStarCollector(c *colly.Collector, bioCollector *BioCollector, logger *sl
 
 		var info starInfo
 		err := json.Unmarshal([]byte(e.ChildText("script[type='application/ld+json']")), &info)
-
 		if err != nil {
 			collector.l.
 				With("star_id", starID).

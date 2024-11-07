@@ -64,7 +64,6 @@ func NewBioCollector(c *colly.Collector, logger *slog.Logger) *BioCollector {
 		collector.l.
 			With("star_id", starID).
 			Debug("bio collected")
-
 	})
 	return collector
 }

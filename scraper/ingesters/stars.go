@@ -105,7 +105,6 @@ func (i *StarIngester) Ingest(stars map[string]*models.Star, bios map[string]*mo
 
 				return s, nil
 			})
-
 			if err != nil {
 				return err
 			}

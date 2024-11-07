@@ -127,7 +127,6 @@ func (i *MoviesIngester) Ingest(movies map[string]*models.Movie, casts map[strin
 
 				return &md.Movie, nil
 			})
-
 			if err != nil {
 				return err
 			}
