@@ -1,12 +1,7 @@
 variable "instance_type" {
-  type = string                     # The type of the variable, in this case a string
-  default = "t3.micro"                 # Default value for the variable
-  description = "The type of EC2 instance" # Description of what this variable represents
-}
-
-variable "aws_region" {
   type = string
-  default = "eu-central-1"
+  default = "t3.micro"
+  description = "The type of EC2 instance"
 }
 
 variable "ami_id" {

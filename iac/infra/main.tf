@@ -205,13 +205,13 @@ resource "aws_instance" "host_instance" {
       -e ADMIN_EMAIL=$ADMIN_EMAIL \
       -e ADMIN_PASSWORD=$ADMIN_PASSWORD \
       -e DB_URL=$DB_URL \
-      DavidMovas/Movies-Reviews:latest
+      davidmovas/movie-reviews:latest
 
     sudo docker run -d \
       --name watchtower \
       -v /var/run/docker.sock:/var/run/docker.sock \
       containrrr/watchtower
-      DavidMovas/Movies-Reviews:latest
+      davidmovas/movie-reviews:latest
       --schedule "0/30 * * * * *"
     EOF
 
