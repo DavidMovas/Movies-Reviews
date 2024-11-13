@@ -130,6 +130,31 @@ resource "aws_security_group" "allow-web" {
   }
 }
 
+resource "aws_security_group" "allow-ssh" {
+  name = "allow-ssh"
+  description = "Allow ssh inbound traffic"
+  vpc_id = aws_vpc.main.id
+
+  ingress {
+    from_port = 22
+    to_port = 22
+    protocol = "tcp"
+    cidr_blocks = ["1.2.3.0/24"]
+  }
+
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "allow-ssh"
+    App = var.AppName
+  }
+}
+
 resource "aws_iam_role" "ec2-role" {
   name = "movie-reviews-ec2-role"
   assume_role_policy = <<EOF
@@ -157,10 +182,10 @@ resource "aws_iam_role_policy" "ec2-role-policy" {
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Action": [
-        "ec2:GetParameter",
-      ],
       "Effect": "Allow",
+      "Action": [
+        "ssm:GetParameter"
+      ],
       "Resource": "arn:aws:ssm:*:*:parameter/movie-reviews/*"
     }
   ]
@@ -178,7 +203,7 @@ resource "aws_instance" "host_instance" {
   instance_type = var.instance_type
   key_name = "movie-reviews"
   iam_instance_profile = aws_iam_instance_profile.ec2-instance-profile.name
-  vpc_security_group_ids = [aws_security_group.allow-postgres.id, aws_security_group.allow-web.id]
+  vpc_security_group_ids = [aws_security_group.allow-web.id, aws_security_group.allow-ssh.id]
   user_data_replace_on_change = true
   subnet_id = aws_subnet.subnet-1.id
   associate_public_ip_address = true
@@ -224,12 +249,12 @@ resource "aws_instance" "host_instance" {
 resource "aws_db_instance" "postgres-db" {
   allocated_storage = 20
   engine = "postgres"
-  engine_version = "17"
+  engine_version = "16"
   instance_class = "db.t3.micro"
   db_name = "movie_reviews"
   username = "movie_reviews"
   password = "CHANGE_ME"
-  parameter_group_name = "default.postgres17"
+  parameter_group_name = "default.postgres16"
   vpc_security_group_ids = [aws_security_group.allow-postgres.id]
   db_subnet_group_name = aws_db_subnet_group.main.name
   publicly_accessible = true

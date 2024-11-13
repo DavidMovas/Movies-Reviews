@@ -6,6 +6,7 @@
 .gitignore
 .git
 .github
+*.pem
 *.terraform
 Makefile
 tern
