@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "5.54.1"
+      version = "5.75.0"
     }
   }
 }
@@ -112,7 +112,7 @@ resource "aws_security_group" "allow-web" {
 
   ingress {
     from_port = 80
-    to_port = 90
+    to_port = 80
     protocol = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -139,7 +139,7 @@ resource "aws_security_group" "allow-ssh" {
     from_port = 22
     to_port = 22
     protocol = "tcp"
-    cidr_blocks = ["1.2.3.0/24"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
@@ -184,7 +184,8 @@ resource "aws_iam_role_policy" "ec2-role-policy" {
     {
       "Effect": "Allow",
       "Action": [
-        "ssm:GetParameter"
+        "ssm:GetParameter",
+        "ssm:DescribeParameters"
       ],
       "Resource": "arn:aws:ssm:*:*:parameter/movie-reviews/*"
     }
@@ -210,33 +211,34 @@ resource "aws_instance" "host_instance" {
 
   user_data = <<-EOF
     #!/bin/bash
-    sudo apt-get update
-    sudo apt-get install -y docker.io awscli jq
+    sudo yum update -y
+    sudo amazon-linux-extras install docker -y
+    sudo yum install -y aws-cli jq
     sudo systemctl start docker
     sudo systemctl enable docker
 
     REGION=eu-central-1
-    JWT_SECRET=$(aws ssm get-parameter --region $REGION --name "/movie-reviews/jwt-secret" --with-decryption --output json | jq -r Parameter.Value)
-    ADMIN_NAME=$(aws ssm get-parameter --region $REGION --name "/movie-reviews/admin/name" --with-decryption --output json | jq -r Parameter.Value)
-    ADMIN_EMAIL=$(aws ssm get-parameter --region $REGION --name "/movie-reviews/admin/email" --with-decryption --output json | jq -r Parameter.Value)
-    ADMIN_PASSWORD=$(aws ssm get-parameter --region $REGION --name "/movie-reviews/admin/password" --with-decryption --output json | jq -r Parameter.Value)
-    DB_URL=$(aws ssm get-parameter --region $REGION --name "/movie-reviews/db-url" --with-decryption --output json | jq -r Parameter.Value)
+    JWT_SECRET=$(aws ssm get-parameter --region $REGION --name "parameter-name" --with-decryption --name "/movie-reviews/jwt-secret" --with-decryption --output json | jq -r '.Parameter.Value')
+    ADMIN_USERNAME=$(aws ssm get-parameter --region $REGION --name "/movie-reviews/admin/name" --with-decryption --output json | jq -r '.Parameter.Value')
+    ADMIN_EMAIL=$(aws ssm get-parameter --region $REGION --name "/movie-reviews/admin/email" --with-decryption --output json | jq -r '.Parameter.Value')
+    ADMIN_PASSWORD=$(aws ssm get-parameter --region $REGION --name "/movie-reviews/admin/password" --with-decryption --output json | jq -r '.Parameter.Value')
+    DB_URL=$(aws ssm get-parameter --region $REGION --name "/movie-reviews/db-url" --with-decryption --output json | jq -r '.Parameter.Value')
 
     sudo docker run -d \
       --name movie-reviews \
       -p 80:8000 \
       -e JWT_SECRET=$JWT_SECRET \
-      -e ADMIN_NAME=$ADMIN_NAME \
+      -e ADMIN_USERNAME=$ADMIN_USERNAME \
       -e ADMIN_EMAIL=$ADMIN_EMAIL \
       -e ADMIN_PASSWORD=$ADMIN_PASSWORD \
       -e DB_URL=$DB_URL \
-      davidmovas/movie-reviews:latest
+      davidmovas/movies-reviews:latest
 
     sudo docker run -d \
       --name watchtower \
       -v /var/run/docker.sock:/var/run/docker.sock \
       containrrr/watchtower
-      davidmovas/movie-reviews:latest
+      davidmovas/movies-reviews:latest
       --schedule "0/30 * * * * *"
     EOF
 
