@@ -30,7 +30,7 @@ type Config struct {
 
 type JWTConfig struct {
 	Secret           string        `env:"SECRET"`
-	AccessExpiration time.Duration `env:"ACCESS_EXPIRATION"`
+	AccessExpiration time.Duration `env:"ACCESS_EXPIRATION" envDefault:"5m"`
 }
 
 type LoggerConfig struct {
