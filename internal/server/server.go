@@ -79,6 +79,8 @@ func New(ctx context.Context, cfg *config.Config) (*Server, error) {
 	e.HideBanner = true
 	e.HidePort = true
 
+	e.Use(middleware.CORS())
+
 	api := e.Group("/api")
 	api.Use(jwt.NewAuthMiddleware(cfg.JWT.Secret))
 	api.Use(echox.Logger)

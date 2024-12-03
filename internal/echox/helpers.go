@@ -1,13 +1,30 @@
 package echox
 
 import (
-	"net/http"
-	"strconv"
+	"fmt"
 
 	apperrors "github.com/DavidMovas/Movies-Reviews/internal/error"
 	"github.com/labstack/echo/v4"
 	"gopkg.in/validator.v2"
 )
+
+type LoginRequest struct {
+	Email    *string `json:"email"`
+	Username *string `json:"username"`
+	Password string  `json:"password"`
+}
+
+type EmailField struct {
+	Email *string `json:"email" validate:"email"`
+}
+
+type UsernameField struct {
+	Username *string `json:"username" validate:"min=3,max=24"`
+}
+
+type PasswordField struct {
+	Password string `json:"password" validate:"password"`
+}
 
 func BindAndValidate[T any](c echo.Context) (*T, error) {
 	req := new(T)
@@ -23,31 +40,36 @@ func BindAndValidate[T any](c echo.Context) (*T, error) {
 	return req, nil
 }
 
-func ReadFromParam[T any](c echo.Context, name, errMsg string) (T, error) {
-	var zeroValue T
+func BindAndValidateLoginRequest(c echo.Context) (*LoginRequest, error) {
+	var request LoginRequest
 
-	param := c.Param(name)
-	if param == "" {
-		return zeroValue, echo.NewHTTPError(http.StatusBadRequest, errMsg)
+	if err := c.Bind(&request); err != nil {
+		return nil, apperrors.BadRequestHidden(err, "invalid or malformed request")
 	}
 
-	var result T
-	switch any(result).(type) {
-	case int:
-		parsedValue, err := strconv.Atoi(param)
-		if err != nil {
-			return zeroValue, echo.NewHTTPError(http.StatusBadRequest, errMsg)
-		}
-		return any(parsedValue).(T), nil
-	case float64:
-		parsedValue, err := strconv.ParseFloat(param, 64)
-		if err != nil {
-			return zeroValue, echo.NewHTTPError(http.StatusBadRequest, errMsg)
-		}
-		return any(parsedValue).(T), nil
-	case string:
-		return any(param).(T), nil
-	default:
-		return zeroValue, echo.NewHTTPError(http.StatusBadRequest, errMsg)
+	if request.Email == nil && request.Username == nil {
+		return nil, apperrors.BadRequest(fmt.Errorf("email or username must be provided"))
 	}
+
+	if err := validator.Validate(&PasswordField{Password: request.Password}); err != nil {
+		return nil, apperrors.BadRequest(err)
+	}
+
+	if request.Email != nil {
+		if err := validator.Validate(&EmailField{Email: request.Email}); err != nil {
+			return nil, apperrors.BadRequest(err)
+		}
+
+		return &request, nil
+	}
+
+	if request.Username != nil {
+		if err := validator.Validate(&UsernameField{Username: request.Username}); err != nil {
+			return nil, apperrors.BadRequest(err)
+		}
+
+		return &request, nil
+	}
+
+	return &request, nil
 }

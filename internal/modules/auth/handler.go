@@ -5,18 +5,19 @@ import (
 
 	"github.com/DavidMovas/Movies-Reviews/internal/modules/users"
 
-	"github.com/DavidMovas/Movies-Reviews/contracts"
 	"github.com/DavidMovas/Movies-Reviews/internal/echox"
 	"github.com/labstack/echo/v4"
 )
 
 type Handler struct {
 	authService *Service
+	userService *users.Service
 }
 
-func NewHandler(authService *Service) *Handler {
+func NewHandler(authService *Service, userService *users.Service) *Handler {
 	return &Handler{
 		authService: authService,
+		userService: userService,
 	}
 }
 
@@ -38,9 +39,10 @@ func (h *Handler) Register(c echo.Context) error {
 	}
 
 	user := &users.User{
-		Username: req.Username,
-		Email:    req.Email,
-		Role:     contracts.UserRole,
+		Username:  req.Username,
+		Email:     req.Email,
+		Role:      users.UserRole,
+		AvatarURL: users.DefaultAvatarURL,
 	}
 
 	if err = h.authService.Register(c.Request().Context(), user, req.Password); err != nil {
@@ -63,15 +65,15 @@ func (h *Handler) Register(c echo.Context) error {
 // @Failure 500 {object} apperrors.Error "Internal server error"
 // @Router /auth/login [post]
 func (h *Handler) Login(c echo.Context) error {
-	req, err := echox.BindAndValidate[LoginUserRequest](c)
+	req, err := echox.BindAndValidateLoginRequest(c)
 	if err != nil {
 		return err
 	}
 
-	token, err := h.authService.Login(c.Request().Context(), req.Email, req.Password)
+	user, token, err := h.authService.Login(c.Request().Context(), req.Email, req.Username, req.Password)
 	if err != nil {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, LoginUserResponse{AccessToken: token})
+	return c.JSON(http.StatusOK, LoginUserResponse{AccessToken: token, User: *user.User})
 }

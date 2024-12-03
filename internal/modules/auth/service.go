@@ -36,18 +36,24 @@ func (s *Service) Register(ctx context.Context, user *users.User, password strin
 	return s.usersService.Create(ctx, userWithPassword)
 }
 
-func (s *Service) Login(ctx context.Context, email, password string) (token string, err error) {
-	user, err := s.usersService.GetExistingUserByEmail(ctx, email)
+func (s *Service) Login(ctx context.Context, email, username *string, password string) (user *users.UserWithPassword, token string, err error) {
+	if email != nil {
+		user, err = s.usersService.GetExistingUserByEmail(ctx, *email)
+	} else {
+		user, err = s.usersService.GetExistingUserByUsername(ctx, *username)
+	}
+
 	if err != nil {
-		return "", err
+		return nil, "", err
 	}
 
 	if err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err != nil {
 		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
-			return "", apperrors.Unauthorized("invalid password")
+			return nil, "", apperrors.Unauthorized("invalid password")
 		}
-		return "", apperrors.Internal(err)
+		return nil, "", apperrors.Internal(err)
 	}
 
-	return s.jwtService.GenerateToken(user.ID, user.Role)
+	token, err = s.jwtService.GenerateToken(user.ID, user.Role)
+	return user, token, err
 }

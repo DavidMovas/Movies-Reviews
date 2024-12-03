@@ -30,7 +30,7 @@ func (s *Service) GetExistingUserByEmail(ctx context.Context, email string) (*Us
 	return s.repo.GetExistingUserByEmail(ctx, email)
 }
 
-func (s *Service) GetExistingUserByID(ctx context.Context, userID int) (*UserWithPassword, error) {
+func (s *Service) GetExistingUserByID(ctx context.Context, userID int) (*User, error) {
 	return s.repo.GetExistingUserByID(ctx, userID)
 }
 

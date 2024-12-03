@@ -1,0 +1,15 @@
+.idea
+*.yml
+*.env
+*.md
+.dockerignore
+.gitignore
+.git
+.github
+*.pem
+.pem
+*.terraform
+Makefile
+client
+integration_tests
+scraper

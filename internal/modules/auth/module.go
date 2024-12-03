@@ -14,7 +14,7 @@ type Module struct {
 func NewModule(jwtService *jwt.Service, userService *users.Service) *Module {
 	repo := NewRepository()
 	service := NewService(userService, jwtService)
-	handler := NewHandler(service)
+	handler := NewHandler(service, userService)
 
 	return &Module{
 		Handler:    handler,

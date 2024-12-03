@@ -13,7 +13,7 @@ import (
 var (
 	passwordMinLength       = 8
 	emailMaxLength          = 127
-	passwordSpecialChars    = "!#$%&'*+/=?^_`{|}~"
+	passwordSpecialChars    = "!#$%&'*+/=?^_`{|}~@"
 	passwordRequiredEntries = []struct {
 		name  string
 		chars string

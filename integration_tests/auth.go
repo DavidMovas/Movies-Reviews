@@ -25,6 +25,7 @@ var (
 
 const (
 	standardPassword = "sgwva3!ekfRRR"
+	defaultAvatarURL = "https://gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"
 )
 
 func authAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
@@ -96,6 +97,10 @@ func authAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 		res, err := c.LoginUser(req)
 		require.NoError(t, err)
 		require.NotEmpty(t, res.AccessToken)
+		require.Equal(t, johnMoore.Email, res.User.Email)
+		require.Equal(t, johnMoore.Username, res.User.Username)
+		require.Equal(t, contracts.UserRole, res.User.Role)
+		require.Equal(t, defaultAvatarURL, res.User.AvatarURL)
 		johnMooreToken = res.AccessToken
 	})
 
