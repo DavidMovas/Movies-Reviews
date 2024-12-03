@@ -7,12 +7,7 @@
 *.idea
 APP.md
 output
-*.terraform
-.terraform.lock.hcl
-.terraform.tfstate
-.pem
-*.tfstate
-*.tfstate.backup
+infra/
 
 # Test binary, built with `go test -c`
 *.test
