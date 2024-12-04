@@ -44,7 +44,7 @@ type UpdateUserRoleRequest struct {
 type UpdateUserRequest struct {
 	UserID    int     `json:"-" param:"userId" validate:"nonzero"`
 	Username  *string `json:"username,omitempty" validate:"username"`
-	Password  *string `json:"password,omitempty" validate:"password"`
+	Password  *string `json:"password,omitempty" validate:"passwordOptional"`
 	AvatarURL *string `json:"avatarUrl,omitempty"`
 	Bio       *string `json:"bio,omitempty"`
 }

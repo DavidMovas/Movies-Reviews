@@ -33,6 +33,7 @@ func SetupValidators() {
 	}{
 		{"email", email},
 		{"password", password},
+		{"passwordOptional", passwordOptional},
 		{"username", username},
 		{"nonzero", nonzero},
 		{"role", role},
@@ -74,6 +75,36 @@ func password(v interface{}, _ string) error {
 			s = *ps
 			ok = true
 		}
+	}
+
+	if !ok {
+		return fmt.Errorf("password must be a string")
+	}
+
+	if len(s) < passwordMinLength {
+		return fmt.Errorf("password must be at least %d characters long", passwordMinLength)
+	}
+
+	for _, entry := range passwordRequiredEntries {
+		if !strings.ContainsAny(s, entry.chars) {
+			return fmt.Errorf("password must contain at least one of the following required entries: %s", entry.name)
+		}
+	}
+
+	return nil
+}
+
+func passwordOptional(v interface{}, _ string) error {
+	s, ok := v.(string)
+	ps, psOk := v.(*string)
+
+	if !ok && ps == nil {
+		return nil
+	}
+
+	if psOk {
+		s = *ps
+		ok = true
 	}
 
 	if !ok {
