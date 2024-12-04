@@ -69,7 +69,7 @@ func (r Repository) GetExistingUserByEmail(ctx context.Context, email string) (*
 }
 
 func (r Repository) GetExistingUserByID(ctx context.Context, id int) (*User, error) {
-	query, args, err := squirrel.Select("id, username, email,role, avatar_url, bio, created_at, deleted_at").
+	query, args, err := squirrel.Select("id, username, email, role, avatar_url, bio, created_at, deleted_at").
 		From("users").
 		Where(squirrel.Eq{"id": id}).
 		Where(squirrel.Eq{"deleted_at": nil}).
@@ -93,7 +93,7 @@ func (r Repository) GetExistingUserByID(ctx context.Context, id int) (*User, err
 }
 
 func (r Repository) GetExistingUserByUsername(ctx context.Context, username string) (*UserWithPassword, error) {
-	query, args, err := squirrel.Select("id, username, email, pass_hash, role, created_at, deleted_at").
+	query, args, err := squirrel.Select("id, username, email, role, avatar_url, bio, created_at, deleted_at").
 		From("users").
 		Where(squirrel.Eq{"username": username}).
 		Where(squirrel.Eq{"deleted_at": nil}).
@@ -104,7 +104,7 @@ func (r Repository) GetExistingUserByUsername(ctx context.Context, username stri
 	}
 
 	user := NewUserWithPassword()
-	err = r.db.QueryRow(ctx, query, args...).Scan(&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.Role, &user.CreatedAt, &user.DeletedAt)
+	err = r.db.QueryRow(ctx, query, args...).Scan(&user.ID, &user.Username, &user.Email, &user.Role, &user.AvatarURL, &user.Bio, &user.CreatedAt, &user.DeletedAt)
 
 	switch {
 	case dbx.IsNoRows(err):

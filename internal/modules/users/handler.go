@@ -76,7 +76,7 @@ func (h *Handler) GetExistingUserByUsername(c echo.Context) error {
 			return nil, err
 		}
 
-		return user, nil
+		return user.User, nil
 	})
 	if err != nil {
 		return err

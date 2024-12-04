@@ -2,8 +2,8 @@ package client
 
 import "github.com/DavidMovas/Movies-Reviews/contracts"
 
-func (c *Client) GetUserByID(req *contracts.GetUserByIDRequest) (*contracts.UserWithPassword, error) {
-	var user *contracts.UserWithPassword
+func (c *Client) GetUserByID(req *contracts.GetUserByIDRequest) (*contracts.User, error) {
+	var user *contracts.User
 
 	_, err := c.client.R().
 		SetResult(&user).
@@ -12,8 +12,8 @@ func (c *Client) GetUserByID(req *contracts.GetUserByIDRequest) (*contracts.User
 	return user, err
 }
 
-func (c *Client) GetUserByUsername(req *contracts.GetUserByUsernameRequest) (*contracts.UserWithPassword, error) {
-	var user *contracts.UserWithPassword
+func (c *Client) GetUserByUsername(req *contracts.GetUserByUsernameRequest) (*contracts.User, error) {
+	var user *contracts.User
 
 	_, err := c.client.R().
 		SetResult(&user).
