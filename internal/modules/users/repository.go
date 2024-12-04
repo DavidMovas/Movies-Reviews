@@ -127,8 +127,8 @@ func (r Repository) UpdateExistingUserByID(ctx context.Context, id int, req *Upd
 		builder = builder.Set("username", *req.Username)
 		hasSet = true
 	}
-	if req.Password != nil {
-		builder = builder.Set("pass_hash", *req.Password)
+	if newPassword != "" {
+		builder = builder.Set("pass_hash", newPassword)
 		hasSet = true
 	}
 	if req.Bio != nil {

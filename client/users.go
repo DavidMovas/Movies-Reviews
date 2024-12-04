@@ -22,14 +22,16 @@ func (c *Client) GetUserByUsername(req *contracts.GetUserByUsernameRequest) (*co
 	return user, err
 }
 
-func (c *Client) UpdateUserData(req *contracts.AuthenticatedRequest[*contracts.UpdateUserRequest]) error {
+func (c *Client) UpdateUserData(req *contracts.AuthenticatedRequest[*contracts.UpdateUserRequest]) (*contracts.User, error) {
+	var user *contracts.User
 	_, err := c.client.R().
 		SetAuthToken(req.AccessToken).
 		SetBody(req.Request).
+		SetResult(&user).
 		SetHeader("Content-Type", "application/json").
 		Put(c.path("/api/users/%d", req.Request.UserID))
 
-	return err
+	return user, err
 }
 
 func (c *Client) UpdateUserRole(req *contracts.AuthenticatedRequest[*contracts.UpdateUserRoleRequest]) error {

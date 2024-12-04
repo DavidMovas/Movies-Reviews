@@ -38,9 +38,11 @@ type UpdateUserRoleRequest struct {
 }
 
 type UpdateUserRequest struct {
-	UserID   int    `json:"-" param:"userId" validate:"nonzero"`
-	Username string `json:"username" validate:"min=3,max=24"`
-	Password string `json:"password" validate:"password"`
+	UserID    int     `json:"-" param:"userId" validate:"nonzero"`
+	Username  *string `json:"username,omitempty" validate:"username"`
+	Password  *string `json:"password,omitempty" validate:"password"`
+	AvatarURL *string `json:"avatarUrl,omitempty"`
+	Bio       *string `json:"bio,omitempty"`
 }
 
 type DeleteUserRequest struct {

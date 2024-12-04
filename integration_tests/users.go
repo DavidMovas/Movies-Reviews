@@ -26,40 +26,41 @@ func usersAPIChecks(t *testing.T, c *client.Client, cfg *config.Config) {
 	t.Run("users.UpdateExistingUserById: success", func(t *testing.T) {
 		req := &contracts.UpdateUserRequest{
 			UserID:   johnMoore.ID,
-			Username: fmt.Sprintf("%sTEST", johnMoore.Username),
-			Password: fmt.Sprintf("%sTEST", johnMoorePass),
+			Username: ptr(fmt.Sprintf("%sTEST", johnMoore.Username)),
+			Password: ptr(fmt.Sprintf("%sTEST", johnMoorePass)),
 		}
-		err := c.UpdateUserData(contracts.NewAuthenticated(req, johnMooreToken))
+		user, err := c.UpdateUserData(contracts.NewAuthenticated(req, johnMooreToken))
 		require.NoError(t, err)
+		require.Equal(t, *req.Username, user.Username)
 	})
 
 	t.Run("users.UpdateExistingUserById: rollback success", func(t *testing.T) {
 		req := &contracts.UpdateUserRequest{
 			UserID:   johnMoore.ID,
-			Username: johnMoore.Username,
-			Password: johnMoorePass,
+			Username: ptr(johnMoore.Username),
+			Password: ptr(johnMoorePass),
 		}
-		err := c.UpdateUserData(contracts.NewAuthenticated(req, johnMooreToken))
+		_, err := c.UpdateUserData(contracts.NewAuthenticated(req, johnMooreToken))
 		require.NoError(t, err)
 	})
 
 	t.Run("users.UpdateExistingUserById: another user", func(t *testing.T) {
 		req := &contracts.UpdateUserRequest{
 			UserID:   johnMoore.ID + 100,
-			Username: fmt.Sprintf("%sTEST", johnMoore.Username),
-			Password: fmt.Sprintf("%sTEST", johnMoorePass),
+			Username: ptr(fmt.Sprintf("%sTEST", johnMoore.Username)),
+			Password: ptr(fmt.Sprintf("%sTEST", johnMoorePass)),
 		}
-		err := c.UpdateUserData(contracts.NewAuthenticated(req, johnMooreToken))
+		_, err := c.UpdateUserData(contracts.NewAuthenticated(req, johnMooreToken))
 		requireForbiddenError(t, err, "insufficient permissions")
 	})
 
 	t.Run("users.UpdateExistingUserById: non-authenticated", func(t *testing.T) {
 		req := &contracts.UpdateUserRequest{
 			UserID:   johnMoore.ID + 1,
-			Username: fmt.Sprintf("%sTEST", johnMoore.Username),
-			Password: fmt.Sprintf("%sTEST", johnMoorePass),
+			Username: ptr(fmt.Sprintf("%sTEST", johnMoore.Username)),
+			Password: ptr(fmt.Sprintf("%sTEST", johnMoorePass)),
 		}
-		err := c.UpdateUserData(contracts.NewAuthenticated(req, ""))
+		_, err := c.UpdateUserData(contracts.NewAuthenticated(req, ""))
 		requireForbiddenError(t, err, "insufficient permissions")
 	})
 
