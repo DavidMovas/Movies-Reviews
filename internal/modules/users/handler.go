@@ -105,11 +105,12 @@ func (h *Handler) UpdateExistingUserByID(c echo.Context) error {
 		return err
 	}
 
-	if err = h.service.UpdateExistingUserByID(c.Request().Context(), req.UserID, req); err != nil {
+	user, err := h.service.UpdateExistingUserByID(c.Request().Context(), req.UserID, req)
+	if err != nil {
 		return err
 	}
 
-	return c.NoContent(http.StatusOK)
+	return c.JSON(http.StatusOK, user)
 }
 
 // UpdateUserRoleByID @Summary Update user role by id

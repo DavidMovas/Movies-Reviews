@@ -38,18 +38,19 @@ func (s *Service) GetExistingUserByUsername(ctx context.Context, username string
 	return s.repo.GetExistingUserByUsername(ctx, username)
 }
 
-func (s *Service) UpdateExistingUserByID(ctx context.Context, userID int, user *UpdateUserRequest) error {
-	passHash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+func (s *Service) UpdateExistingUserByID(ctx context.Context, userID int, req *UpdateUserRequest) (*User, error) {
+	passHash, err := bcrypt.GenerateFromPassword([]byte(*req.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	if err = s.repo.UpdateExistingUserByID(ctx, userID, user.Username, string(passHash)); err != nil {
-		return err
+	user, err := s.repo.UpdateExistingUserByID(ctx, userID, req, string(passHash))
+	if err != nil {
+		return nil, err
 	}
 
 	log.FromContext(ctx).Info("user updated", "user_id", userID)
-	return nil
+	return user, nil
 }
 
 func (s *Service) UpdateUserRoleByID(ctx context.Context, userID int, role string) error {

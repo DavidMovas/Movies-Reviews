@@ -116,27 +116,47 @@ func (r Repository) GetExistingUserByUsername(ctx context.Context, username stri
 	return user, nil
 }
 
-func (r Repository) UpdateExistingUserByID(ctx context.Context, id int, newUsername string, newPassword string) error {
-	query, args, err := squirrel.Update("users").
-		Set("username", newUsername).
-		Set("pass_hash", newPassword).
+func (r Repository) UpdateExistingUserByID(ctx context.Context, id int, req *UpdateUserRequest, newPassword string) (*User, error) {
+	builder := squirrel.Update("users").
 		Where(squirrel.Eq{"id": id}).
-		PlaceholderFormat(squirrel.Dollar).
-		ToSql()
+		Suffix("RETURNING id, username, email, role, avatar_url, bio, created_at, deleted_at").
+		PlaceholderFormat(squirrel.Dollar)
+
+	hasSet := false
+	if req.Username != nil {
+		builder = builder.Set("username", *req.Username)
+		hasSet = true
+	}
+	if req.Password != nil {
+		builder = builder.Set("pass_hash", *req.Password)
+		hasSet = true
+	}
+	if req.Bio != nil {
+		builder = builder.Set("bio", *req.Bio)
+		hasSet = true
+	}
+	if req.AvatarURL != nil {
+		builder = builder.Set("avatar_url", *req.AvatarURL)
+		hasSet = true
+	}
+
+	if !hasSet {
+		builder = builder.Set("id", id)
+	}
+
+	query, args, err := builder.ToSql()
 	if err != nil {
-		return apperrors.Internal(err)
+		return nil, apperrors.Internal(err)
 	}
 
-	n, err := r.db.Exec(ctx, query, args...)
+	var user User
+	err = r.db.QueryRow(ctx, query, args...).Scan(&user.ID, &user.Username, &user.Email, &user.Role, &user.AvatarURL, &user.Bio, &user.CreatedAt, &user.DeletedAt)
+
 	if err != nil {
-		return apperrors.Internal(err)
+		return nil, apperrors.Internal(err)
 	}
 
-	if n.RowsAffected() == 0 {
-		return apperrors.NotFound("user", "id", id)
-	}
-
-	return nil
+	return &user, nil
 }
 
 func (r Repository) UpdateUserRoleByID(ctx context.Context, id int, newRole string) error {
