@@ -46,8 +46,12 @@ func GetClaims(c echo.Context) *AccessClaims {
 }
 
 func clearToken(tokenStr string) string {
+	if strings.Contains(tokenStr, "\"") {
+		tokenStr = strings.Trim(tokenStr, "\"")
+	}
+
 	if strings.Contains(tokenStr, "Bearer") {
-		return strings.TrimPrefix(tokenStr, "Bearer ")
+		tokenStr = strings.TrimPrefix(tokenStr, "Bearer ")
 	}
 
 	return tokenStr

@@ -35,6 +35,7 @@ func SetupValidators() {
 		{"password", password},
 		{"passwordOptional", passwordOptional},
 		{"username", username},
+		{"usernameOptional", usernameOptional},
 		{"nonzero", nonzero},
 		{"role", role},
 	}
@@ -46,13 +47,29 @@ func SetupValidators() {
 
 func username(v interface{}, _ string) error {
 	s, ok := v.(string)
+
+	if !ok {
+		return fmt.Errorf("username must be a string")
+	}
+
+	if len(s) < usernameMinLength {
+		return fmt.Errorf("username must be at least %d characters long", usernameMinLength)
+	}
+
+	return nil
+}
+
+func usernameOptional(v interface{}, _ string) error {
+	s, ok := v.(string)
 	ps, psOk := v.(*string)
 
+	if !ok && ps == nil {
+		return nil
+	}
+
 	if psOk {
-		if ps != nil {
-			s = *ps
-			ok = true
-		}
+		s = *ps
+		ok = true
 	}
 
 	if !ok {
@@ -68,14 +85,6 @@ func username(v interface{}, _ string) error {
 
 func password(v interface{}, _ string) error {
 	s, ok := v.(string)
-	ps, psOk := v.(*string)
-
-	if psOk {
-		if ps != nil {
-			s = *ps
-			ok = true
-		}
-	}
 
 	if !ok {
 		return fmt.Errorf("password must be a string")
