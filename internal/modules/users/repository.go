@@ -151,7 +151,6 @@ func (r Repository) UpdateExistingUserByID(ctx context.Context, id int, req *Upd
 
 	var user User
 	err = r.db.QueryRow(ctx, query, args...).Scan(&user.ID, &user.Username, &user.Email, &user.Role, &user.AvatarURL, &user.Bio, &user.CreatedAt, &user.DeletedAt)
-
 	if err != nil {
 		return nil, apperrors.Internal(err)
 	}
