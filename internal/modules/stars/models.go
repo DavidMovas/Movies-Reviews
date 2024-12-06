@@ -11,10 +11,12 @@ type Star struct {
 	FirstName  string     `json:"firstName"`
 	MiddleName *string    `json:"middleName,omitempty"`
 	LastName   string     `json:"lastName"`
+	AvatarURL  *string    `json:"avatarUrl,omitempty"`
 	BirthDate  time.Time  `json:"birthDate"`
 	BirthPlace *string    `json:"birthPlace,omitempty"`
 	DeathDate  *time.Time `json:"deathDate,omitempty"`
 	Bio        *string    `json:"bio,omitempty"`
+	IMDbURL    *string    `json:"imdbUrl,omitempty"`
 	CreatedAt  time.Time  `json:"createdAt"`
 	DeletedAt  *time.Time `json:"deletedAt,omitempty"`
 }
@@ -54,6 +56,7 @@ type CreateStarRequest struct {
 	FirstName  string     `json:"firstName" validate:"min=1,max=50"`
 	MiddleName *string    `json:"middleName,omitempty" validate:"max=50"`
 	LastName   string     `json:"lastName" validate:"min=1,max=50"`
+	AvatarURL  *string    `json:"avatarUrl,omitempty"`
 	BirthDate  time.Time  `json:"birthDate" validate:"nonzero"`
 	BirthPlace *string    `json:"birthPlace,omitempty" validate:"max=100"`
 	DeathDate  *time.Time `json:"deathDate,omitempty"`

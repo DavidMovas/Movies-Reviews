@@ -10,7 +10,6 @@ type Movie struct {
 	Description string    `json:"description"`
 	Metascore   int       `json:"metascore"`
 	Storyline   string    `json:"storyline"`
-	Runtime     string    `json:"runtime"`
 	Genres      []string  `json:"genres"`
 	ReleaseDate time.Time `json:"release_date"`
 

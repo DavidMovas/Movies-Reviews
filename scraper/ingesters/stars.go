@@ -103,6 +103,14 @@ func (i *StarIngester) Ingest(stars map[string]*models.Star, bios map[string]*mo
 					req.BirthPlace = &bio.BirthPlace
 				}
 
+				if *star.MiddleName != "" {
+					req.MiddleName = star.MiddleName
+				}
+
+				if star.AvatarURL != "" {
+					req.AvatarURL = &star.AvatarURL
+				}
+
 				var s *contracts.Star
 				s, err = i.c.CreateStar(contracts.NewAuthenticated(req, i.token))
 				if err != nil {

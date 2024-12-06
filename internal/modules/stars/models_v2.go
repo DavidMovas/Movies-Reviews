@@ -7,6 +7,7 @@ type StarV2 struct {
 	FirstName  string     `json:"firstName"`
 	MiddleName *string    `json:"middleName,omitempty"`
 	LastName   string     `json:"lastName"`
+	AvatarURL  *string    `json:"avatarUrl,omitempty"`
 	CreatedAt  time.Time  `json:"createdAt"`
 	DeletedAt  *time.Time `json:"deletedAt,omitempty"`
 }
