@@ -2,6 +2,7 @@ package movies
 
 import (
 	"context"
+
 	"github.com/DavidMovas/Movies-Reviews/internal/modules/stars"
 
 	"github.com/DavidMovas/Movies-Reviews/internal/modules/genres"
