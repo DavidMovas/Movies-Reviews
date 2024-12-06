@@ -45,7 +45,6 @@ type Star struct {
 	LastName   string     `json:"last_name"`
 	AvatarURL  string     `json:"avatar_url"`
 	IMDbURL    string     `json:"imdb_url"`
-	BornPlace  string     `json:"born_place"`
 	BirthDate  time.Time  `json:"birth_date"`
 	DeathDate  *time.Time `json:"death_date"`
 

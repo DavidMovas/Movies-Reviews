@@ -39,6 +39,7 @@ func NewStarCollector(c *colly.Collector, bioCollector *BioCollector, logger *sl
 			Name        string `json:"name"`
 			Image       string `json:"image"`
 			Description string `json:"description"`
+			URL         string `json:"url"`
 			MainEntity  struct {
 				Name        string `json:"name"`
 				BirthDate   string `json:"birthDate"`
@@ -61,6 +62,8 @@ func NewStarCollector(c *colly.Collector, bioCollector *BioCollector, logger *sl
 		star.Name = info.Name
 		star.FirstName, star.LastName = splitName(info.Name)
 		star.BirthDate = mustParseDate(info.MainEntity.BirthDate)
+		star.AvatarURL = info.Image
+		star.IMDbURL = info.URL
 		if info.MainEntity.DeathDate != "" {
 			deathDate := mustParseDate(info.MainEntity.DeathDate)
 			star.DeathDate = &deathDate
