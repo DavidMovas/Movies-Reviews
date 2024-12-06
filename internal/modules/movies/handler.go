@@ -96,6 +96,20 @@ func (h *Handler) GetMovieByID(c echo.Context) error {
 	return c.JSON(http.StatusOK, movie)
 }
 
+func (h *Handler) GetMovieByIDV2(c echo.Context) error {
+	req, err := echox.BindAndValidate[GetMovieRequest](c)
+	if err != nil {
+		return err
+	}
+
+	movie, err := h.service.GetMovieByIDV2(c.Request().Context(), req.MovieID)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, movie)
+}
+
 // GetStarsByMovieID godoc
 // @Summary      Get stars by movie id
 // @Description  Get stars by movie id
