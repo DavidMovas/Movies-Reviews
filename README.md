@@ -65,6 +65,7 @@ These tests help identify potential issues and provide confidence in the correct
 |--------|-----------------------------|-----------------------------------------------|--------|
 | GET    | /api/movies                 | Get all movies (paginated, filtered, ordered) | any    |
 | GET    | /api/movies/{movieId}       | Get movie by id                               | any    |
+| GET    | /api/movies/2/{movieId}     | Get movie by id (short cast version)          | any    |
 | GET    | /api/movies/{movieId}/stars | Get all stars by movie id                     | any    |
 | POST   | /api/movies                 | Create a new movie                            | editor |
 | PUT    | /api/movies/{movieId}       | Update movie by id                            | editor |
