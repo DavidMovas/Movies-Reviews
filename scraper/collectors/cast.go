@@ -112,9 +112,8 @@ func (c *CastCollector) isNewStarLink(link string) bool {
 
 func (c *CastCollector) addCastFromSimpleTable(cast *models.Cast, role string, table *goquery.Selection) {
 	table.Find("tr").Each(func(_ int, row *goquery.Selection) {
+		var herroName string
 		starLink := row.Find("td.name a")
-		heroBlock := row.Find("a.cast-item-characters-link data-testid.cast-item-characters-link")
-		heroName := heroBlock.Find("span")
 		if starLink.Nodes == nil {
 			return
 		}
@@ -124,11 +123,17 @@ func (c *CastCollector) addCastFromSimpleTable(cast *models.Cast, role string, t
 		link = removeQueryPart(link)
 		details := row.Find("td.credit").Text()
 
+		starNames := strings.Split(strings.TrimSpace(starLink.Text()), `\n`)
+
+		if len(starNames) > 1 {
+			herroName = starNames[1]
+		}
+
 		credit := &models.Credit{
 			Role:     role,
 			Details:  strings.TrimSpace(details),
-			StarName: strings.TrimSpace(starLink.Text()),
-			HeroName: strings.TrimSpace(heroName.Text()),
+			StarName: starNames[0],
+			HeroName: herroName,
 			StarLink: link,
 			StarID:   getStarID(link),
 		}
@@ -140,9 +145,8 @@ func (c *CastCollector) addCastFromSimpleTable(cast *models.Cast, role string, t
 func (c *CastCollector) addCastFromCastTable(cast *models.Cast, table *goquery.Selection, max int) {
 	var added int
 	table.Find("tr").EachWithBreak(func(_ int, row *goquery.Selection) bool {
+		var herroName string
 		starLink := row.Find("td:not(.primary_photo .character) a")
-		heroBlock := row.Find("a.cast-item-characters-link data-testid.cast-item-characters-link")
-		heroName := heroBlock.Find("span")
 
 		if starLink.Nodes == nil {
 			return true
@@ -152,12 +156,18 @@ func (c *CastCollector) addCastFromCastTable(cast *models.Cast, table *goquery.S
 		link, _ := url.JoinPath("https://www.imdb.com", href)
 		link = removeQueryPart(link)
 
+		starNames := strings.Split(strings.TrimSpace(starLink.Text()), "\n")
+
+		if len(starNames) > 1 {
+			herroName = starNames[1]
+		}
+
 		credit := &models.Credit{
 			Role:     "actor",
 			Details:  "",
-			StarName: strings.TrimSpace(starLink.Text()),
+			StarName: starNames[0],
 			StarLink: link,
-			HeroName: strings.TrimSpace(heroName.Text()),
+			HeroName: herroName,
 			StarID:   getStarID(link),
 		}
 

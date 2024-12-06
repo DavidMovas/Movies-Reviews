@@ -17,7 +17,7 @@ func main() {
 	}
 
 	rootCmd.AddCommand(cmd.NewScrapCmd(logger))
-	//rootCmd.AddCommand(cmd.NewIngestCmd(logger))
+	rootCmd.AddCommand(cmd.NewIngestCmd(logger))
 
 	if err := rootCmd.Execute(); err != nil {
 		logger.Error(err.Error())

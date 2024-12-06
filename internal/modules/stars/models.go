@@ -61,6 +61,7 @@ type CreateStarRequest struct {
 	BirthPlace *string    `json:"birthPlace,omitempty" validate:"max=100"`
 	DeathDate  *time.Time `json:"deathDate,omitempty"`
 	Bio        *string    `json:"bio,omitempty"`
+	IMDbURL    *string    `json:"imdbUrl,omitempty"`
 }
 
 type UpdateStarRequest struct {

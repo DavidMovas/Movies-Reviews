@@ -93,6 +93,7 @@ func (i *StarIngester) Ingest(stars map[string]*models.Star, bios map[string]*mo
 					LastName:  star.LastName,
 					BirthDate: star.BirthDate,
 					DeathDate: star.DeathDate,
+					IMDbURL:   &star.Link,
 				}
 
 				if bio.Bio != "" {

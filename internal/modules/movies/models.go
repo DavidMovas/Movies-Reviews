@@ -50,16 +50,16 @@ type GetMoviesRequest struct {
 }
 
 type CreateMovieRequest struct {
-	Title       string            `json:"title" validate:"min=1,max=100"`
-	ReleaseDate time.Time         `json:"releaseDate" validate:"nonzero"`
-	PosterURL   *string           `json:"posterUrl,omitempty"`
-	IMDbRating  *float64          `json:"imdbRating,omitempty"`
-	IMDbURL     *string           `json:"imdbUrl,omitempty"`
-	Metascore   *int              `json:"metascore,omitempty"`
-	Storyline   *string           `json:"storyline,omitempty"`
-	Description string            `json:"description"`
-	GenreIDs    []int             `json:"genreIds" validate:"nonzero"`
-	Cast        []MovieCreditInfo `json:"cast"`
+	Title        string            `json:"title" validate:"min=1,max=100"`
+	ReleaseDate  time.Time         `json:"releaseDate" validate:"nonzero"`
+	PosterURL    *string           `json:"posterUrl,omitempty"`
+	IMDbRating   *float64          `json:"imdbRating,omitempty"`
+	IMDbURL      *string           `json:"imdbUrl,omitempty"`
+	Metascore    *int              `json:"metascore,omitempty"`
+	MetascoreURL *string           `json:"metascoreUrl,omitempty"`
+	Description  string            `json:"description"`
+	GenreIDs     []int             `json:"genreIds" validate:"nonzero"`
+	Cast         []MovieCreditInfo `json:"cast"`
 }
 
 type UpdateMovieRequest struct {

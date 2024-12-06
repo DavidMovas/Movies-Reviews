@@ -85,6 +85,18 @@ func (i *MoviesIngester) Ingest(movies map[string]*models.Movie, casts map[strin
 					req.PosterURL = &movie.PosterURL
 				}
 
+				if movie.IMDbRating != 0 {
+					req.IMDbRating = &movie.IMDbRating
+				}
+
+				if movie.Metascore != 0 {
+					req.Metascore = &movie.Metascore
+				}
+
+				if movie.MetascoreURL != "" {
+					req.MetascoreURL = &movie.MetascoreURL
+				}
+
 				for _, genre := range movie.Genres {
 					genreID, ok := i.genreIDConverter(genre)
 					if !ok {
@@ -113,8 +125,9 @@ func (i *MoviesIngester) Ingest(movies map[string]*models.Movie, casts map[strin
 					}
 
 					creditInfo := &contracts.MovieCreditInfo{
-						StarID: starID,
-						Role:   credit.Role,
+						StarID:  starID,
+						Role:    credit.Role,
+						IMDbURL: &credit.StarLink,
 					}
 
 					if credit.Details != "" {
