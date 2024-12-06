@@ -120,7 +120,7 @@ func (r *Repository) GetMovieByID(ctx context.Context, movieID int) (*MovieDetai
 
 func (r *Repository) CreateMovie(ctx context.Context, movie *MovieDetails) error {
 	query, args, err := squirrel.Insert("movies").
-		Columns("title", "description", "poster_url", "imdb_rating", "imdb_url", "metascore", "metascore_url", "release_date").
+		Columns("title", "poster_url", "imdb_rating", "imdb_url", "metascore", "metascore_url", "description", "release_date").
 		Values(movie.Title, movie.PosterURL, movie.IMDbRating, movie.IMDbURL, movie.Metascore, movie.MetascoreURL, movie.Description, movie.ReleaseDate).
 		Suffix("RETURNING id, created_at").
 		PlaceholderFormat(squirrel.Dollar).
@@ -150,6 +150,9 @@ func (r *Repository) CreateMovie(ctx context.Context, movie *MovieDetails) error
 
 		// Insert stars
 		nextCast := slices.MapIndex(movie.Cast, func(i int, credit *MovieCredit) *stars.MovieStarsRelation {
+			if credit.HeroName == nil {
+				credit.HeroName = ptr("N/A")
+			}
 			return &stars.MovieStarsRelation{
 				MovieID:  movie.ID,
 				StarID:   credit.Star.ID,
@@ -369,6 +372,9 @@ func (r *Repository) starsUpdateRequest(ctx context.Context, cast []*MovieCredit
 		}
 
 		nextCast := slices.MapIndex(starsIDs, func(i, starID int) *stars.MovieStarsRelation {
+			if cast[i].HeroName == nil {
+				cast[i].HeroName = ptr("N/A")
+			}
 			return &stars.MovieStarsRelation{
 				MovieID:  movieID,
 				StarID:   starID,
@@ -382,4 +388,8 @@ func (r *Repository) starsUpdateRequest(ctx context.Context, cast []*MovieCredit
 		return r.updateStars(ctx, currenCast, nextCast)
 	}
 	return nil
+}
+
+func ptr(ptr string) *string {
+	return &ptr
 }

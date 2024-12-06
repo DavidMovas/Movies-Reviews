@@ -48,9 +48,10 @@ func (m MovieStarsRelation) Key() any {
 }
 
 type MovieCredit struct {
-	Star    Star
-	Role    string
-	Details string
+	Star     Star
+	Role     string
+	HeroName string
+	Details  string
 }
 
 type CreateStarRequest struct {
@@ -70,10 +71,12 @@ type UpdateStarRequest struct {
 	FirstName  *string    `json:"firstName,omitempty" validate:"max=50"`
 	MiddleName *string    `json:"middleName,omitempty" validate:"max=50"`
 	LastName   *string    `json:"lastName,omitempty" validate:"max=50"`
+	AvatarURL  *string    `json:"avatarUrl,omitempty"`
 	BirthDate  *time.Time `json:"birthDate,omitempty"`
 	BirthPlace *string    `json:"birthPlace,omitempty" validate:"max=100"`
 	DeathDate  *time.Time `json:"deathDate,omitempty"`
 	Bio        *string    `json:"bio,omitempty"`
+	IMDbURL    *string    `json:"imdbUrl,omitempty"`
 }
 
 type DeleteStarRequest struct {

@@ -13,7 +13,7 @@ import (
 type Movie struct {
 	ID          int        `json:"id"`
 	Title       string     `json:"title"`
-	PosterURL   *string    `json:"posterUrl,omitempty"`
+	PosterURL   string     `json:"posterUrl"`
 	ReleaseDate time.Time  `json:"releaseDate"`
 	AvgRating   *float64   `json:"avgRating,omitempty"`
 	CreatedAt   time.Time  `json:"createdAt"`

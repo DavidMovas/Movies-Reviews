@@ -17,6 +17,10 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+const (
+	DefaultPosterURL = "https://assets.dryicons.com/uploads/vector/preview/8393/large_1x_movie_countdown.jpg"
+)
+
 type Handler struct {
 	service          *Service
 	paginationConfig *config.PaginationConfig
@@ -171,13 +175,18 @@ func (h *Handler) CreateMovie(c echo.Context) error {
 		Movie: Movie{
 			Title:       req.Title,
 			ReleaseDate: req.ReleaseDate,
-			PosterURL:   req.PosterURL,
 		},
 		Description:  req.Description,
 		IMDbRating:   req.IMDbRating,
 		IMDbURL:      req.IMDbURL,
 		Metascore:    req.Metascore,
 		MetascoreURL: req.MetascoreURL,
+	}
+
+	if req.PosterURL != nil {
+		movie.PosterURL = *req.PosterURL
+	} else {
+		movie.PosterURL = DefaultPosterURL
 	}
 
 	for _, genreID := range req.GenreIDs {
