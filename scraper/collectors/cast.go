@@ -113,6 +113,8 @@ func (c *CastCollector) isNewStarLink(link string) bool {
 func (c *CastCollector) addCastFromSimpleTable(cast *models.Cast, role string, table *goquery.Selection) {
 	table.Find("tr").Each(func(_ int, row *goquery.Selection) {
 		starLink := row.Find("td.name a")
+		heroBlock := row.Find("a.cast-item-characters-link data-testid.cast-item-characters-link")
+		heroName := heroBlock.Find("span")
 		if starLink.Nodes == nil {
 			return
 		}
@@ -126,6 +128,7 @@ func (c *CastCollector) addCastFromSimpleTable(cast *models.Cast, role string, t
 			Role:     role,
 			Details:  strings.TrimSpace(details),
 			StarName: strings.TrimSpace(starLink.Text()),
+			HeroName: strings.TrimSpace(heroName.Text()),
 			StarLink: link,
 			StarID:   getStarID(link),
 		}

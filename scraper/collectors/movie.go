@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/PuerkitoBio/goquery"
 	"log/slog"
+	"math"
 	"net/url"
 	"strconv"
 	"strings"
@@ -43,7 +44,6 @@ func NewMovieCollector(c *colly.Collector, castCollector *CastCollector, logger 
 			URL           string   `json:"url"`
 			Name          string   `json:"name"`
 			Image         string   `json:"image"`
-			Rating        string   `json:"ratingValue"`
 			Description   string   `json:"description"`
 			Genre         []string `json:"genre"`
 			DatePublished string   `json:"datePublished"`
@@ -60,14 +60,14 @@ func NewMovieCollector(c *colly.Collector, castCollector *CastCollector, logger 
 			return
 		}
 
-		metascoreHeader := e.DOM.Find("span#score")
-		if metascoreHeader.Nodes != nil {
-			collector.getMetaScore(movie, metascoreHeader.Next())
+		ratingTable := e.DOM.Find("div.sc-d541859f-2")
+		if ratingTable.Nodes != nil {
+			collector.getIMDbRating(movie, ratingTable)
 		}
 
-		storylineHeader := e.DOM.Find("div#ipc-html-content-inner-div")
-		if storylineHeader.Nodes != nil {
-			collector.getStoryline(movie, storylineHeader)
+		metascoreHeader := e.DOM.Find("a.isReview")
+		if metascoreHeader.Nodes != nil {
+			collector.getMetascore(movie, metascoreHeader)
 		}
 
 		movie.Title = info.Name
@@ -75,7 +75,7 @@ func NewMovieCollector(c *colly.Collector, castCollector *CastCollector, logger 
 		movie.Genres = info.Genre
 		movie.ReleaseDate = mustParseDate(info.DatePublished)
 		movie.PosterURL = info.Image
-		movie.IMDbRating, _ = strconv.ParseFloat(info.Rating, 32)
+		movie.MetascoreURL, _ = url.JoinPath(info.URL, "/criticreviews")
 
 		collector.toAllGenres(movie.Genres)
 
@@ -84,8 +84,8 @@ func NewMovieCollector(c *colly.Collector, castCollector *CastCollector, logger 
 			With("title", movie.Title).
 			Debug("movie collected")
 
-		creditsLink, _ := url.JoinPath(info.URL, "/fullcredits")
-		castCollector.Visit(creditsLink)
+		//creditsLink, _ := url.JoinPath(info.URL, "/fullcredits")
+		//castCollector.Visit(creditsLink)
 	})
 
 	return collector
@@ -132,14 +132,14 @@ func (c *MovieCollector) toAllGenres(genres []string) {
 	}
 }
 
-func (c *MovieCollector) getMetaScore(movie *models.Movie, table *goquery.Selection) {
-	table.Find("span").EachWithBreak(func(_ int, row *goquery.Selection) bool {
-		metascoreBlock := row.Find("metacritic-score-box")
+func (c *MovieCollector) getIMDbRating(movie *models.Movie, table *goquery.Selection) {
+	table.Find("span.sc-d541859f-1").EachWithBreak(func(_ int, row *goquery.Selection) bool {
+		scoreLine := row.Text()
 
-		score := metascoreBlock.Text()
-
-		if res, err := strconv.Atoi(strings.TrimSpace(score)); err == nil {
-			movie.Metascore = res
+		if scoreLine != "" {
+			var num float64
+			num, _ = strconv.ParseFloat(scoreLine, 32)
+			movie.IMDbRating = math.Round(num*10) / 10
 			return false
 		}
 
@@ -147,17 +147,9 @@ func (c *MovieCollector) getMetaScore(movie *models.Movie, table *goquery.Select
 	})
 }
 
-func (c *MovieCollector) getStoryline(movie *models.Movie, table *goquery.Selection) {
-	table.Find("p").EachWithBreak(func(_ int, row *goquery.Selection) bool {
-		storyline := row.Text()
-
-		if storyline != "" {
-			movie.Storyline = storyline
-			return false
-		}
-
-		return true
-	})
+func (c *MovieCollector) getMetascore(movie *models.Movie, table *goquery.Selection) {
+	scoreBox := table.Find("span.metacritic-score-box")
+	movie.Metascore, _ = strconv.Atoi(scoreBox.Text())
 }
 
 func getMovieID(url *url.URL) string {

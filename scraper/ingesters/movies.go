@@ -78,22 +78,11 @@ func (i *MoviesIngester) Ingest(movies map[string]*models.Movie, casts map[strin
 					Title:       movie.Title,
 					ReleaseDate: movie.ReleaseDate,
 					Description: movie.Description,
+					IMDbURL:     &movie.Link,
 				}
 
 				if movie.PosterURL != "" {
 					req.PosterURL = &movie.PosterURL
-				}
-
-				if movie.IMDbRating != 0 {
-					req.IMDbRating = &movie.IMDbRating
-				}
-
-				if movie.Metascore != 0 {
-					req.Metascore = &movie.Metascore
-				}
-
-				if movie.Storyline != "" {
-					req.Storyline = &movie.Storyline
 				}
 
 				for _, genre := range movie.Genres {

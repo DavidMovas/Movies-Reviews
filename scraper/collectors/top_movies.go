@@ -32,7 +32,10 @@ func NewTopMoviesCollector(c *colly.Collector, movieCollector *MovieCollector, l
 		}
 
 		urls := findMovieURLs(data)
-		for _, url := range urls {
+		for idx, url := range urls {
+			if idx >= 10 {
+				break
+			}
 			movieCollector.Visit(url)
 		}
 	})

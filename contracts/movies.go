@@ -63,6 +63,7 @@ type CreateMovieRequest struct {
 	ReleaseDate time.Time         `json:"releaseDate" validate:"nonzero"`
 	PosterURL   *string           `json:"posterUrl,omitempty"`
 	IMDbRating  *float64          `json:"imdbRating,omitempty"`
+	IMDbURL     *string           `json:"imdbUrl,omitempty"`
 	Metascore   *int              `json:"metascore,omitempty"`
 	Storyline   *string           `json:"storyline,omitempty"`
 	Description string            `json:"description"`

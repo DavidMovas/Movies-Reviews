@@ -3,15 +3,15 @@ package models
 import "time"
 
 type Movie struct {
-	ID          string    `json:"id"`
-	Title       string    `json:"title"`
-	PosterURL   string    `json:"poster_url"`
-	IMDbRating  float64   `json:"imdb_rating"`
-	Description string    `json:"description"`
-	Metascore   int       `json:"metascore"`
-	Storyline   string    `json:"storyline"`
-	Genres      []string  `json:"genres"`
-	ReleaseDate time.Time `json:"release_date"`
+	ID           string    `json:"id"`
+	Title        string    `json:"title"`
+	PosterURL    string    `json:"poster_url"`
+	Description  string    `json:"description"`
+	IMDbRating   float64   `json:"imdbRating"`
+	Metascore    int       `json:"metascore"`
+	MetascoreURL string    `json:"metascore_url"`
+	Genres       []string  `json:"genres"`
+	ReleaseDate  time.Time `json:"release_date"`
 
 	Link string `json:"_link"`
 }
