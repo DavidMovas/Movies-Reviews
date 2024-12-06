@@ -24,9 +24,10 @@ func (s *Service) assemble(ctx context.Context, movie *MovieDetails) error {
 		if err == nil {
 			movie.Cast = slices.CastSlice(credits, func(credit *stars.MovieCredit) *MovieCredit {
 				return &MovieCredit{
-					Star:    credit.Star,
-					Role:    credit.Role,
-					Details: credit.Details,
+					Star:     credit.Star,
+					HeroName: credit.HeroName,
+					Role:     credit.Role,
+					Details:  credit.Details,
 				}
 			})
 		}

@@ -151,7 +151,7 @@ func (r *Repository) CreateMovie(ctx context.Context, movie *MovieDetails) error
 		// Insert stars
 		nextCast := slices.MapIndex(movie.Cast, func(i int, credit *MovieCredit) *stars.MovieStarsRelation {
 			if credit.HeroName == nil {
-				credit.HeroName = ptr("N/A")
+				credit.HeroName = ptr("")
 			}
 			return &stars.MovieStarsRelation{
 				MovieID:  movie.ID,

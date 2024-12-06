@@ -135,7 +135,9 @@ func (i *MoviesIngester) Ingest(movies map[string]*models.Movie, casts map[strin
 					}
 
 					if credit.HeroName != "" {
-						creditInfo.HeroName = &credit.HeroName
+						if len(credit.HeroName) < 100 {
+							creditInfo.HeroName = &credit.HeroName
+						}
 					}
 
 					req.Cast = append(req.Cast, *creditInfo)

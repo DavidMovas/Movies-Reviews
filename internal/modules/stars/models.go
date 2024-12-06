@@ -50,7 +50,7 @@ func (m MovieStarsRelation) Key() any {
 type MovieCredit struct {
 	Star     Star
 	Role     string
-	HeroName string
+	HeroName *string
 	Details  string
 }
 

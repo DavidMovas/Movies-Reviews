@@ -104,7 +104,7 @@ func (i *StarIngester) Ingest(stars map[string]*models.Star, bios map[string]*mo
 					req.BirthPlace = &bio.BirthPlace
 				}
 
-				if *star.MiddleName != "" {
+				if star.MiddleName != nil {
 					req.MiddleName = star.MiddleName
 				}
 
