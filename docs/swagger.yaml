@@ -33,11 +33,17 @@ definitions:
         type: string
       password:
         type: string
+      username:
+        maxLength: 24
+        minLength: 3
+        type: string
     type: object
   auth.LoginUserResponse:
     properties:
       access_token:
         type: string
+      user:
+        $ref: '#/definitions/users.User'
     type: object
   auth.RegisterUserRequest:
     properties:
@@ -126,6 +132,8 @@ definitions:
     type: object
   contracts.Movie:
     properties:
+      avgRating:
+        type: number
       createdAt:
         type: string
       deletedAt:
@@ -155,11 +163,49 @@ definitions:
       starId:
         type: integer
     type: object
+  contracts.MovieCreditV2:
+    properties:
+      details:
+        type: string
+      role:
+        type: string
+      star:
+        $ref: '#/definitions/contracts.StarV2'
+    type: object
   contracts.MovieDetails:
     properties:
+      avgRating:
+        type: number
       cast:
         items:
           $ref: '#/definitions/contracts.MovieCredit'
+        type: array
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      description:
+        type: string
+      genres:
+        items:
+          $ref: '#/definitions/contracts.Genre'
+        type: array
+      id:
+        type: integer
+      releaseDate:
+        type: string
+      title:
+        type: string
+      version:
+        type: integer
+    type: object
+  contracts.MovieDetailsV2:
+    properties:
+      avgRating:
+        type: number
+      cast:
+        items:
+          $ref: '#/definitions/contracts.MovieCreditV2'
         type: array
       createdAt:
         type: string
@@ -231,6 +277,21 @@ definitions:
       middleName:
         type: string
     type: object
+  contracts.StarV2:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      firstName:
+        type: string
+      id:
+        type: integer
+      lastName:
+        type: string
+      middleName:
+        type: string
+    type: object
   contracts.UpdateMovieRequest:
     properties:
       cast:
@@ -268,15 +329,21 @@ definitions:
     type: object
   contracts.UpdateUserRequest:
     properties:
+      avatarUrl:
+        type: string
+      bio:
+        type: string
       password:
         type: string
       username:
-        maxLength: 24
-        minLength: 3
         type: string
     type: object
   contracts.User:
     properties:
+      avatarUrl:
+        type: string
+      bio:
+        type: string
       createdAt:
         type: string
       deletedAt:
@@ -383,29 +450,6 @@ definitions:
         maxLength: 50
         type: string
     type: object
-  stars.Star:
-    properties:
-      bio:
-        type: string
-      birthDate:
-        type: string
-      birthPlace:
-        type: string
-      createdAt:
-        type: string
-      deathDate:
-        type: string
-      deletedAt:
-        type: string
-      firstName:
-        type: string
-      id:
-        type: integer
-      lastName:
-        type: string
-      middleName:
-        type: string
-    type: object
   stars.UpdateStarRequest:
     properties:
       bio:
@@ -425,6 +469,25 @@ definitions:
         type: string
       middleName:
         maxLength: 50
+        type: string
+    type: object
+  users.User:
+    properties:
+      avatarUrl:
+        type: string
+      bio:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      role:
+        type: string
+      username:
         type: string
     type: object
 host: localhost:8080
@@ -904,6 +967,38 @@ paths:
       summary: Get stars by movie id
       tags:
       - movies
+  /movies/v2/{movieId}:
+    get:
+      description: Get movie by id
+      operationId: get-movie-by-id-v2
+      parameters:
+      - description: Movie ID
+        in: path
+        name: movieId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Movie details (short version)
+          schema:
+            $ref: '#/definitions/contracts.MovieDetailsV2'
+        "400":
+          description: Invalid movie id, invalid parameter or missing parameter
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "404":
+          description: Movie not found
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apperrors.Error'
+      summary: Get movie by id
+      tags:
+      - movies
   /reviews/{reviewId}:
     get:
       consumes:
@@ -981,9 +1076,9 @@ paths:
       - application/json
       responses:
         "201":
-          description: Star
+          description: Start
           schema:
-            $ref: '#/definitions/stars.Star'
+            $ref: '#/definitions/contracts.Star'
         "400":
           description: Invalid request, invalid parameter or missing parameter
           schema:
@@ -1004,7 +1099,7 @@ paths:
       description: Delete star by id
       operationId: delete-star-by-id
       parameters:
-      - description: Star ID
+      - description: Start ID
         in: path
         name: starId
         required: true
@@ -1021,7 +1116,7 @@ paths:
           schema:
             $ref: '#/definitions/apperrors.Error'
         "404":
-          description: Star not found
+          description: Start not found
           schema:
             $ref: '#/definitions/apperrors.Error'
         "500":
@@ -1035,7 +1130,7 @@ paths:
       description: Get star by id
       operationId: get-star-by-id
       parameters:
-      - description: Star ID
+      - description: Start ID
         in: path
         name: starId
         required: true
@@ -1044,15 +1139,15 @@ paths:
       - application/json
       responses:
         "200":
-          description: Star
+          description: Start
           schema:
-            $ref: '#/definitions/stars.Star'
+            $ref: '#/definitions/contracts.Star'
         "400":
           description: Invalid request, invalid parameter or missing parameter
           schema:
             $ref: '#/definitions/apperrors.Error'
         "404":
-          description: Star not found
+          description: Start not found
           schema:
             $ref: '#/definitions/apperrors.Error'
         "500":
@@ -1066,7 +1161,7 @@ paths:
       description: Update star by id
       operationId: update-star-by-id
       parameters:
-      - description: Star ID
+      - description: Start ID
         in: path
         name: starId
         required: true
@@ -1081,9 +1176,9 @@ paths:
       - application/json
       responses:
         "200":
-          description: Star
+          description: Start
           schema:
-            $ref: '#/definitions/stars.Star'
+            $ref: '#/definitions/contracts.Star'
         "400":
           description: Invalid request, invalid parameter or missing parameter
           schema:
@@ -1093,7 +1188,7 @@ paths:
           schema:
             $ref: '#/definitions/apperrors.Error'
         "404":
-          description: Star not found
+          description: Start not found
           schema:
             $ref: '#/definitions/apperrors.Error'
         "500":

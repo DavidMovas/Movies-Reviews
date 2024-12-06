@@ -31,7 +31,7 @@ import (
 
 var (
 	dbConnectionTime  = time.Second * 10
-	adminCreationTime = time.Second * 4
+	adminCreationTime = time.Second * 5
 )
 
 type Server struct {
@@ -116,6 +116,7 @@ func New(ctx context.Context, cfg *config.Config) (*Server, error) {
 	// Movies API routers
 	api.GET("/movies", moviesModule.Handler.GetMovies)
 	api.GET("/movies/:movieId", moviesModule.Handler.GetMovieByID)
+	api.GET("/movies/v2/:movieId", moviesModule.Handler.GetMovieByIDV2)
 	api.GET("/movies/:movieId/stars", moviesModule.Handler.GetStarsByMovieID)
 	api.POST("/movies", moviesModule.Handler.CreateMovie, auth.Editor)
 	api.PUT("/movies/:movieId", moviesModule.Handler.UpdateMovieByID, auth.Editor)
@@ -171,6 +172,11 @@ func getDB(ctx context.Context, connString string) (*pgxpool.Pool, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to db: %w", err)
 	}
+
+	if err = db.Ping(ctx); err != nil {
+		return nil, fmt.Errorf("failed to connect to db: %w", err)
+	}
+
 	return db, err
 }
 

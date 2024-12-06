@@ -96,6 +96,18 @@ func (h *Handler) GetMovieByID(c echo.Context) error {
 	return c.JSON(http.StatusOK, movie)
 }
 
+// GetMovieByIDV2 godoc
+// @Summary      Get movie by id
+// @Description  Get movie by id
+// @ID           get-movie-by-id-v2
+// @Tags         movies
+// @Produce      json
+// @Param        movieId path int true "Movie ID"
+// @Success      200 {object} contracts.MovieDetailsV2 "Movie details (short version)"
+// @Failure      400 {object} apperrors.Error "Invalid movie id, invalid parameter or missing parameter"
+// @Failure      404 {object} apperrors.Error "Movie not found"
+// @Failure      500 {object} apperrors.Error "Internal server error"
+// @Router       /movies/v2/{movieId} [get]
 func (h *Handler) GetMovieByIDV2(c echo.Context) error {
 	req, err := echox.BindAndValidate[GetMovieRequest](c)
 	if err != nil {

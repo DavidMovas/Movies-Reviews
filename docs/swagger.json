@@ -447,6 +447,54 @@
                 }
             }
         },
+        "/movies/v2/{movieId}": {
+            "get": {
+                "description": "Get movie by id",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "movies"
+                ],
+                "summary": "Get movie by id",
+                "operationId": "get-movie-by-id-v2",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Movie ID",
+                        "name": "movieId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Movie details (short version)",
+                        "schema": {
+                            "$ref": "#/definitions/contracts.MovieDetailsV2"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid movie id, invalid parameter or missing parameter",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Movie not found",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/movies/{movieId}": {
             "get": {
                 "description": "Get movie by id",
@@ -828,9 +876,9 @@
                 ],
                 "responses": {
                     "201": {
-                        "description": "Star",
+                        "description": "Start",
                         "schema": {
-                            "$ref": "#/definitions/stars.Star"
+                            "$ref": "#/definitions/contracts.Star"
                         }
                     },
                     "400": {
@@ -868,7 +916,7 @@
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Star ID",
+                        "description": "Start ID",
                         "name": "starId",
                         "in": "path",
                         "required": true
@@ -876,9 +924,9 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Star",
+                        "description": "Start",
                         "schema": {
-                            "$ref": "#/definitions/stars.Star"
+                            "$ref": "#/definitions/contracts.Star"
                         }
                     },
                     "400": {
@@ -888,7 +936,7 @@
                         }
                     },
                     "404": {
-                        "description": "Star not found",
+                        "description": "Start not found",
                         "schema": {
                             "$ref": "#/definitions/apperrors.Error"
                         }
@@ -914,7 +962,7 @@
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Star ID",
+                        "description": "Start ID",
                         "name": "starId",
                         "in": "path",
                         "required": true
@@ -931,9 +979,9 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Star",
+                        "description": "Start",
                         "schema": {
-                            "$ref": "#/definitions/stars.Star"
+                            "$ref": "#/definitions/contracts.Star"
                         }
                     },
                     "400": {
@@ -949,7 +997,7 @@
                         }
                     },
                     "404": {
-                        "description": "Star not found",
+                        "description": "Start not found",
                         "schema": {
                             "$ref": "#/definitions/apperrors.Error"
                         }
@@ -972,7 +1020,7 @@
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Star ID",
+                        "description": "Start ID",
                         "name": "starId",
                         "in": "path",
                         "required": true
@@ -995,7 +1043,7 @@
                         }
                     },
                     "404": {
-                        "description": "Star not found",
+                        "description": "Start not found",
                         "schema": {
                             "$ref": "#/definitions/apperrors.Error"
                         }
@@ -1556,6 +1604,11 @@
                 },
                 "password": {
                     "type": "string"
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 24,
+                    "minLength": 3
                 }
             }
         },
@@ -1564,6 +1617,9 @@
             "properties": {
                 "access_token": {
                     "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/users.User"
                 }
             }
         },
@@ -1697,6 +1753,9 @@
         "contracts.Movie": {
             "type": "object",
             "properties": {
+                "avgRating": {
+                    "type": "number"
+                },
                 "createdAt": {
                     "type": "string"
                 },
@@ -1742,13 +1801,71 @@
                 }
             }
         },
+        "contracts.MovieCreditV2": {
+            "type": "object",
+            "properties": {
+                "details": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "star": {
+                    "$ref": "#/definitions/contracts.StarV2"
+                }
+            }
+        },
         "contracts.MovieDetails": {
             "type": "object",
             "properties": {
+                "avgRating": {
+                    "type": "number"
+                },
                 "cast": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/contracts.MovieCredit"
+                    }
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "genres": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/contracts.Genre"
+                    }
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "releaseDate": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "integer"
+                }
+            }
+        },
+        "contracts.MovieDetailsV2": {
+            "type": "object",
+            "properties": {
+                "avgRating": {
+                    "type": "number"
+                },
+                "cast": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/contracts.MovieCreditV2"
                     }
                 },
                 "createdAt": {
@@ -1858,6 +1975,29 @@
                 }
             }
         },
+        "contracts.StarV2": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "middleName": {
+                    "type": "string"
+                }
+            }
+        },
         "contracts.UpdateMovieRequest": {
             "type": "object",
             "properties": {
@@ -1912,19 +2052,29 @@
         "contracts.UpdateUserRequest": {
             "type": "object",
             "properties": {
+                "avatarUrl": {
+                    "type": "string"
+                },
+                "bio": {
+                    "type": "string"
+                },
                 "password": {
                     "type": "string"
                 },
                 "username": {
-                    "type": "string",
-                    "maxLength": 24,
-                    "minLength": 3
+                    "type": "string"
                 }
             }
         },
         "contracts.User": {
             "type": "object",
             "properties": {
+                "avatarUrl": {
+                    "type": "string"
+                },
+                "bio": {
+                    "type": "string"
+                },
                 "createdAt": {
                     "type": "string"
                 },
@@ -2080,41 +2230,6 @@
                 }
             }
         },
-        "stars.Star": {
-            "type": "object",
-            "properties": {
-                "bio": {
-                    "type": "string"
-                },
-                "birthDate": {
-                    "type": "string"
-                },
-                "birthPlace": {
-                    "type": "string"
-                },
-                "createdAt": {
-                    "type": "string"
-                },
-                "deathDate": {
-                    "type": "string"
-                },
-                "deletedAt": {
-                    "type": "string"
-                },
-                "firstName": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "lastName": {
-                    "type": "string"
-                },
-                "middleName": {
-                    "type": "string"
-                }
-            }
-        },
         "stars.UpdateStarRequest": {
             "type": "object",
             "properties": {
@@ -2142,6 +2257,35 @@
                 "middleName": {
                     "type": "string",
                     "maxLength": 50
+                }
+            }
+        },
+        "users.User": {
+            "type": "object",
+            "properties": {
+                "avatarUrl": {
+                    "type": "string"
+                },
+                "bio": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         }
