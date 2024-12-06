@@ -2,8 +2,10 @@ package collectors
 
 import (
 	"encoding/json"
+	"github.com/PuerkitoBio/goquery"
 	"log/slog"
 	"net/url"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -41,6 +43,7 @@ func NewMovieCollector(c *colly.Collector, castCollector *CastCollector, logger 
 			URL           string   `json:"url"`
 			Name          string   `json:"name"`
 			Image         string   `json:"image"`
+			Rating        string   `json:"ratingValue"`
 			Description   string   `json:"description"`
 			Genre         []string `json:"genre"`
 			DatePublished string   `json:"datePublished"`
@@ -57,10 +60,22 @@ func NewMovieCollector(c *colly.Collector, castCollector *CastCollector, logger 
 			return
 		}
 
+		metascoreHeader := e.DOM.Find("span#score")
+		if metascoreHeader.Nodes != nil {
+			collector.getMetaScore(movie, metascoreHeader.Next())
+		}
+
+		storylineHeader := e.DOM.Find("div#ipc-html-content-inner-div")
+		if storylineHeader.Nodes != nil {
+			collector.getStoryline(movie, storylineHeader)
+		}
+
 		movie.Title = info.Name
 		movie.Description = info.Description
 		movie.Genres = info.Genre
 		movie.ReleaseDate = mustParseDate(info.DatePublished)
+		movie.PosterURL = info.Image
+		movie.IMDbRating, _ = strconv.ParseFloat(info.Rating, 32)
 
 		collector.toAllGenres(movie.Genres)
 
@@ -115,6 +130,34 @@ func (c *MovieCollector) toAllGenres(genres []string) {
 	for _, genre := range genres {
 		c.allGenres[genre] = true
 	}
+}
+
+func (c *MovieCollector) getMetaScore(movie *models.Movie, table *goquery.Selection) {
+	table.Find("span").EachWithBreak(func(_ int, row *goquery.Selection) bool {
+		metascoreBlock := row.Find("metacritic-score-box")
+
+		score := metascoreBlock.Text()
+
+		if res, err := strconv.Atoi(strings.TrimSpace(score)); err == nil {
+			movie.Metascore = res
+			return false
+		}
+
+		return true
+	})
+}
+
+func (c *MovieCollector) getStoryline(movie *models.Movie, table *goquery.Selection) {
+	table.Find("p").EachWithBreak(func(_ int, row *goquery.Selection) bool {
+		storyline := row.Text()
+
+		if storyline != "" {
+			movie.Storyline = storyline
+			return false
+		}
+
+		return true
+	})
 }
 
 func getMovieID(url *url.URL) string {
