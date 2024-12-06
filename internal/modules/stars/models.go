@@ -30,11 +30,12 @@ type GetStarsRequest struct {
 }
 
 type MovieStarsRelation struct {
-	MovieID int
-	StarID  int
-	Role    string
-	Details string
-	OrderNo int
+	MovieID  int
+	StarID   int
+	HeroName string
+	Role     string
+	Details  string
+	OrderNo  int
 }
 
 func (m MovieStarsRelation) Key() any {

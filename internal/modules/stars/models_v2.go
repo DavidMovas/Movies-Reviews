@@ -18,6 +18,7 @@ func (s Star) ConvertToV2() *StarV2 {
 		FirstName:  s.FirstName,
 		MiddleName: normalizeString(s.MiddleName),
 		LastName:   s.LastName,
+		AvatarURL:  normalizeString(s.AvatarURL),
 		CreatedAt:  s.CreatedAt,
 		DeletedAt:  normalizeDate(s.DeletedAt),
 	}

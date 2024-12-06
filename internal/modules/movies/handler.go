@@ -171,8 +171,13 @@ func (h *Handler) CreateMovie(c echo.Context) error {
 		Movie: Movie{
 			Title:       req.Title,
 			ReleaseDate: req.ReleaseDate,
+			PosterURL:   req.PosterURL,
 		},
-		Description: req.Description,
+		Description:  req.Description,
+		IMDbRating:   req.IMDbRating,
+		IMDbURL:      req.IMDbURL,
+		Metascore:    req.Metascore,
+		MetascoreURL: req.MetascoreURL,
 	}
 
 	for _, genreID := range req.GenreIDs {
@@ -186,8 +191,9 @@ func (h *Handler) CreateMovie(c echo.Context) error {
 			Star: stars.Star{
 				ID: creditID.StarID,
 			},
-			Role:    creditID.Role,
-			Details: creditID.Details,
+			HeroName: creditID.HeroName,
+			Role:     creditID.Role,
+			Details:  creditID.Details,
 		})
 	}
 

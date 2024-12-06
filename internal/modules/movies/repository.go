@@ -34,7 +34,7 @@ func NewRepository(db *pgxpool.Pool, genresRepo *genres.Repository, starsRepo *s
 }
 
 func (r *Repository) GetMovies(ctx context.Context, offset int, limit int, sort, order string, searchTerm *string) ([]*Movie, int, error) {
-	selectQuery := dbx.StatementBuilder.Select("id, title, release_date, avg_rating, created_at, deleted_at").
+	selectQuery := dbx.StatementBuilder.Select("id, title, poster_url, release_date, avg_rating, created_at, deleted_at").
 		From("movies").
 		Where(squirrel.Eq{"deleted_at": nil}).
 		OrderBy(sort + " " + order).
@@ -75,7 +75,7 @@ func (r *Repository) GetMovies(ctx context.Context, offset int, limit int, sort,
 	var movies []*Movie
 	for rows.Next() {
 		var movie Movie
-		if err = rows.Scan(&movie.ID, &movie.Title, &movie.ReleaseDate, &movie.AvgRating, &movie.CreatedAt, &movie.DeletedAt); err != nil {
+		if err = rows.Scan(&movie.ID, &movie.Title, &movie.PosterURL, &movie.ReleaseDate, &movie.AvgRating, &movie.CreatedAt, &movie.DeletedAt); err != nil {
 			return nil, 0, apperrors.Internal(err)
 		}
 		movies = append(movies, &movie)
@@ -94,7 +94,7 @@ func (r *Repository) GetMovies(ctx context.Context, offset int, limit int, sort,
 }
 
 func (r *Repository) GetMovieByID(ctx context.Context, movieID int) (*MovieDetails, error) {
-	query, args, err := squirrel.Select("id, title, description, release_date, avg_rating, created_at, version").
+	query, args, err := squirrel.Select("id", "title", "poster_url", "description", "imdb_rating", "imdb_url", "metascore", "metascore_url", "release_date", "avg_rating", "created_at", "version").
 		From("movies").
 		Where(squirrel.Eq{"id": movieID}).
 		Where(squirrel.Eq{"deleted_at": nil}).
@@ -106,7 +106,7 @@ func (r *Repository) GetMovieByID(ctx context.Context, movieID int) (*MovieDetai
 
 	var movie MovieDetails
 	err = r.db.QueryRow(ctx, query, args...).
-		Scan(&movie.ID, &movie.Title, &movie.Description, &movie.ReleaseDate, &movie.AvgRating, &movie.CreatedAt, &movie.Version)
+		Scan(&movie.ID, &movie.Title, &movie.PosterURL, &movie.Description, &movie.IMDbRating, &movie.IMDbURL, &movie.Metascore, &movie.MetascoreURL, &movie.ReleaseDate, &movie.AvgRating, &movie.CreatedAt, &movie.Version)
 
 	switch {
 	case dbx.IsNoRows(err):
@@ -120,8 +120,8 @@ func (r *Repository) GetMovieByID(ctx context.Context, movieID int) (*MovieDetai
 
 func (r *Repository) CreateMovie(ctx context.Context, movie *MovieDetails) error {
 	query, args, err := squirrel.Insert("movies").
-		Columns("title", "description", "release_date").
-		Values(movie.Title, movie.Description, movie.ReleaseDate).
+		Columns("title", "description", "poster_url", "imdb_rating", "imdb_url", "metascore", "metascore_url", "release_date").
+		Values(movie.Title, movie.PosterURL, movie.IMDbRating, movie.IMDbURL, movie.Metascore, movie.MetascoreURL, movie.Description, movie.ReleaseDate).
 		Suffix("RETURNING id, created_at").
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
@@ -151,11 +151,12 @@ func (r *Repository) CreateMovie(ctx context.Context, movie *MovieDetails) error
 		// Insert stars
 		nextCast := slices.MapIndex(movie.Cast, func(i int, credit *MovieCredit) *stars.MovieStarsRelation {
 			return &stars.MovieStarsRelation{
-				MovieID: movie.ID,
-				StarID:  credit.Star.ID,
-				Role:    credit.Role,
-				Details: credit.Details,
-				OrderNo: i,
+				MovieID:  movie.ID,
+				StarID:   credit.Star.ID,
+				HeroName: *credit.HeroName,
+				Role:     credit.Role,
+				Details:  credit.Details,
+				OrderNo:  i,
 			}
 		})
 		return r.updateStars(ctx, nil, nextCast)
@@ -177,7 +178,7 @@ func (r *Repository) UpdateMovieByID(ctx context.Context, movieID int, req *Upda
 		Where(squirrel.Eq{"id": movieID}).
 		Where(squirrel.Eq{"deleted_at": nil}).
 		Where(squirrel.Eq{"version": req.Version}).
-		Suffix("RETURNING id, title, description, release_date, created_at, deleted_at, version").
+		Suffix("RETURNING id, title, poster_url, imdb_rating, imdb_url, metascore, metascore_url, description, release_date, created_at, deleted_at, version").
 		PlaceholderFormat(squirrel.Dollar)
 
 	if req.Title != nil {
@@ -189,6 +190,21 @@ func (r *Repository) UpdateMovieByID(ctx context.Context, movieID int, req *Upda
 	if req.Description != nil {
 		builder = builder.Set("description", *req.Description)
 	}
+	if req.PosterURL != nil {
+		builder = builder.Set("poster_url", *req.PosterURL)
+	}
+	if req.IMDbRating != nil {
+		builder = builder.Set("imdb_rating", *req.IMDbRating)
+	}
+	if req.IMDbURL != nil {
+		builder = builder.Set("imdb_url", *req.IMDbURL)
+	}
+	if req.Metascore != nil {
+		builder = builder.Set("metascore", *req.Metascore)
+	}
+	if req.MetascoreURL != nil {
+		builder = builder.Set("metascore_url", *req.MetascoreURL)
+	}
 
 	query, args, err := builder.ToSql()
 	if err != nil {
@@ -197,7 +213,20 @@ func (r *Repository) UpdateMovieByID(ctx context.Context, movieID int, req *Upda
 
 	err = dbx.InTransaction(ctx, r.db, func(ctx context.Context, _ pgx.Tx) error {
 		err = r.db.QueryRow(ctx, query, args...).
-			Scan(&movie.ID, &movie.Title, &movie.Description, &movie.ReleaseDate, &movie.CreatedAt, &movie.DeletedAt, &movie.Version)
+			Scan(
+				&movie.ID,
+				&movie.Title,
+				&movie.PosterURL,
+				&movie.IMDbRating,
+				&movie.IMDbURL,
+				&movie.Metascore,
+				&movie.MetascoreURL,
+				&movie.Description,
+				&movie.ReleaseDate,
+				&movie.CreatedAt,
+				&movie.DeletedAt,
+				&movie.Version,
+			)
 
 		switch {
 		case dbx.NotValidEnumType(err):
@@ -284,13 +313,13 @@ func (r *Repository) updateStars(ctx context.Context, current, next []*stars.Mov
 	q := dbx.FromContext(ctx, r.db)
 
 	addFunc := func(mgo *stars.MovieStarsRelation) error {
-		_, err := q.Exec(ctx, `INSERT INTO movie_stars (movie_id, star_id, role, details, order_no) VALUES ($1, $2, $3, $4, $5)`,
-			mgo.MovieID, mgo.StarID, mgo.Role, mgo.Details, mgo.OrderNo)
+		_, err := q.Exec(ctx, `INSERT INTO movie_stars (movie_id, star_id, hero_name, role, details, order_no) VALUES ($1, $2, $3, $4, $5, $6)`,
+			mgo.MovieID, mgo.StarID, mgo.HeroName, mgo.Role, mgo.Details, mgo.OrderNo)
 		return err
 	}
 
 	removeFunc := func(mgo *stars.MovieStarsRelation) error {
-		_, err := q.Exec(ctx, `DELETE FROM movie_stars WHERE movie_id = $1 AND star_id = $2 AND role = $3 AND details = $4`, mgo.MovieID, mgo.StarID, mgo.Role, mgo.Details)
+		_, err := q.Exec(ctx, `DELETE FROM movie_stars WHERE movie_id = $1 AND star_id = $2 AND hero_name = $3 AND role = $4 AND details = $5`, mgo.MovieID, mgo.StarID, mgo.HeroName, mgo.Role, mgo.Details)
 		return err
 	}
 
@@ -341,11 +370,12 @@ func (r *Repository) starsUpdateRequest(ctx context.Context, cast []*MovieCredit
 
 		nextCast := slices.MapIndex(starsIDs, func(i, starID int) *stars.MovieStarsRelation {
 			return &stars.MovieStarsRelation{
-				MovieID: movieID,
-				StarID:  starID,
-				Role:    cast[i].Role,
-				Details: cast[i].Details,
-				OrderNo: i,
+				MovieID:  movieID,
+				StarID:   starID,
+				HeroName: *cast[i].HeroName,
+				Role:     cast[i].Role,
+				Details:  cast[i].Details,
+				OrderNo:  i,
 			}
 		})
 
