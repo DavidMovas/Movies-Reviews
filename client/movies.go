@@ -25,6 +25,16 @@ func (c *Client) GetMovieByID(req *contracts.GetMovieRequest) (*contracts.MovieD
 	return movie, err
 }
 
+func (c *Client) GetMovieByIDV2(req *contracts.GetMovieRequest) (*contracts.MovieDetailsV2, error) {
+	var movie *contracts.MovieDetailsV2
+
+	_, err := c.client.R().
+		SetResult(&movie).
+		Get(c.path("/api/movies/v2/%d", req.MovieID))
+
+	return movie, err
+}
+
 func (c *Client) GetStarsByMovieID(req *contracts.GetMovieRequest) ([]*contracts.Star, error) {
 	var stars []*contracts.Star
 

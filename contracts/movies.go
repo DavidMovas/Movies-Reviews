@@ -22,10 +22,24 @@ type MovieDetails struct {
 	Cast        []*MovieCredit `json:"cast"`
 }
 
+type MovieDetailsV2 struct {
+	Movie
+	Description string           `json:"description"`
+	Version     int              `json:"version"`
+	Genres      []*Genre         `json:"genres"`
+	Cast        []*MovieCreditV2 `json:"cast"`
+}
+
 type MovieCredit struct {
 	Star    Star   `json:"star"`
 	Role    string `json:"role"`
 	Details string `json:"details,omitempty"`
+}
+
+type MovieCreditV2 struct {
+	Star    *StarV2 `json:"star"`
+	Role    string  `json:"role"`
+	Details string  `json:"details,omitempty"`
 }
 
 type GetMovieRequest struct {

@@ -450,6 +450,54 @@ const docTemplate = `{
                 }
             }
         },
+        "/movies/v2/{movieId}": {
+            "get": {
+                "description": "Get movie by id",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "movies"
+                ],
+                "summary": "Get movie by id",
+                "operationId": "get-movie-by-id-v2",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Movie ID",
+                        "name": "movieId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Movie details (short version)",
+                        "schema": {
+                            "$ref": "#/definitions/contracts.MovieDetailsV2"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid movie id, invalid parameter or missing parameter",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Movie not found",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/movies/{movieId}": {
             "get": {
                 "description": "Get movie by id",
@@ -690,7 +738,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/contracts.Start"
+                                "$ref": "#/definitions/contracts.Star"
                             }
                         }
                     },
@@ -833,7 +881,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Start",
                         "schema": {
-                            "$ref": "#/definitions/stars.Start"
+                            "$ref": "#/definitions/contracts.Star"
                         }
                     },
                     "400": {
@@ -881,7 +929,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Start",
                         "schema": {
-                            "$ref": "#/definitions/stars.Start"
+                            "$ref": "#/definitions/contracts.Star"
                         }
                     },
                     "400": {
@@ -936,7 +984,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Start",
                         "schema": {
-                            "$ref": "#/definitions/stars.Start"
+                            "$ref": "#/definitions/contracts.Star"
                         }
                     },
                     "400": {
@@ -1559,6 +1607,11 @@ const docTemplate = `{
                 },
                 "password": {
                     "type": "string"
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 24,
+                    "minLength": 3
                 }
             }
         },
@@ -1567,6 +1620,9 @@ const docTemplate = `{
             "properties": {
                 "access_token": {
                     "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/users.User"
                 }
             }
         },
@@ -1700,6 +1756,9 @@ const docTemplate = `{
         "contracts.Movie": {
             "type": "object",
             "properties": {
+                "avgRating": {
+                    "type": "number"
+                },
                 "createdAt": {
                     "type": "string"
                 },
@@ -1727,7 +1786,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "star": {
-                    "$ref": "#/definitions/contracts.Start"
+                    "$ref": "#/definitions/contracts.Star"
                 }
             }
         },
@@ -1745,13 +1804,71 @@ const docTemplate = `{
                 }
             }
         },
+        "contracts.MovieCreditV2": {
+            "type": "object",
+            "properties": {
+                "details": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "star": {
+                    "$ref": "#/definitions/contracts.StarV2"
+                }
+            }
+        },
         "contracts.MovieDetails": {
             "type": "object",
             "properties": {
+                "avgRating": {
+                    "type": "number"
+                },
                 "cast": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/contracts.MovieCredit"
+                    }
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "genres": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/contracts.Genre"
+                    }
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "releaseDate": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "integer"
+                }
+            }
+        },
+        "contracts.MovieDetailsV2": {
+            "type": "object",
+            "properties": {
+                "avgRating": {
+                    "type": "number"
+                },
+                "cast": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/contracts.MovieCreditV2"
                     }
                 },
                 "createdAt": {
@@ -1826,7 +1943,7 @@ const docTemplate = `{
                 }
             }
         },
-        "contracts.Start": {
+        "contracts.Star": {
             "type": "object",
             "properties": {
                 "bio": {
@@ -1842,6 +1959,29 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "deathDate": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "middleName": {
+                    "type": "string"
+                }
+            }
+        },
+        "contracts.StarV2": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
                     "type": "string"
                 },
                 "deletedAt": {
@@ -1915,19 +2055,29 @@ const docTemplate = `{
         "contracts.UpdateUserRequest": {
             "type": "object",
             "properties": {
+                "avatarUrl": {
+                    "type": "string"
+                },
+                "bio": {
+                    "type": "string"
+                },
                 "password": {
                     "type": "string"
                 },
                 "username": {
-                    "type": "string",
-                    "maxLength": 24,
-                    "minLength": 3
+                    "type": "string"
                 }
             }
         },
         "contracts.User": {
             "type": "object",
             "properties": {
+                "avatarUrl": {
+                    "type": "string"
+                },
+                "bio": {
+                    "type": "string"
+                },
                 "createdAt": {
                     "type": "string"
                 },
@@ -2007,7 +2157,7 @@ const docTemplate = `{
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/contracts.Start"
+                        "$ref": "#/definitions/contracts.Star"
                     }
                 },
                 "page": {
@@ -2083,41 +2233,6 @@ const docTemplate = `{
                 }
             }
         },
-        "stars.Start": {
-            "type": "object",
-            "properties": {
-                "bio": {
-                    "type": "string"
-                },
-                "birthDate": {
-                    "type": "string"
-                },
-                "birthPlace": {
-                    "type": "string"
-                },
-                "createdAt": {
-                    "type": "string"
-                },
-                "deathDate": {
-                    "type": "string"
-                },
-                "deletedAt": {
-                    "type": "string"
-                },
-                "firstName": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "lastName": {
-                    "type": "string"
-                },
-                "middleName": {
-                    "type": "string"
-                }
-            }
-        },
         "stars.UpdateStarRequest": {
             "type": "object",
             "properties": {
@@ -2145,6 +2260,35 @@ const docTemplate = `{
                 "middleName": {
                     "type": "string",
                     "maxLength": 50
+                }
+            }
+        },
+        "users.User": {
+            "type": "object",
+            "properties": {
+                "avatarUrl": {
+                    "type": "string"
+                },
+                "bio": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         }

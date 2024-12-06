@@ -137,6 +137,14 @@ func moviesAPIChecks(t *testing.T, c *client.Client, _ *config.Config) {
 		deepMovieCompare(t, godFather, movie)
 	})
 
+	t.Run("movies.GetMovieByIdV2: success", func(t *testing.T) {
+		req := &contracts.GetMovieRequest{MovieID: godFather.ID}
+		movie, err := c.GetMovieByID(req)
+		require.NoError(t, err)
+
+		deepMovieCompare(t, godFather, movie)
+	})
+
 	t.Run("movies.GetMovies: success", func(t *testing.T) {
 		req := &contracts.GetMoviesRequest{}
 		res, err := c.GetMovies(req)
