@@ -138,6 +138,9 @@ func (c *CastCollector) addCastFromCastTable(cast *models.Cast, table *goquery.S
 	var added int
 	table.Find("tr").EachWithBreak(func(_ int, row *goquery.Selection) bool {
 		starLink := row.Find("td:not(.primary_photo .character) a")
+		heroBlock := row.Find("a.cast-item-characters-link data-testid.cast-item-characters-link")
+		heroName := heroBlock.Find("span")
+
 		if starLink.Nodes == nil {
 			return true
 		}
@@ -151,6 +154,7 @@ func (c *CastCollector) addCastFromCastTable(cast *models.Cast, table *goquery.S
 			Details:  "",
 			StarName: strings.TrimSpace(starLink.Text()),
 			StarLink: link,
+			HeroName: strings.TrimSpace(heroName.Text()),
 			StarID:   getStarID(link),
 		}
 
