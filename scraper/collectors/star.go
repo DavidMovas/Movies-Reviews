@@ -39,6 +39,7 @@ func NewStarCollector(c *colly.Collector, bioCollector *BioCollector, logger *sl
 			Name        string `json:"name"`
 			Image       string `json:"image"`
 			Description string `json:"description"`
+			URL         string `json:"url"`
 			MainEntity  struct {
 				Name        string `json:"name"`
 				BirthDate   string `json:"birthDate"`
@@ -58,12 +59,20 @@ func NewStarCollector(c *colly.Collector, bioCollector *BioCollector, logger *sl
 			return
 		}
 
+		var middleName string
 		star.Name = info.Name
-		star.FirstName, star.LastName = splitName(info.Name)
+		star.FirstName, middleName, star.LastName = splitName(info.Name)
 		star.BirthDate = mustParseDate(info.MainEntity.BirthDate)
+		star.AvatarURL = info.Image
+		star.IMDbURL = star.Link
+
 		if info.MainEntity.DeathDate != "" {
 			deathDate := mustParseDate(info.MainEntity.DeathDate)
 			star.DeathDate = &deathDate
+		}
+
+		if middleName != "" {
+			star.MiddleName = &middleName
 		}
 
 		collector.l.
@@ -105,19 +114,19 @@ func (c *StarCollector) getOrCreateStar(starID, link string) *models.Star {
 	return star
 }
 
-func splitName(name string) (string, string) {
+func splitName(name string) (string, string, string) {
 	names := strings.Split(name, " ")
 	switch len(names) {
 	case 1:
-		return names[0], ""
+		return names[0], "", ""
 	case 2:
-		return names[0], names[1]
+		return names[0], "", names[1]
 	case 3:
 		if names[2] == "Jr." || names[2] == "Sr." {
-			return names[0], strings.Join(names[1:], " ")
+			return names[0], "", strings.Join(names[1:], " ")
 		}
-		return names[0], names[2]
+		return names[0], names[1], names[2]
 	default:
-		return names[0], strings.Join(names[2:], " ")
+		return names[0], "", strings.Join(names[2:], " ")
 	}
 }

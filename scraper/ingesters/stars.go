@@ -93,6 +93,7 @@ func (i *StarIngester) Ingest(stars map[string]*models.Star, bios map[string]*mo
 					LastName:  star.LastName,
 					BirthDate: star.BirthDate,
 					DeathDate: star.DeathDate,
+					IMDbURL:   &star.Link,
 				}
 
 				if bio.Bio != "" {
@@ -101,6 +102,14 @@ func (i *StarIngester) Ingest(stars map[string]*models.Star, bios map[string]*mo
 
 				if bio.BirthPlace != "" {
 					req.BirthPlace = &bio.BirthPlace
+				}
+
+				if star.MiddleName != nil {
+					req.MiddleName = star.MiddleName
+				}
+
+				if star.AvatarURL != "" {
+					req.AvatarURL = &star.AvatarURL
 				}
 
 				var s *contracts.Star

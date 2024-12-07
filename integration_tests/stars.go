@@ -56,7 +56,9 @@ func starsAPIChecks(t *testing.T, client *client.Client, _ *config.Config) {
 			{
 				req: &contracts.CreateStarRequest{
 					FirstName:  "jack",
+					MiddleName: ptr("nick"),
 					LastName:   "nicholson",
+					AvatarURL:  ptr("LINK"),
 					BirthDate:  time.Date(1937, 0o4, 22, 0, 0, 0, 0, time.UTC),
 					BirthPlace: ptr("Neptune, New Jersey, USA"),
 					Bio:        ptr("Jack Nicholson, an American actor, producer, director and screenwriter, is a three-time Academy Award winner and twelve-time nominee. Nicholson is also notable for being one of two actors - the other being Michael Caine - who have received an Oscar nomination in every decade from the '60s through the '00s."),
@@ -66,6 +68,7 @@ func starsAPIChecks(t *testing.T, client *client.Client, _ *config.Config) {
 			{
 				req: &contracts.CreateStarRequest{
 					FirstName:  "denzel",
+					MiddleName: ptr("hayes"),
 					LastName:   "washington",
 					BirthDate:  time.Date(1954, 11, 28, 0, 0, 0, 0, time.UTC),
 					BirthPlace: ptr("Mount Vernon, New York, USA"),
@@ -76,10 +79,13 @@ func starsAPIChecks(t *testing.T, client *client.Client, _ *config.Config) {
 			{
 				req: &contracts.CreateStarRequest{
 					FirstName:  "sophia",
+					MiddleName: ptr("loren"),
 					LastName:   "loren",
+					AvatarURL:  ptr("LINK"),
 					BirthDate:  time.Date(1934, 10, 20, 0, 0, 0, 0, time.UTC),
 					BirthPlace: ptr("Rome, Lazio, Italy"),
 					Bio:        ptr("Sophia Loren was born as Sofia Scicolone at the Clinica Regina Margherita in Rome on September 20, 1934. Her father Riccardo was married to another woman and refused to marry her mother Romilda Villani, despite the fact that she was the mother of his two children (Sophia and her younger sister Maria Scicolone)."),
+					IMDbURL:    ptr("https://www.imdb.com/name/nm0000103/"),
 				},
 				addr: &sophiaStar,
 			},
@@ -92,6 +98,7 @@ func starsAPIChecks(t *testing.T, client *client.Client, _ *config.Config) {
 			*c.addr = star
 			require.NotEmpty(t, star.ID)
 			require.NotEmpty(t, star.CreatedAt)
+			require.Equal(t, *c.req.MiddleName, *star.MiddleName)
 		}
 	})
 

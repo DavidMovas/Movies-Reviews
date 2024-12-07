@@ -25,7 +25,7 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 }
 
 func (r *Repository) GetStars(ctx context.Context) ([]*Star, error) {
-	query, args, err := squirrel.Select("id", "first_name", "middle_name", "last_name", "birth_date", "birth_place", "death_date", "bio", "created_at", "deleted_at").
+	query, args, err := squirrel.Select("id", "first_name", "middle_name", "last_name", "avatar_url", "birth_date", "birth_place", "death_date", "bio", "created_at", "deleted_at").
 		From("stars").
 		Where(squirrel.Eq{"deleted_at": nil}).
 		ToSql()
@@ -43,7 +43,7 @@ func (r *Repository) GetStars(ctx context.Context) ([]*Star, error) {
 }
 
 func (r *Repository) GetRelationsByMovieID(ctx context.Context, movieID int) ([]*MovieStarsRelation, error) {
-	query, args, err := squirrel.Select("movie_id, star_id, role, details, order_no").
+	query, args, err := squirrel.Select("movie_id, star_id, hero_name, role, details, order_no").
 		From("movie_stars").
 		Where("movie_id = ?", movieID).
 		OrderBy("order_no").
@@ -62,7 +62,7 @@ func (r *Repository) GetRelationsByMovieID(ctx context.Context, movieID int) ([]
 	var relations []*MovieStarsRelation
 	for rows.Next() {
 		var relation MovieStarsRelation
-		if err = rows.Scan(&relation.MovieID, &relation.StarID, &relation.Role, &relation.Details, &relation.OrderNo); err != nil {
+		if err = rows.Scan(&relation.MovieID, &relation.StarID, &relation.HeroName, &relation.Role, &relation.Details, &relation.OrderNo); err != nil {
 			return nil, apperrors.Internal(err)
 		}
 		relations = append(relations, &relation)
@@ -72,7 +72,7 @@ func (r *Repository) GetRelationsByMovieID(ctx context.Context, movieID int) ([]
 }
 
 func (r *Repository) GetStarsPaginated(ctx context.Context, offset int, limit int) ([]*Star, int, error) {
-	selectQuery := dbx.StatementBuilder.Select("id, first_name, middle_name, last_name, birth_date, birth_place, death_date, bio, created_at, deleted_at").
+	selectQuery := dbx.StatementBuilder.Select("id, first_name, middle_name, last_name, avatar_url, birth_date, birth_place, death_date, bio, created_at, deleted_at").
 		From("stars").
 		Where(squirrel.Eq{"deleted_at": nil}).
 		OrderBy("id").
@@ -118,7 +118,7 @@ func (r *Repository) GetStarsPaginated(ctx context.Context, offset int, limit in
 }
 
 func (r *Repository) GetStarByID(ctx context.Context, starID int) (*Star, error) {
-	query, args, err := squirrel.Select("id, first_name, middle_name, last_name, birth_date, birth_place, death_date, bio, created_at").
+	query, args, err := squirrel.Select("id, first_name, middle_name, last_name, avatar_url, birth_date, birth_place, death_date, bio, imdb_url, created_at").
 		From("stars").
 		Where(squirrel.Eq{"id": starID}).
 		Where(squirrel.Eq{"deleted_at": nil}).
@@ -130,7 +130,7 @@ func (r *Repository) GetStarByID(ctx context.Context, starID int) (*Star, error)
 
 	star := NewStar()
 	err = r.db.QueryRow(ctx, query, args...).
-		Scan(&star.ID, &star.FirstName, &star.MiddleName, &star.LastName, &star.BirthDate, &star.BirthPlace, &star.DeathDate, &star.Bio, &star.CreatedAt)
+		Scan(&star.ID, &star.FirstName, &star.MiddleName, &star.LastName, &star.AvatarURL, &star.BirthDate, &star.BirthPlace, &star.DeathDate, &star.Bio, &star.IMDbURL, &star.CreatedAt)
 
 	switch {
 	case dbx.IsNoRows(err):
@@ -143,7 +143,7 @@ func (r *Repository) GetStarByID(ctx context.Context, starID int) (*Star, error)
 }
 
 func (r *Repository) GetStarsForMovie(ctx context.Context, movieID int) ([]*Star, error) {
-	query, args, err := squirrel.Select("id, first_name, middle_name, last_name, birth_date, birth_place, death_date, bio, created_at, deleted_at").
+	query, args, err := squirrel.Select("id, first_name, middle_name, last_name, avatar_url, birth_date, birth_place, death_date, bio, created_at, deleted_at").
 		From("stars").
 		InnerJoin("movie_stars ON star_id = id").
 		Where(squirrel.Eq{"movie_id": movieID}).
@@ -171,7 +171,7 @@ func (r *Repository) GetStarsForMovie(ctx context.Context, movieID int) ([]*Star
 }
 
 func (r *Repository) GetStarsByMovieID(ctx context.Context, movieID int) ([]*MovieCredit, error) {
-	query, args, err := squirrel.Select("id, first_name, middle_name, last_name, birth_date, birth_place, death_date, bio, created_at, role, details").
+	query, args, err := squirrel.Select("id, first_name, middle_name, last_name, avatar_url, birth_date, birth_place, death_date, imdb_url, bio, created_at, hero_name, role, details").
 		From("stars").
 		InnerJoin("movie_stars ON star_id = id").
 		Where(squirrel.Eq{"movie_id": movieID}).
@@ -195,7 +195,22 @@ func (r *Repository) GetStarsByMovieID(ctx context.Context, movieID int) ([]*Mov
 			Star: Star{},
 		}
 
-		err = rows.Scan(&credit.Star.ID, &credit.Star.FirstName, &credit.Star.MiddleName, &credit.Star.LastName, &credit.Star.BirthDate, &credit.Star.BirthPlace, &credit.Star.DeathDate, &credit.Star.Bio, &credit.Star.CreatedAt, &credit.Role, &credit.Details)
+		err = rows.Scan(
+			&credit.Star.ID,
+			&credit.Star.FirstName,
+			&credit.Star.MiddleName,
+			&credit.Star.LastName,
+			&credit.Star.AvatarURL,
+			&credit.Star.BirthDate,
+			&credit.Star.BirthPlace,
+			&credit.Star.DeathDate,
+			&credit.Star.IMDbURL,
+			&credit.Star.Bio,
+			&credit.Star.CreatedAt,
+			&credit.HeroName,
+			&credit.Role,
+			&credit.Details,
+		)
 		if err != nil {
 			return nil, apperrors.Internal(err)
 		}
@@ -207,8 +222,8 @@ func (r *Repository) GetStarsByMovieID(ctx context.Context, movieID int) ([]*Mov
 
 func (r *Repository) CreateStar(ctx context.Context, req *CreateStarRequest) (*Star, error) {
 	query, args, err := squirrel.Insert("stars").
-		Columns("first_name", "middle_name", "last_name", "birth_date", "birth_place", "death_date", "bio").
-		Values(req.FirstName, req.MiddleName, req.LastName, req.BirthDate, req.BirthPlace, req.DeathDate, req.Bio).
+		Columns("first_name", "middle_name", "last_name", "avatar_url", "birth_date", "birth_place", "death_date", "bio", "imdb_url").
+		Values(req.FirstName, req.MiddleName, req.LastName, req.AvatarURL, req.BirthDate, req.BirthPlace, req.DeathDate, req.Bio, req.IMDbURL).
 		Suffix("RETURNING id, created_at").
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
@@ -228,7 +243,7 @@ func (r *Repository) CreateStar(ctx context.Context, req *CreateStarRequest) (*S
 func (r *Repository) UpdateStar(ctx context.Context, starID int, req *UpdateStarRequest) (*Star, error) {
 	builder := squirrel.Update("stars").
 		Where(squirrel.Eq{"id": starID}).
-		Suffix("RETURNING id, first_name, middle_name, last_name, birth_date, birth_place, death_date, bio, created_at").
+		Suffix("RETURNING id, first_name, middle_name, last_name, avatar_url, birth_date, birth_place, death_date, imdb_url, bio, created_at").
 		PlaceholderFormat(squirrel.Dollar)
 
 	hasSet := false
@@ -244,6 +259,9 @@ func (r *Repository) UpdateStar(ctx context.Context, starID int, req *UpdateStar
 		builder = builder.Set("last_name", *req.LastName)
 		hasSet = true
 	}
+	if req.AvatarURL != nil {
+		builder = builder.Set("avatar_url", *req.AvatarURL)
+	}
 	if req.BirthDate != nil {
 		builder = builder.Set("birth_date", *req.BirthDate)
 		hasSet = true
@@ -255,6 +273,9 @@ func (r *Repository) UpdateStar(ctx context.Context, starID int, req *UpdateStar
 	if req.DeathDate != nil {
 		builder = builder.Set("death_date", *req.DeathDate)
 		hasSet = true
+	}
+	if req.IMDbURL != nil {
+		builder = builder.Set("imdb_url", *req.IMDbURL)
 	}
 	if req.Bio != nil {
 		builder = builder.Set("bio", *req.Bio)
@@ -271,7 +292,7 @@ func (r *Repository) UpdateStar(ctx context.Context, starID int, req *UpdateStar
 	}
 
 	star := NewStar()
-	err = r.db.QueryRow(ctx, query, args...).Scan(&star.ID, &star.FirstName, &star.MiddleName, &star.LastName, &star.BirthDate, &star.BirthPlace, &star.DeathDate, &star.Bio, &star.CreatedAt)
+	err = r.db.QueryRow(ctx, query, args...).Scan(&star.ID, &star.FirstName, &star.MiddleName, &star.LastName, &star.AvatarURL, &star.BirthDate, &star.BirthPlace, &star.DeathDate, &star.IMDbURL, &star.Bio, &star.CreatedAt)
 
 	switch {
 	case dbx.IsNoRows(err):
@@ -309,7 +330,7 @@ func (r *Repository) scanStars(rows pgx.Rows) ([]*Star, error) {
 	var stars []*Star
 	for rows.Next() {
 		star := NewStar()
-		err := rows.Scan(&star.ID, &star.FirstName, &star.MiddleName, &star.LastName, &star.BirthDate, &star.BirthPlace, &star.DeathDate, &star.Bio, &star.CreatedAt, &star.DeletedAt)
+		err := rows.Scan(&star.ID, &star.FirstName, &star.MiddleName, &star.LastName, &star.AvatarURL, &star.BirthDate, &star.BirthPlace, &star.DeathDate, &star.Bio, &star.CreatedAt, &star.DeletedAt)
 		if err != nil {
 			return nil, apperrors.Internal(err)
 		}
