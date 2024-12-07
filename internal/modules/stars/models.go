@@ -105,12 +105,14 @@ func (s Star) Normalize() *Star {
 		FirstName:  s.FirstName,
 		MiddleName: normalizeString(s.MiddleName),
 		LastName:   s.LastName,
+		AvatarURL:  s.AvatarURL,
 		BirthDate:  s.BirthDate,
 		BirthPlace: normalizeString(s.BirthPlace),
 		DeathDate:  normalizeDate(s.DeathDate),
 		Bio:        normalizeString(s.Bio),
 		CreatedAt:  s.CreatedAt,
 		DeletedAt:  normalizeDate(s.DeletedAt),
+		IMDbURL:    s.IMDbURL,
 	}
 }
 

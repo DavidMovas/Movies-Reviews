@@ -118,7 +118,7 @@ func (r *Repository) GetStarsPaginated(ctx context.Context, offset int, limit in
 }
 
 func (r *Repository) GetStarByID(ctx context.Context, starID int) (*Star, error) {
-	query, args, err := squirrel.Select("id, first_name, middle_name, last_name, avatar_url, birth_date, birth_place, death_date, bio, imdb_url, created_at").
+	query, args, err := squirrel.Select("id", "first_name", "middle_name", "last_name", "avatar_url", "birth_date", "birth_place", "death_date", "bio", "imdb_url", "created_at").
 		From("stars").
 		Where(squirrel.Eq{"id": starID}).
 		Where(squirrel.Eq{"deleted_at": nil}).
@@ -130,7 +130,19 @@ func (r *Repository) GetStarByID(ctx context.Context, starID int) (*Star, error)
 
 	star := NewStar()
 	err = r.db.QueryRow(ctx, query, args...).
-		Scan(&star.ID, &star.FirstName, &star.MiddleName, &star.LastName, &star.AvatarURL, &star.BirthDate, &star.BirthPlace, &star.DeathDate, &star.Bio, &star.IMDbURL, &star.CreatedAt)
+		Scan(
+			&star.ID,
+			&star.FirstName,
+			&star.MiddleName,
+			&star.LastName,
+			&star.AvatarURL,
+			&star.BirthDate,
+			&star.BirthPlace,
+			&star.DeathDate,
+			&star.Bio,
+			&star.IMDbURL,
+			&star.CreatedAt,
+		)
 
 	switch {
 	case dbx.IsNoRows(err):
