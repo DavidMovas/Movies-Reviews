@@ -2,7 +2,6 @@ package collectors
 
 import (
 	"encoding/json"
-	"github.com/PuerkitoBio/goquery"
 	"log/slog"
 	"math"
 	"net/url"
@@ -10,6 +9,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/PuerkitoBio/goquery"
 
 	"github.com/DavidMovas/Movies-Reviews/internal/maps"
 
